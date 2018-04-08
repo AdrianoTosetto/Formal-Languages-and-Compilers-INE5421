@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		.answer{
+
+		}
+	</style>
+</head>
+<body>
+
+1 - a)
+<div class="answer">
+<h3>União</h3>
+	Prova por construção(Automato):
+<p>
+		Pegue os dois automatos finitos e adicione um novo estado inicial. Nele, parta de 
+		&epsilon; para os antigos estados iniciais de cada automato. Como todo automato não determinístico pode ser convertido para um automato determinístico, então a união de suas linguagens regulares também será regular.
+</p>
+	Prova por construção(Gramática):
+	<p>
+		Sejam G1 = (V1, T1, P1, S1) a gramática da linguagem L1 e G2 = (V2, T2, P2, S2) a gramática para a linguagem 2. Agora construa uma gramática G3 = (V3, T3, P3, S3). Em P3 existe uma produção do tipo S3 -> S1 | S2
+	</p>
+</div>
+
+<h3>Concatenação</h3>
+	Prova por construção(Automato):
+<p>
+	Pegue os dois automatos. Nos estados de aceitação do primeiro automato, adicione transições para o estado inicial do segundo automato.
+</p>
+	Prova por construção(Gramática):
+	<p>
+		Para cada produção do tipo N -> x, em que N é um símbolo não terminal da primeira linguagem e x é um símbolo terminal da primeira linguagem, substitua-a por uma produção do tipo N -> xS, em que S é o símbolo inicial da segunda linguagem. Se &epsilon; pertencer à segunda linguagem, apenas adicione a produção anterior, sem substituir.
+	</p>
+</div>
+
+
+1-b)
+<div class="answer">
+<h3>União</h3>
+	Prova por construção(Automato):
+<p>
+		Pegue os dois automatos finitos e adicione um novo estado inicial. Nele, parta de 
+		&epsilon; para os antigos estados iniciais de cada automato. Como todo automato não determinístico pode ser convertido para um automato determinístico, então a união de suas linguagens regulares também será regular.
+</p>
+	Prova por construção(Gramática):
+	<p>
+		Adicione um novo símbolo S' que vai para S'S| S | &epsilon;. Isso é valido para todas as linguagens menores que o tipo 3, mas também é necessário . Se ela for regular, para cada produção que gere uma sentença (que gera apenas um símbolo terminal), adicione S para manter a linguagem regular.
+	</p>
+</div>
+
+1-c)
+<div class="answer">
+<h3>União</h3>
+	Prova por construção(Automato):
+<p>
+		Pegue os dois automatos finitos e adicione um novo estado inicial. Nele, parta de 
+		&epsilon; para os antigos estados iniciais de cada automato. Como todo automato não determinístico pode ser convertido para um automato determinístico, então a união de suas linguagens regulares também será regular.
+</p>
+	Prova por construção(Gramática):
+	<p>
+		<strong>Para linguagens não regulares</strong>:
+		Adicione um novo símbolo inicial S' que vai para S'S| S | &epsilon;. Isso é valido para todas as linguagens menores que o tipo 3, mas também é necessário.</p>
+		<p>
+		<strong>Para linguagens regulares</strong>:
+		Se ela for regular, para cada produção que gere uma sentença (que gera apenas um símbolo terminal), adicione S para manter a linguagem regular. Se existe S que gera 
+		&epsilon;, então essa produção deve ser removida.
+		</p>
+</div>
+
+1-d)
+<div class="answer">
+<p>
+	
+</p>
+	
+</div>
+
+</div>
+
+</body>
+</html>
