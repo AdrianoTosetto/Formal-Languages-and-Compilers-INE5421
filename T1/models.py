@@ -1,40 +1,51 @@
 class Automaton:
 
-	def __init__(self, states, finalStates, initialState, transitions):
-		self.transitions = set(transitions)
-		self.states = set(states)
-		self.finalStates = set(finalStates)
+	def __init__(self, states, finalStates, initialState):
+		self.states = (states)
+		self.finalStates = (finalStates)
 		self.initialState = initialState
-		self.input = []
+		self.currentState = initialState
 
-	def transition_function(self, current_state, symbol):
-		for t in self.transitions:
-			if t.state == current_state and t.read_symbol == symbol:
-				return t.next_state
-
-		return None
+	def process_input(self, input):
+		for symbol in input:
+			print(self.currentState)
+			self.currentState = self.currentState.next_state(symbol)
+	def next_state(self, symbol):
+		self.currentState = self.currentState.next_state(symbol)
+		return self.currentState
 
 
 class Transition:
-	def __init__(self, target_state, symbol):
+	def __init__(self, symbol, target_state):
 		self.target_state = target_state
 		self.symbol = symbol
+	def get_symbol(self):
+		return self.symbol
+	def get_next_state(self):
+		return self.target_state
+	def __str__(self):
+		return self.symbol + " -> " + self.target_state.__str__()
 
 class State:
-	def __init__(self, name, t=[]):
+	def __init__(self, name):
 		self.name = name
-		self.transitions = t
+		self.transitions = []
 
 	def __str__(self):
-		print(self.name)
+		return self.name
 
 	def next_state(self, symbol):
 		for t in self.transitions:
-			if t.symbol == symbol:
-				return t.target_state
+			print(t)
+			if t.get_symbol() == symbol:
+				return t.get_next_state()
+		return None
 
 	def __eq__(self, other):
 		return self.name == other
+
+	def add_transition(self, t):
+		self.transitions.append(t)
 
 
 if __name__ == "__main__":
@@ -42,9 +53,9 @@ if __name__ == "__main__":
 	input2 = ['a','a']
 	q0 = State("q0")
 	q1 = State("q1")
-	t1 = Transition(q0, 'a', q1)
-	t2 = Transition(q1, 'a', q1)
-	#for t in trs:
-	#	print(t.next(q0, 'a'))
-	#a = Automaton(set([q0, q1]), set([q1]), q0, trs)
-
+	t1 = Transition('a', q1)
+	t2 = Transition('a', q0)
+	q0.add_transition(t1)
+	q1.add_transition(t2)
+	a = Automaton([q0, q1],[q1],q0)
+	a.process_input('aaaa')
