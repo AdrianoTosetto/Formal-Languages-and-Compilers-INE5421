@@ -50,8 +50,9 @@ class NDState:
 
 	def __str__(self):
 		return self.name
-
-	def next_states(self):
+	def __repr__(self):
+		return self.__str__()
+	def next_states(self, symbol):
 		for t in self.ndtransitions:
 			if t.get_symbol() == symbol:
 				return t.get_next_states()
@@ -64,9 +65,35 @@ class NDState:
 	def add_transition(self, t):
 		self.ndtransitions.append(t)
 class NDAutomaton:
+	def __init__(self, states, finalStates, initialState):
+		self.states = (states)
+		self.finalStates = (finalStates)
+		self.initialState = initialState
+		self.currentStates = [initialState]
 
-	def __init__(self):
-		print('')
+	def process_input(self, input):
+		return None
+		#for symbol in input:
+		#	print(self.currentState)
+		#	self.currentState = self.currentState.next_state(symbol)
+	def next_states(self, symbol, go_ahead=True):
+		temp = []
+		for state in self.currentStates:
+			s = state.next_states(symbol)
+			if s is not None:
+				temp.extend(s)
+		#remove duplicated states
+		temp = list(set(temp))
+		if go_ahead:
+			self.currentStates = temp
+			return self.currentStates
+		else:
+			return temp
+
+	def transition_table(self):
+		already_visited = []
+		Σ = ['0','1']
+
 
 class State:
 	def __init__(self, name):
@@ -106,7 +133,11 @@ if __name__ == "__main__":
 	q2 = NDState("q2")
 	t0 = NDTransition('0',[q0, q1])
 	t1 = NDTransition('1', [q2])
+	t2 = NDTransition('0',[q1, q2])
 	q0.add_transition(t0)
 	q1.add_transition(t1)
-
-	print(q0.next_states_str('1'))
+	q1.add_transition(t2)
+	a = NDAutomaton([q0,q1], [q2], q0)
+	a.transition_table()
+	print(a.next_states('0'))
+	print(a.next_states('0'))
