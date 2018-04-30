@@ -26,6 +26,48 @@ class Transition:
 	def __str__(self):
 		return self.symbol + " -> " + self.target_state.__str__()
 
+class NDTransition:
+	def __init__(self, symbol, target_states):
+		self.target_states = target_states
+		self.symbol = symbol
+	def get_symbol(self):
+		return self.symbol
+	def get_next_states(self):
+		return self.target_states
+
+	def __str__(self):
+		ret = "["
+		ret = ret + ",".join(s.__str__() for s in self.target_states)
+		ret = ret + "]"
+		return ret
+	def __repr__(self):
+		return self.__str__()
+
+class NDState:
+	def __init__(self, name):
+		self.name = name
+		self.ndtransitions = []
+
+	def __str__(self):
+		return self.name
+
+	def next_states(self):
+		for t in self.ndtransitions:
+			if t.get_symbol() == symbol:
+				return t.get_next_states()
+		return None
+	def next_states_str(self, symbol):
+		for t in self.ndtransitions:
+			if t.get_symbol() == symbol:
+				return t.__str__()
+		return None
+	def add_transition(self, t):
+		self.ndtransitions.append(t)
+class NDAutomaton:
+
+	def __init__(self):
+		print('')
+
 class State:
 	def __init__(self, name):
 		self.name = name
@@ -49,7 +91,7 @@ class State:
 
 
 if __name__ == "__main__":
-	input1 = ['a', 'a', 'a']
+	'''input1 = ['a', 'a', 'a']
 	input2 = ['a','a']
 	q0 = State("q0")
 	q1 = State("q1")
@@ -58,4 +100,13 @@ if __name__ == "__main__":
 	q0.add_transition(t1)
 	q1.add_transition(t2)
 	a = Automaton([q0, q1],[q1],q0)
-	a.process_input('aaaa')
+	a.process_input('aaaa')'''
+	q0 = NDState("q0")
+	q1 = NDState("q1")
+	q2 = NDState("q2")
+	t0 = NDTransition('0',[q0, q1])
+	t1 = NDTransition('1', [q2])
+	q0.add_transition(t0)
+	q1.add_transition(t1)
+
+	print(q0.next_states_str('1'))
