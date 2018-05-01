@@ -116,9 +116,61 @@ class State:
 	def add_transition(self, t):
 		self.transitions.append(t)
 
+#-------------------------------------------------------------------------------
+
+class Grammar:
+	def __init__(self, productions):
+		self.productions = productions
+
+	def produce(self, size):
+		sentences = []
+		sForms = [self.productions[0].leftSide]
+		while len(sForms) != 0:
+			curr_sym = sForms[0][-1]
+			for prods in self.productions:
+				if curr_sym == prods.leftSide[-1]:
+					#curr_form = (sForms[0] - sForms[0][-1]) + prods.rightSide
+					curr_form = "".join(sForms[0].rsplit(sForms[0][-1]))
+					curr_form = curr_form + prods.rightSide
+					if len(curr_form) <= size:
+						#print("Passou")
+						if all(s.isdigit() or s.islower() for s in curr_form):
+							print(curr_form)
+							sentences.append(curr_form)
+						else:
+							sForms.append(curr_form)
+			#"".join(sForms[0].rsplit(sForms[0][-1]))
+			sForms.pop(0)
+		return sentences
+
+
+class Production:
+	def __init__(self, leftSide, rightSide):
+		self.leftSide = leftSide
+		self.rightSide = rightSide
+
+	def __str__(self):
+		return self.leftSide + " -> " + self.rightSide
+
+	def __repr__(self):
+		return str(self)
+
+'''class SententialForm:
+	def __init__(self, symbols):
+		self.symbols = symbols
+
+	def __str__(self):
+		return self.symbols
+
+	def __add__(self, form):
+		return SententialForm(self.symbols + form.symbols)
+
+	def __sub__(self, index):
+		return SententialForm("".join(self.symbols.rsplit(self.symbols[index])))'''
 
 if __name__ == "__main__":
-	'''input1 = ['a', 'a', 'a']
+	'''
+	input1 = ['a', 'a', 'a']
 	input2 = ['a','a']
 	q0 = State("q0")
 	q1 = State("q1")
@@ -127,7 +179,9 @@ if __name__ == "__main__":
 	q0.add_transition(t1)
 	q1.add_transition(t2)
 	a = Automaton([q0, q1],[q1],q0)
-	a.process_input('aaaa')'''
+	a.process_input('aaaa')
+	'''
+	'''
 	q0 = NDState("q0")
 	q1 = NDState("q1")
 	q2 = NDState("q2")
@@ -141,3 +195,20 @@ if __name__ == "__main__":
 	a.transition_table()
 	print(a.next_states('0'))
 	print(a.next_states('0'))
+	'''
+	leftSides = ['S', 'A', 'B']
+	rightSides = ['0S', '1A', '0', '0B', '1S', '1', '0A', '1B']
+	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
+				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
+				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
+	print(productions)
+	myGrammar = Grammar(productions)
+	leftSides1 = ['S', 'A', 'B', 'C']
+	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
+	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
+	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
+				   Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
+				   Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
+	print(productions1)
+	myGrammar1 = Grammar(productions1)
+	myGrammar1.produce(4)
