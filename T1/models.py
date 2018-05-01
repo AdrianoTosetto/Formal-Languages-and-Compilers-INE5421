@@ -143,6 +143,24 @@ class Grammar:
 			sForms.pop(0)
 		return sentences
 
+	def __str__(self):
+		stringerson = ""
+		leftSides = set()
+		first = True
+		for prods in self.productions:
+			leftSides.add(prods.leftSide)
+		for lefts in leftSides:
+			for prods in self.productions:
+				if first and lefts is prods.leftSide:
+					stringerson = stringerson + lefts + " -> " + prods.rightSide
+					first = False
+				elif lefts is prods.leftSide:
+					stringerson = stringerson + " | " + prods.rightSide
+			stringerson = stringerson + "\n"
+			first = True
+		return stringerson
+
+
 
 class Production:
 	def __init__(self, leftSide, rightSide):
@@ -201,14 +219,14 @@ if __name__ == "__main__":
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
 				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
-	print(productions)
 	myGrammar = Grammar(productions)
+	print(myGrammar)
 	leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
 	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
 	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
 				   Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
 				   Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
-	print(productions1)
 	myGrammar1 = Grammar(productions1)
+	print(myGrammar1)
 	myGrammar1.produce(4)
