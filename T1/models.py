@@ -60,6 +60,34 @@ class Transition:
 	def __str__(self):
 		return self.symbol + " -> " + self.target_state.__str__()
 
+
+class State:
+	def __init__(self, name):
+		self.name = name
+		self.transitions = []
+
+	def __str__(self):
+
+		return self.name
+
+	def __repr__(self):
+		return self.__str__()
+
+	def next_state(self, symbol):
+		for t in self.transitions:
+			print(t)
+			if t.get_symbol() == symbol:
+				return t.get_next_state()
+		return None
+
+	def __eq__(self, other):
+		return self.name == other
+
+	def add_transition(self, t):
+		self.transitions.append(t)
+
+#-------------------------------------------------------------------------------
+
 class NDTransition:
 	def __init__(self, symbol, target_states):
 		self.target_states = target_states
@@ -161,32 +189,6 @@ class NDAutomaton:
 
 	def __repr__(self):
 		return str(self)
-
-
-class State:
-	def __init__(self, name):
-		self.name = name
-		self.transitions = []
-
-	def __str__(self):
-
-		return self.name
-
-	def __repr__(self):
-		return self.__str__()
-
-	def next_state(self, symbol):
-		for t in self.transitions:
-			print(t)
-			if t.get_symbol() == symbol:
-				return t.get_next_state()
-		return None
-
-	def __eq__(self, other):
-		return self.name == other
-
-	def add_transition(self, t):
-		self.transitions.append(t)
 
 #-------------------------------------------------------------------------------
 
@@ -343,15 +345,7 @@ class Production:
 	def isTerminalProduction(self):
 		return len(self.rightSide) == 1
 
-'''class SententialForm:
-	def __init__(self, symbols):
-		self.symbols = symbols
-	def __str__(self):
-		return self.symbols
-	def __add__(self, form):
-		return SententialForm(self.symbols + form.symbols)
-	def __sub__(self, index):
-		return SententialForm("".join(self.symbols.rsplit(self.symbols[index])))'''
+#-------------------------------------------------------------------------------
 
 if __name__ == "__main__":
 
