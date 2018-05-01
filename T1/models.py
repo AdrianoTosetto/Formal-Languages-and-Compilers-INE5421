@@ -147,7 +147,11 @@ class Grammar:
 			#"".join(sForms[0].rsplit(sForms[0][-1]))
 			sForms.pop(0)
 		return sentences
-
+	def has_empty_sentence(self):
+		for p in self.productions:
+			if p.leftSide == 'S' and p.rightSide == '&':
+				return True
+		return False
 	def __str__(self):
 		stringerson = ""
 		leftSides = set()
@@ -170,40 +174,49 @@ class Grammar:
 			ret.append(p.leftSide)
 
 		return list(set(ret))
+	'''
+		this function outputs the productions of a given non-terminal
+		e.g if the non_terminal has the following productions:  B -> bS | aC | a,
+		the function is supposed to output [bS, aC, a]
+	'''
 	def get_productions_from(self, non_terminal):
 		ret = []
 		for p in self.productions:
 			if p.leftSide == non_terminal:
 				ret.append(p.rightSide)
 		return ret
+
+	'''
+		this functions outputs the productions in lexical order
+		e.g: if the non_terminal has the following productions: B -> bS | aC | a,
+		the functions is supposed to output [a, aC, bS]
+	'''
 	def get_ord_productions_from(self, non_terminal):
 		ret = []
 		for p in self.productions:
 			if p.leftSide == non_terminal:
 				ret.append(p.rightSide)
 		return sorted(ret, key=str.lower)
-
+	'''
+		this functions works the same way as the function above, but it outputs
+		the productions in lists. E.g: if the non_terminal has the following productions: B -> bS | aC | a,
+		the functions is supposed to output [[a, aC], [bS]]
+	'''
 	def _get_ord_productions_from(self, non_terminal):
 		sorted = self.get_ord_productions_from(non_terminal)
-		print(sorted)
 		lastSymbol = sorted[0][0]
 		add = []
 		ret = []
-		finalAdd = None
-		i = 0
-		ii = 0
 		t = 0
 		for p in sorted:
 			if p[0] == lastSymbol:
 				add.append(p)
 			else:
-				#print(add)
 				ret.append(add)
 				lastSymbol = p[0]
 				add = []
 				add.append(p)
 		ret.append(add)
-		print(ret)
 		return ret
 	def convert_to_automaton(self):
 		states = {s:NDState(s) for s in self.get_non_terminals()}
@@ -211,24 +224,27 @@ class Grammar:
 		λ = NDState('λ')
 		for s in states:
 			prods = self._get_ord_productions_from(s.__str__())
-			break
-			'''for p in prods:
-				symbol = p[0]
-				t = None
-				if len(p) == 1:
-					sset.append(λ)
-				else:
-					nt = p[1]
-					next_state = states[nt]
-					sset.append(next_state)
-				#print(s + " goes to " + str(sset) + " for " + symbol)
-				#t = NDTransition(symbol, sset)
-				#states[s].add_transition(t)'''
-		'''tst = states.values()
-		print(tst)
-		for s in tst:
-			for t in s.ndtransitions:
-				print(t)'''
+			for prod in prods:
+				sset = []
+				for i in prod:
+					symbol = i[0] #terminal symbol
+					if len(i) == 1:
+						sset.append(λ)
+					else:
+						nt = i[1]
+						next_state = states[nt]
+						sset.append(next_state)
+				t = NDTransition(symbol, sset)
+				#print(states[s].__str__() + " goes to " + str(sset) + " for " + symbol)
+
+				sset = []
+				states[s].add_transition(t)
+		initialState = states['S']
+		finalStates = [λ]
+		if self.has_empty_sentence():
+			finalStates.append(initialState)
+		
+		return NDAutomaton(states.values(), finalStates, initialState)
 
 class Production:
 	def __init__(self, leftSide, rightSide):
@@ -254,33 +270,7 @@ class Production:
 		return SententialForm("".join(self.symbols.rsplit(self.symbols[index])))'''
 
 if __name__ == "__main__":
-	'''
-	input1 = ['a', 'a', 'a']
-	input2 = ['a','a']
-	q0 = State("q0")
-	q1 = State("q1")
-	t1 = Transition('a', q1)
-	t2 = Transition('a', q0)
-	q0.add_transition(t1)
-	q1.add_transition(t2)
-	a = Automaton([q0, q1],[q1],q0)
-	a.process_input('aaaa')
-	'''
-	'''
-	q0 = NDState("q0")
-	q1 = NDState("q1")
-	q2 = NDState("q2")
-	t0 = NDTransition('0',[q0, q1])
-	t1 = NDTransition('1', [q2])
-	t2 = NDTransition('0',[q1, q2])
-	q0.add_transition(t0)
-	q1.add_transition(t1)
-	q1.add_transition(t2)
-	a = NDAutomaton([q0,q1], [q2], q0)
-	a.transition_table()
-	print(a.next_states('0'))
-	print(a.next_states('0'))
-	'''
+
 	leftSides = ['S', 'A', 'B']
 	rightSides = ['0S', '1A', '0', '0B', '1S', '1', '0A', '1B']
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
@@ -297,4 +287,9 @@ if __name__ == "__main__":
 	myGrammar1 = Grammar(productions1)
 
 	print(myGrammar1)
-	myGrammar1.convert_to_automaton()
+	a = myGrammar1.convert_to_automaton()
+	print(a.next_states('a')) #should output [A] and it does!
+	print(a.next_states('b')) #should output [C, λ] and it does!
+
+	#print(myGrammar)
+	#myGrammar.convert_to_automaton()
