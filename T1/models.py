@@ -19,17 +19,17 @@ class Automaton:
 	def __str__(self):
 		stringerson = "   δ"
 		Σ = sorted(self.Σ)
-		first = True
+		#first = True
 		for σ in Σ:
 			stringerson = stringerson + " | " + σ
 		stringerson = stringerson + "\n"
 		for s in self.states:
 			if s == self.initialState:
 				stringerson = stringerson + "->"
-				first = False
-			elif first:
-				Σ.append(s)
-				continue
+			#	first = False
+			#elif first:
+			#	Σ.append(s)
+			#	continue
 			else:
 				stringerson = stringerson + "  "
 			if s in self.finalStates:
