@@ -19,17 +19,12 @@ class Automaton:
 	def __str__(self):
 		stringerson = "   δ"
 		Σ = sorted(self.Σ)
-		#first = True
 		for σ in Σ:
 			stringerson = stringerson + " | " + σ
 		stringerson = stringerson + "\n"
 		for s in self.states:
-			if s == self.initialState:
+			if s.name == self.initialState.name:
 				stringerson = stringerson + "->"
-			#	first = False
-			#elif first:
-			#	Σ.append(s)
-			#	continue
 			else:
 				stringerson = stringerson + "  "
 			if s in self.finalStates:
@@ -37,11 +32,11 @@ class Automaton:
 			else:
 				stringerson = stringerson + " "
 			stringerson = stringerson + s.__str__()
-			for t in s.transitions:
-				if t.target_state == None:
-					stringerson = stringerson + " | -"
+			for σ in Σ:
+				if σ in s.get_symbols():
+					stringerson = stringerson + " | " + s.next_state(σ).__str__()
 				else:
-					stringerson = stringerson + " | " + t.target_states__str__()
+					stringerson = stringerson + " | -"
 			stringerson	= stringerson + "\n"
 		return stringerson
 
@@ -66,8 +61,13 @@ class State:
 		self.name = name
 		self.transitions = []
 
-	def __str__(self):
+	def get_symbols(self):
+		symb = set()
+		for t in self.transitions:
+			symb.add(t.symbol)
+		return symb
 
+	def __str__(self):
 		return self.name
 
 	def __repr__(self):
@@ -75,16 +75,19 @@ class State:
 
 	def next_state(self, symbol):
 		for t in self.transitions:
-			print(t)
+			#print(t)
 			if t.get_symbol() == symbol:
 				return t.get_next_state()
 		return None
 
-	def __eq__(self, other):
-		return self.name == other
-
 	def add_transition(self, t):
 		self.transitions.append(t)
+
+	def __hash__(self):
+		return id(self)
+
+	def __eq__(self, other):
+		return self.name == other.name
 
 #-------------------------------------------------------------------------------
 
@@ -110,6 +113,12 @@ class NDState:
 		self.name = name
 		self.ndtransitions = []
 
+	def get_symbols(self):
+		symb = set()
+		for t in self.ndtransitions:
+			symb.add(t.symbol)
+		return symb
+
 	def __str__(self):
 		return self.name
 	def __repr__(self):
@@ -126,6 +135,13 @@ class NDState:
 		return None
 	def add_transition(self, t):
 		self.ndtransitions.append(t)
+
+	def __hash__(self):
+		return id(self)
+
+	def __eq__(self, other):
+		return self.name == other.name
+
 
 class NDAutomaton:
 	def __init__(self, states, finalStates, initialState, Σ=['0','1']):
@@ -161,17 +177,12 @@ class NDAutomaton:
 	def __str__(self):
 		stringerson = "   δ"
 		Σ = sorted(self.Σ)
-		first = True
 		for σ in Σ:
 			stringerson = stringerson + " |  " + σ + " "
 		stringerson = stringerson + "\n"
 		for s in self.states:
 			if s == self.initialState:
 				stringerson = stringerson + "->"
-				first = False
-			elif first:
-				Σ.append(s)
-				continue
 			else:
 				stringerson = stringerson + "  "
 			if s in self.finalStates:
@@ -179,16 +190,59 @@ class NDAutomaton:
 			else:
 				stringerson = stringerson + " "
 			stringerson = stringerson + s.__str__()
-			for t in s.ndtransitions:
-				if t.target_states == []:
-					stringerson = stringerson + " | -"
+			for σ in Σ:
+				if σ in s.get_symbols():
+					stringerson = stringerson + " | " + s.next_states(σ).__str__()
 				else:
-					stringerson = stringerson + " | " + t.target_states.__str__()
+					stringerson = stringerson + " |  - "
 			stringerson	= stringerson + "\n"
 		return stringerson
 
 	def __repr__(self):
 		return str(self)
+
+	'''
+		determinization functions:
+	'''
+
+	def determinize_states(self, states, finalStates, newStates):
+		if len(states) == 1:
+			newState = State(list(states)[0].name)
+			newStates.add(newState)
+			if list(states)[0] in self.finalStates:
+				finalStates.add(newState)
+			return newState
+		newState = State(states.__str__())
+		for a in self.Σ:
+			nextStates = set()
+			for s in states:
+				for t in s.ndtransitions:
+					if t.symbol == a:
+						nextStates = nextStates | set(t.target_states)
+			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, nextStates)))
+		if any(s in self.finalStates for s in states):
+			finalStates.add(newState)
+		newStates.add(newState)
+		return newState
+
+	def determinize(self):
+		newStates = set()
+		finalStates = set()
+		for s in self.finalStates:
+			newFinalState = State(s.name)
+			finalStates.add(newFinalState)
+		for s in self.states:
+			newState = State(s.name)
+			for t in s.ndtransitions:
+				newState.add_transition(Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates)))
+			newStates.add(newState)
+		print(newStates)
+		print(finalStates)
+		return Automaton(newStates, finalStates, self.initialState, self.Σ)
+
+
+
+
 
 #-------------------------------------------------------------------------------
 
@@ -224,6 +278,12 @@ class Grammar:
 							sForms.append(curr_form)
 			sForms.pop(0)
 		return sentences
+
+	def getAlphabet(self):
+		Σ = set()
+		for prod in self.productions:
+			Σ.add(prod.rightSide[0])
+		return list(Σ)
 
 	def has_empty_sentence(self):
 		for p in self.productions:
@@ -304,6 +364,7 @@ class Grammar:
 		return ret
 
 	def convert_to_automaton(self):
+		alphabet = self.getAlphabet()
 		states = {s:NDState(s) for s in self.get_non_terminals()}
 		# state that accepts the input
 		λ = NDState('λ')
@@ -321,15 +382,17 @@ class Grammar:
 						sset.append(next_state)
 				t = NDTransition(symbol, sset)
 				#print(states[s].__str__() + " goes to " + str(sset) + " for " + symbol)
-
 				sset = []
 				states[s].add_transition(t)
+
+		states['λ'] = λ
+
 		initialState = states['S']
 		finalStates = [λ]
 		if self.has_empty_sentence():
 			finalStates.append(initialState)
 
-		return NDAutomaton(states.values(), finalStates, initialState)
+		return NDAutomaton(states.values(), finalStates, initialState, alphabet)
 
 class Production:
 	def __init__(self, leftSide, rightSide):
@@ -360,8 +423,8 @@ if __name__ == "__main__":
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
 	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
 	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
-				   Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
-				   Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
+				   	Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
+				   	Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
 	myGrammar1 = Grammar(productions1)
 
 	print(myGrammar1)
@@ -374,3 +437,6 @@ if __name__ == "__main__":
 	print(b.next_states('0'))
 	print(b.next_states('1'))
 	print(a)
+	print(b)
+	a1 = a.determinize()
+	print(a1)
