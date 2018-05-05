@@ -6,11 +6,14 @@ class Automaton:
 		self.initialState = initialState
 		self.currentState = initialState
 		self.Σ = Σ
+		self.equi_classes = []
 
 	def process_input(self, input):
 		for symbol in input:
 			print(self.currentState)
 			self.currentState = self.currentState.next_state(symbol)
+
+		return self.currentState.isAcceptance
 
 	def next_state(self, symbol):
 		self.currentState = self.currentState.next_state(symbol)
@@ -42,6 +45,35 @@ class Automaton:
 
 	def __repr__(self):
 		return str(self)
+	def get_acceptance_states(self):
+		ret = []
+		for s in self.states:
+			if s.isAcceptance:
+				ret.append(s)
+		return ret
+	def get_non_acceptance_states(self):
+		ret= []
+		for s in self.states:
+			if not(s.isAcceptance):
+				ret.append(s)
+		return ret
+	def belong_same_equi_class(self, q0, q1):
+		for eqclass in self.equi_classes:
+			if q0 in eqclass and q1 in eqclass:
+				return True
+		return False
+	def minimize(self):
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+		#print(self.equi_classes)
+		for eqclass in self.equi_classes:
+			for state in eqclass:
+				test_states = eqclass - {state}
+				for ts in test_states:
+					for symbol in self.Σ:
+						n1 = state.next_state(symbol)
+						n2 = ts.next_state(symbol)
+						if not self.belong_same_equi_class(n1, n2):
+							print(str(n1) + ' ' + str(n2) + ' nao pertencem')
 
 
 class Transition:
@@ -57,9 +89,10 @@ class Transition:
 
 
 class State:
-	def __init__(self, name):
+	def __init__(self, name, isAcceptance = False):
 		self.name = name
 		self.transitions = []
+		self.isAcceptance = isAcceptance
 
 	def get_symbols(self):
 		symb = set()
@@ -109,9 +142,10 @@ class NDTransition:
 		return self.__str__()
 
 class NDState:
-	def __init__(self, name):
+	def __init__(self, name, isAcceptance = False):
 		self.name = name
 		self.ndtransitions = []
+		self.isAcceptance = isAcceptance
 
 	def get_symbols(self):
 		symb = set()
@@ -412,7 +446,7 @@ class Production:
 
 if __name__ == "__main__":
 
-	leftSides = ['S', 'A', 'B']
+	'''leftSides = ['S', 'A', 'B']
 	rightSides = ['0S', '1A', '0', '0B', '1S', '1', '0A', '1B']
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
 				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
@@ -439,4 +473,41 @@ if __name__ == "__main__":
 	print(a)
 	print(b)
 	a1 = a.determinize()
-	print(a1)
+	print(a1)'''
+
+	q0 = State('q0', True)
+	q1 = State('q1')
+	q2 = State('q2')
+	q3 = State('q3')
+
+	t1 = Transition('a', q2)
+	t2 = Transition('b', q1)
+
+	q0.add_transition(t1)
+	q0.add_transition(t2)
+
+	t3 = Transition('a', q3)
+	t4 = Transition('b', q0)
+
+	q1.add_transition(t3)
+	q1.add_transition(t4)
+
+	t5 = Transition('a', q0)
+	t6 = Transition('b', q3)
+
+	q2.add_transition(t5)
+	q2.add_transition(t6)
+
+	t7 = Transition('a', q1)
+	t8 = Transition('b', q2)
+
+	q3.add_transition(t7)
+	q3.add_transition(t8)
+
+	states = [q0,q1,q2,q3]
+	finalStates = [q0]
+	initialState = q0
+
+	a = Automaton(states,finalStates, initialState, ['a','b'])
+	a.minimize()
+	print(a.belong_same_equi_class(q3,q1))
