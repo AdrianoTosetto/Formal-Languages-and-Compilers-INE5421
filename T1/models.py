@@ -68,7 +68,37 @@ class Automaton:
 		print()
 
 	def remove_dead_states(self):
-		
+		for s in set(self.states) - set(self.finalStates):
+			for fs in self.finalStates:
+				if not self.has_path(s, fs):
+					try:
+						self.states.remove(s)
+						continue
+					except ValueError:
+						pass
+
+
+
+	def has_path(self, q0, q1):
+		if q0 == q1:
+			return True
+		visited = set([q0])
+		to_visit = visited
+		temp = to_visit
+		while(len(to_visit) != 0):
+			for symbol in self.Σ:
+				for s in to_visit.copy():
+					temp = to_visit - {s}
+					ns = s.next_state(symbol)
+					if ns is None:
+						continue
+					if ns not in visited:
+						temp.add(ns)
+					visited.add(ns)
+				to_visit = temp
+				temp = set()
+		return q1 in visited
+
 	def minimize(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 		temp = self.equi_classes
@@ -537,12 +567,16 @@ if __name__ == "__main__":
 	t11 = Transition('a', q4)
 	t12 = Transition('b', q4)
 
+	q5.add_transition(t11)
+	q5.add_transition(t12)
+
 	states = [q0,q1,q2,q3,q4,q5]
 	finalStates = [q4,q5]
 	initialState = q0
 
 	a = Automaton(states,finalStates, initialState, ['a','b'])
-	a.minimize()
-	print(a.equi_classes)
+	a.remove_dead_states()
+	print(a)
+	#print(a.has_path(q0, q3))
 	#print(a.belong_same_equi_class(q3,q1))
 	#print(a.process_input('b'))
