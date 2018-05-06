@@ -12,6 +12,8 @@ class Automaton:
 		for symbol in input:
 			print(self.currentState)
 			self.currentState = self.currentState.next_state(symbol)
+			if self.currentState is None:
+				return False
 
 		return self.currentState.isAcceptance
 
@@ -62,9 +64,15 @@ class Automaton:
 			if q0 in eqclass and q1 in eqclass:
 				return True
 		return False
+	def remove_unreacheable_states(self):
+		print()
+
+	def remove_dead_states(self):
+		
 	def minimize(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
-		#print(self.equi_classes)
+		temp = self.equi_classes
+		print(self.equi_classes)
 		for eqclass in self.equi_classes:
 			for state in eqclass:
 				test_states = eqclass - {state}
@@ -73,7 +81,11 @@ class Automaton:
 						n1 = state.next_state(symbol)
 						n2 = ts.next_state(symbol)
 						if not self.belong_same_equi_class(n1, n2):
-							print(str(n1) + ' ' + str(n2) + ' nao pertencem')
+							#print(str(n1) + ' ' + str(n2) + ' nao pertencem')
+							self.equi_classes.remove(eqclass)
+							eqclass = eqclass - {ts}
+							self.equi_classes.append({ts})
+							self.equi_classes.append(eqclass)
 
 
 class Transition:
@@ -117,7 +129,10 @@ class State:
 		self.transitions.append(t)
 
 	def __hash__(self):
-		return id(self)
+		hashable = self.name
+		if self.name == 'λ':
+			hashable ='lambda'
+		return sum([ord(c) for c in hashable])
 
 	def __eq__(self, other):
 		return self.name == other.name
@@ -256,12 +271,17 @@ class NDAutomaton:
 			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, nextStates)))
 		if any(s in self.finalStates for s in states):
 			finalStates.add(newState)
+		if newState in newStates:
+			newStates.remove(newState)
 		newStates.add(newState)
 		return newState
 
 	def determinize(self):
 		newStates = set()
 		finalStates = set()
+		for s in self.states:
+			newState = State(s.name)
+			newStates.add(newState)
 		for s in self.finalStates:
 			newFinalState = State(s.name)
 			finalStates.add(newFinalState)
@@ -269,6 +289,8 @@ class NDAutomaton:
 			newState = State(s.name)
 			for t in s.ndtransitions:
 				newState.add_transition(Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates)))
+			if newState in newStates:
+				newStates.remove(newState)
 			newStates.add(newState)
 		print(newStates)
 		print(finalStates)
@@ -475,39 +497,52 @@ if __name__ == "__main__":
 	a1 = a.determinize()
 	print(a1)'''
 
-	q0 = State('q0', True)
+	q0 = State('q0')
 	q1 = State('q1')
 	q2 = State('q2')
 	q3 = State('q3')
+	q4 = State('q4', True)
+	q5 = State('q5', True)
 
-	t1 = Transition('a', q2)
-	t2 = Transition('b', q1)
+	t1 = Transition('a', q1)
+	t2 = Transition('b', q2)
 
 	q0.add_transition(t1)
 	q0.add_transition(t2)
 
-	t3 = Transition('a', q3)
-	t4 = Transition('b', q0)
+	t3 = Transition('a', q4)
+	t4 = Transition('b', q4)
 
 	q1.add_transition(t3)
 	q1.add_transition(t4)
 
-	t5 = Transition('a', q0)
-	t6 = Transition('b', q3)
+	t5 = Transition('a', q2)
+	t6 = Transition('b', q2)
 
 	q2.add_transition(t5)
 	q2.add_transition(t6)
 
-	t7 = Transition('a', q1)
-	t8 = Transition('b', q2)
+	t7 = Transition('a', q4)
+	t8 = Transition('b', q4)
 
 	q3.add_transition(t7)
 	q3.add_transition(t8)
 
-	states = [q0,q1,q2,q3]
-	finalStates = [q0]
+	t9  = Transition('a', q5)
+	t10 = Transition('b', q5)
+
+	q4.add_transition(t9)
+	q4.add_transition(t10)
+
+	t11 = Transition('a', q4)
+	t12 = Transition('b', q4)
+
+	states = [q0,q1,q2,q3,q4,q5]
+	finalStates = [q4,q5]
 	initialState = q0
 
 	a = Automaton(states,finalStates, initialState, ['a','b'])
 	a.minimize()
-	print(a.belong_same_equi_class(q3,q1))
+	print(a.equi_classes)
+	#print(a.belong_same_equi_class(q3,q1))
+	#print(a.process_input('b'))
