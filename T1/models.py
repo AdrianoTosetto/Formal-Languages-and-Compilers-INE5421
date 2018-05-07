@@ -65,7 +65,18 @@ class Automaton:
 				return True
 		return False
 	def remove_unreacheable_states(self):
-		print()
+		test_states = set(self.states) - {self.initialState}
+
+		for s in test_states.copy():
+			if not self.has_path(self.initialState, s):
+				self.states.remove(s)
+				self.remove_transitions_from(s)
+	def remove_transitions_from(self, st):
+		for state in self.states:
+			for t in state.transitions:
+				if t.target_state == st:
+					t.target_state = None
+
 
 	def remove_dead_states(self):
 		for s in set(self.states) - set(self.finalStates):
@@ -73,14 +84,13 @@ class Automaton:
 				if not self.has_path(s, fs):
 					try:
 						self.states.remove(s)
+						self.remove_transitions_from(s)
 						continue
 					except ValueError:
 						pass
 
-
-
 	def has_path(self, q0, q1):
-		if q0 == q1:
+		'''if q0 == q1:
 			return True
 		visited = set([q0])
 		to_visit = visited
@@ -97,9 +107,31 @@ class Automaton:
 					visited.add(ns)
 				to_visit = temp
 				temp = set()
-		return q1 in visited
+		return q1 in visited'''
 
+		return q1 in self.depth_first_search(q0)
+	def next_states_all(self, s):
+		ret = []
+		for symbol in self.Σ:
+			ret.append(s.next_state(symbol))
+
+		return ret
+
+	def depth_first_search(self, s):
+
+		visited = set()
+		stack = [s]
+
+		while stack:
+			vertex = stack.pop()
+			if vertex not in visited:
+				visited.add(vertex)
+				stack.extend((self.next_states_all(vertex)))
+
+		return visited
 	def minimize(self):
+		self.remove_dead_states()
+		self.remove_unreacheable_states()
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 		temp = self.equi_classes
 		print(self.equi_classes)
@@ -575,8 +607,13 @@ if __name__ == "__main__":
 	initialState = q0
 
 	a = Automaton(states,finalStates, initialState, ['a','b'])
+	print(a)
 	a.remove_dead_states()
 	print(a)
-	#print(a.has_path(q0, q3))
+	#a.remove_unreacheable_states()
+	#a.remove_dead_states()
+	#print(a)
+	#print(a.breadth_first_search(q0))
+	#print(a.has_path(q0, q2))
 	#print(a.belong_same_equi_class(q3,q1))
 	#print(a.process_input('b'))
