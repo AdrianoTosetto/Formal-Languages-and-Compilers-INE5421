@@ -82,14 +82,18 @@ class Automaton:
 
 	def remove_dead_states(self):
 		for s in set(self.states) - set(self.finalStates):
+			sremove = True
 			for fs in self.finalStates:
-				if not self.has_path(s, fs) and not(s.name == "phi"):
-					try:
-						self.states.remove(s)
-						self.remove_transitions_from(s)
-						continue
-					except ValueError:
-						pass
+				if self.has_path(s, fs):
+					sremove = False
+			if sremove:
+				try:
+					self.states.remove(s)
+					self.remove_transitions_from(s)
+					
+				except ValueError:
+					pass
+			sremove = True
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 
 	def has_path(self, q0, q1):
@@ -135,11 +139,12 @@ class Automaton:
 		return visited
 	def minimize(self):
 		self.complete()
-		self.remove_dead_states()
-		self.remove_unreacheable_states()
 		print(self.equi_classes)
+		#self.remove_dead_states()
+		#self.remove_unreacheable_states()
 		changed = True
 		while(changed):
+			print(self.equi_classes)
 			changed = False
 			for eqclass in self.equi_classes:
 				if self.test_eqclass(eqclass):
@@ -153,14 +158,20 @@ class Automaton:
 				for symbol in self.Σ:
 					n1 = state.next_state(symbol)
 					n2 = ts.next_state(symbol)
-					#print("testando equivalencia de " + str(state) + \
-					#	" com " + str(ts) + " pelo simbolo " + symbol)
 					if not self.belong_same_equi_class(n1, n2):
 						self.equi_classes.remove(eqclass)
 						eqclass = eqclass - {ts}
 						self.equi_classes.append(eqclass)
 						self.equi_classes.append({ts})
+						print("testando equivalencia de " + str(state) + \
+						" com " + str(ts) + " pelo simbolo " + symbol + \
+						" e eles nao vao p/ a msm classe " + str(n1) + " " + \
+						str(n2))
+						print(self.equi_classes)
 						return True
+					else:
+						print("testando equivalencia de " + str(state) + \
+						" com " + str(ts) + " pelo simbolo " + symbol)
 		return False
 	def change_equi_classes(self, eqclass_remove, new_eqclass):
 		eqclass_remove = eqclass_remove - {new_eqclass}
@@ -612,7 +623,7 @@ if __name__ == "__main__":
 	a1 = a.determinize()
 	print(a1)'''
 
-	q0 = State('q0')
+	'''q0 = State('q0')
 	q1 = State('q1')
 	q2 = State('q2')
 	q3 = State('q3')
@@ -674,4 +685,64 @@ if __name__ == "__main__":
 	#print(a.breadth_first_search(q0))
 	#print(a.has_path(q0, q2))
 	#print(a.belong_same_equi_class(q3,q1))
-	#print(a.process_input('b'))
+	#print(a.process_input('b'))'''
+
+	q1 = State('q1')
+	q2 = State('q2', True)
+	q3 = State('q3', True)
+	q4 = State('q4')
+	q5 = State('q5')
+	q6 = State('q6', True)
+	q7 = State('q7')
+	q8 = State('q8', True)
+	q9 = State('q9', True)
+	q10 = State('q10')
+
+	t1 = Transition('a', q2)
+	t2 = Transition('a', q1)
+
+	t3 = Transition('b', q3)
+	t4 = Transition('b', q4)
+	t5 = Transition('b', q9)
+	t3a = Transition('b', q3)
+	t4a = Transition('b', q4)
+
+	t6 = Transition('c', q6)
+	t7 = Transition('c', q5)
+	t8 = Transition('c', q7)
+	t9 = Transition('c', q8)
+	t10 = Transition('c', q10)
+	t7a = Transition('c', q5)
+	t6a = Transition('c', q6)
+
+	q1.add_transition(t1)
+	q1.add_transition(t3)
+	q1.add_transition(t6)
+
+	q2.add_transition(t2)
+	q2.add_transition(t4)
+	q2.add_transition(t7)
+
+	q3.add_transition(t8)
+
+	q4.add_transition(t9)
+
+	q5.add_transition(t5)
+
+	q6.add_transition(t10)
+
+	q7.add_transition(t3a)
+
+	q8.add_transition(t4a)
+
+	q9.add_transition(t7a)
+
+	q10.add_transition(t6a)
+
+	states = [q1, q2, q3, q4, q5, q6, q7, q8, q9,q10]
+	finalStates = [q2, q3, q6, q8, q9]
+	a = Automaton(states,finalStates, q1, ['a','b','c'])
+	print(a)
+	#print(a.equi_classes)
+	a.minimize()
+	print(a)
