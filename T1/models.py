@@ -592,6 +592,96 @@ class Production:
 
 #-------------------------------------------------------------------------------
 
+class Stack:
+     def __init__(self):
+         self.items = []
+
+     def isEmpty(self):
+         return self.items == []
+
+     def push(self, item):
+         self.items.append(item)
+
+     def pop(self):
+         return self.items.pop()
+
+     def peek(self):
+         return self.items[len(self.items)-1]
+
+     def size(self):
+         return len(self.items)
+'''
+	this function is equivalent to the post order traversal. E.g if you had a binary tree of your regex and used 
+	the post order algorithm, it would output the same thing that this function outputs. Given the output of this
+	function, it is easier to build the expression tree
+'''
+
+def polish_notation(infixexpr):
+    prec = {}
+    prec["("] = 1
+    prec["|"] = 2
+    prec["."] = 3
+    prec["?"] = 4
+    prec["*"] = 4
+    prec["+"] = 4
+    prec["^"] = 5
+    opStack = Stack()
+    postfixList = []
+    tokenList = infixexpr.split()
+
+    for token in tokenList:
+        if token in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or token in "0123456789":
+            postfixList.append(token)
+        elif token == '(':
+            opStack.push(token)
+        elif token == ')':
+            topToken = opStack.pop()
+            while topToken != '(':
+                postfixList.append(topToken)
+                topToken = opStack.pop()
+        else:
+            while (not opStack.isEmpty()) and \
+               (prec[opStack.peek()] >= prec[token]):
+                  postfixList.append(opStack.pop())
+            opStack.push(token)
+
+    while not opStack.isEmpty():
+        postfixList.append(opStack.pop())
+    print(" ".join(postfixList))
+    return " ".join(postfixList)
+
+
+traversal = []
+class BinaryTree:
+
+	def __init__(self, root_node):
+		self.root = root_node
+
+class Node:
+
+	def __init__(self, symbol, left=None, right=None):
+		self.left = left
+		self.right = right
+		self.symbol = symbol
+		self.traversal = []
+	def set_left(self, left):
+		self.left = left
+	def set_right(self, right):
+		self.right = right
+	'''
+		this function is equivalent to the polish notation (reversed)
+	'''
+	def post_order(self):
+
+		if self.left is not None:
+			self.left.post_order()
+		if self.right is not None:
+			self.right.post_order()
+		traversal.append(self.symbol)
+		return (self.symbol)
+
+
+#--------------------------------------------------------------------------------
 if __name__ == "__main__":
 
 	'''leftSides = ['S', 'A', 'B']
@@ -687,7 +777,7 @@ if __name__ == "__main__":
 	#print(a.belong_same_equi_class(q3,q1))
 	#print(a.process_input('b'))'''
 
-	q1 = State('q1')
+	'''q1 = State('q1')
 	q2 = State('q2', True)
 	q3 = State('q3', True)
 	q4 = State('q4')
@@ -745,4 +835,32 @@ if __name__ == "__main__":
 	print(a)
 	#print(a.equi_classes)
 	a.minimize()
-	print(a)
+	print(a)'''
+	n1 = Node('a')
+	n2 = Node('b')
+	n3 = Node('.', n1, n2)
+
+	n4 = Node('a')
+	n5 = Node('c')
+	n6 = Node('.', n4, n5)
+	n7 = Node('|', n3, n6)
+	n8 = Node('*', n7)
+	n9 = Node('a')
+	n10 = Node('?', n9)
+	n11 = Node('.', n8, n10)
+
+	n12 = Node('a')
+	n13 = Node('?', n12)
+	n14 = Node('b')
+	n15 = Node('.', n14, n12)
+	n16 = Node('c')
+	n17 = Node('.', n15, n16)
+	n18 = Node('*', n17)
+
+	n19 = Node('|',n11,n18)
+
+	n19.post_order()
+	print(n19.traversal)
+
+	polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
+	print(traversal)
