@@ -75,7 +75,7 @@ class Automaton:
 		for state in self.states:
 			for t in state.transitions:
 				if t.target_state == st:
-					t.target_state = None
+					t.target_state = φ(self.Σ)
 
 
 	def remove_dead_states(self):
@@ -113,7 +113,8 @@ class Automaton:
 	def next_states_all(self, s):
 		ret = []
 		for symbol in self.Σ:
-			ret.append(s.next_state(symbol))
+			if s.next_state(symbol) is not None:
+				ret.append(s.next_state(symbol))
 
 		return ret
 
@@ -135,7 +136,7 @@ class Automaton:
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 		temp = self.equi_classes
 		print(self.equi_classes)
-		for eqclass in self.equi_classes:
+		'''for eqclass in self.equi_classes:
 			for state in eqclass:
 				test_states = eqclass - {state}
 				for ts in test_states:
@@ -147,9 +148,10 @@ class Automaton:
 							self.equi_classes.remove(eqclass)
 							eqclass = eqclass - {ts}
 							self.equi_classes.append({ts})
-							self.equi_classes.append(eqclass)
-
-
+							self.equi_classes.append(eqclass)'''
+	def complete(self):
+		for s in self.states:
+			s.complete(self.Σ)
 class Transition:
 	def __init__(self, symbol, target_state):
 		self.target_state = target_state
@@ -161,8 +163,8 @@ class Transition:
 	def __str__(self):
 		return self.symbol + " -> " + self.target_state.__str__()
 
-
 class State:
+
 	def __init__(self, name, isAcceptance = False):
 		self.name = name
 		self.transitions = []
@@ -198,6 +200,35 @@ class State:
 
 	def __eq__(self, other):
 		return self.name == other.name
+	def complete(self, Σ):
+		add_t = True
+		for symbol in Σ:
+			for t in self.transitions:
+				if t.symbol == symbol:
+					add_t = False
+					continue
+				else:
+					add_t = True
+			if add_t:
+				nt = Transition(symbol, φ(Σ))
+				self.transitions.append(nt)
+				add_t = False
+
+'''
+	error state
+'''
+
+class φ(State):
+	def __init__(self, Σ):
+		State.__init__(self, "phi")
+		for symbol in Σ:
+			t = Transition(symbol, self)
+			self.transitions.append(t)
+	def next_state(self, symbol):
+		return self
+	def __str__(self):
+		return "φ"
+
 
 #-------------------------------------------------------------------------------
 
@@ -246,6 +277,7 @@ class NDState:
 		return None
 	def add_transition(self, t):
 		self.ndtransitions.append(t)
+		self.complete()
 
 	def __hash__(self):
 		return id(self)
@@ -277,7 +309,7 @@ class NDAutomaton:
 		temp = list(set(temp))
 		if go_ahead:
 			self.currentStates = temp
-			return self.currentStates
+			return self.curaddrentStates
 		else:
 			return temp
 
@@ -570,7 +602,7 @@ if __name__ == "__main__":
 	t2 = Transition('b', q2)
 
 	q0.add_transition(t1)
-	q0.add_transition(t2)
+	#q0.add_transition(t2)
 
 	t3 = Transition('a', q4)
 	t4 = Transition('b', q4)
@@ -600,16 +632,25 @@ if __name__ == "__main__":
 	t12 = Transition('b', q4)
 
 	q5.add_transition(t11)
-	q5.add_transition(t12)
-
+	#q5.add_transition(t12)
+	#q5.complete(['a','b'])
+	#print(q5.transitions[1])
 	states = [q0,q1,q2,q3,q4,q5]
 	finalStates = [q4,q5]
 	initialState = q0
 
+
 	a = Automaton(states,finalStates, initialState, ['a','b'])
+	print(a)
+	a.complete()
 	print(a)
 	a.remove_dead_states()
 	print(a)
+	#print(a.states[5].transitions[1])
+	#a.remove_unreacheable_states()
+	#a.remove_dead_states()
+	#print(a)
+
 	#a.remove_unreacheable_states()
 	#a.remove_dead_states()
 	#print(a)
