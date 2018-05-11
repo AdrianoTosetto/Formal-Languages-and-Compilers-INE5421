@@ -864,7 +864,7 @@ if __name__ == "__main__":
 	n12 = Node('a')
 	n13 = Node('?', n12)
 	n14 = Node('b')
-	n15 = Node('.', n14, n12)
+	n15 = Node('.', n14, n13)
 	n16 = Node('c')
 	n17 = Node('.', n15, n16)
 	n18 = Node('*', n17)
