@@ -68,9 +68,11 @@ class Automaton:
 		test_states = set(self.states) - {self.initialState}
 
 		for s in test_states.copy():
-			if not self.has_path(self.initialState, s):
+			if not self.has_path(self.initialState, s) and not(s.name == "phi"):
 				self.states.remove(s)
 				self.remove_transitions_from(s)
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+
 	def remove_transitions_from(self, st):
 		for state in self.states:
 			for t in state.transitions:
@@ -81,13 +83,14 @@ class Automaton:
 	def remove_dead_states(self):
 		for s in set(self.states) - set(self.finalStates):
 			for fs in self.finalStates:
-				if not self.has_path(s, fs):
+				if not self.has_path(s, fs) and not(s.name == "phi"):
 					try:
 						self.states.remove(s)
 						self.remove_transitions_from(s)
 						continue
 					except ValueError:
 						pass
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 
 	def has_path(self, q0, q1):
 		'''if q0 == q1:
@@ -131,27 +134,45 @@ class Automaton:
 
 		return visited
 	def minimize(self):
+		self.complete()
 		self.remove_dead_states()
 		self.remove_unreacheable_states()
-		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
-		temp = self.equi_classes
 		print(self.equi_classes)
-		'''for eqclass in self.equi_classes:
-			for state in eqclass:
-				test_states = eqclass - {state}
-				for ts in test_states:
-					for symbol in self.Σ:
-						n1 = state.next_state(symbol)
-						n2 = ts.next_state(symbol)
-						if not self.belong_same_equi_class(n1, n2):
-							#print(str(n1) + ' ' + str(n2) + ' nao pertencem')
-							self.equi_classes.remove(eqclass)
-							eqclass = eqclass - {ts}
-							self.equi_classes.append({ts})
-							self.equi_classes.append(eqclass)'''
+		changed = True
+		while(changed):
+			changed = False
+			for eqclass in self.equi_classes:
+				if self.test_eqclass(eqclass):
+					changed = True
+					break
+		print(self.equi_classes)
+	def test_eqclass(self, eqclass):
+		for state in eqclass:
+			test_states = eqclass - {state}
+			for ts in test_states:
+				for symbol in self.Σ:
+					n1 = state.next_state(symbol)
+					n2 = ts.next_state(symbol)
+					#print("testando equivalencia de " + str(state) + \
+					#	" com " + str(ts) + " pelo simbolo " + symbol)
+					if not self.belong_same_equi_class(n1, n2):
+						self.equi_classes.remove(eqclass)
+						eqclass = eqclass - {ts}
+						self.equi_classes.append(eqclass)
+						self.equi_classes.append({ts})
+						return True
+		return False
+	def change_equi_classes(self, eqclass_remove, new_eqclass):
+		eqclass_remove = eqclass_remove - {new_eqclass}
+		self.equi_classes.append({new_eqclass})
 	def complete(self):
 		for s in self.states:
 			s.complete(self.Σ)
+		self.states.append(φ(self.Σ))
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+	def set_(self):
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+
 class Transition:
 	def __init__(self, symbol, target_state):
 		self.target_state = target_state
@@ -632,7 +653,7 @@ if __name__ == "__main__":
 	t12 = Transition('b', q4)
 
 	q5.add_transition(t11)
-	#q5.add_transition(t12)
+	q5.add_transition(t12)
 	#q5.complete(['a','b'])
 	#print(q5.transitions[1])
 	states = [q0,q1,q2,q3,q4,q5]
@@ -641,11 +662,7 @@ if __name__ == "__main__":
 
 
 	a = Automaton(states,finalStates, initialState, ['a','b'])
-	print(a)
-	a.complete()
-	print(a)
-	a.remove_dead_states()
-	print(a)
+	a.minimize()
 	#print(a.states[5].transitions[1])
 	#a.remove_unreacheable_states()
 	#a.remove_dead_states()
