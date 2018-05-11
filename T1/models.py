@@ -680,6 +680,18 @@ class Node:
 		traversal.append(self.symbol)
 		return (self.symbol)
 
+def display(root, level):
+	if root is None:
+		for i in range(0, level):
+			print("\t", end="")
+		print("=")
+		return
+	display(root.right, level+1)
+
+	for i in range(0, level):
+		print("\t", end="")
+	print(root.symbol)
+	display(root.left, level+1)
 
 #--------------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -864,3 +876,5 @@ if __name__ == "__main__":
 
 	polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
 	print(traversal)
+
+	display(n19, 1)
