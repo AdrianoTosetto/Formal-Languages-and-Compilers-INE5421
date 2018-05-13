@@ -187,7 +187,7 @@ if __name__ == "__main__":
 	print(traversal)
 
 	display(n19, 1)'''
-	q0 = State('q0', True)
+	'''q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2', True)
 
@@ -211,5 +211,78 @@ if __name__ == "__main__":
 	a1 = a.minimize()
 	print(a.process_input("aaabaa"))
 
-	print(a1)
+	print(a1)'''
+
+	q1 = State('q1')
+	q2 = State('q2', True)
+	q3 = State('q3', True)
+	q4 = State('q4')
+	q5 = State('q5')
+	q6 = State('q6', True)
+	q7 = State('q7')
+	q8 = State('q8', True)
+	q9 = State('q9', True)
+	q10 = State('q10')
+	#q11 = State('q11', True)
+
+	t1  = Transition('a',q2)
+	t2  = Transition('b',q3)
+	t3  = Transition('c',q6)
+	#t3  = Transition('c',q11)
+
+	q1.add_transition(t1)
+	q1.add_transition(t2)
+	q1.add_transition(t3)
+
+	t4  = Transition('a',q1)
+	t5  = Transition('b',q7)
+	t6  = Transition('c',q10)
+
+	q2.add_transition(t4)
+	q2.add_transition(t5)
+	q2.add_transition(t6)
+
+	t7  = Transition('b',q5)
+	t8  = Transition('c',q4)
+
+	q3.add_transition(t7)
+	q3.add_transition(t8)
+
+	t9  = Transition('b',q3)
+	q4.add_transition(t9)
+
+	t10 = Transition('b',q3)
+	t11 = Transition('c',q6)
+	q5.add_transition(t10)
+	q5.add_transition(t11)
+
+
+	t12 = Transition('b',q5)
+	q6.add_transition(t12)
+
+
+	t13 = Transition('b',q8)
+	t14 = Transition('c',q9)
+
+	q7.add_transition(t13)
+	q7.add_transition(t14)
+
+	t15 = Transition('b',q7)
+	t16 = Transition('c',q10)
+
+	q8.add_transition(t15)
+	q8.add_transition(t16)
+
+	t17 = Transition('b',q7)
+	q9.add_transition(t17)
+
+	t18 = Transition('b',q8)
+	q10.add_transition(t18)
+
+	t19 = Transition('b',q5)
+	#q11.add_transition(t19)
+
+	a = Automaton([q1,q2,q3,q4,q5,q6,q7,q8,q9,q10], [q2,q3,q6,q8,q9], q1, ['a','b','c'])
+	print(a)
+	print(a.minimize())
 	#print(a.process_input('aaaa'))

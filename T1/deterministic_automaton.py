@@ -139,20 +139,22 @@ class Automaton:
 
 		return visited
 	def minimize(self):
-		self.complete()
 		print(self.get_eq_class(self.initialState))
 		print(self.equi_classes)
-		#self.remove_dead_states()
-		#self.remove_unreacheable_states()
+		self.remove_dead_states()
+		print(self)
+
+		self.remove_unreacheable_states()
+		self.complete()
 		changed = True
 		while(changed):
-			print(self.equi_classes)
+			print(len(self.equi_classes))
 			changed = False
 			for eqclass in self.equi_classes:
 				if self.test_eqclass(eqclass):
 					changed = True
+					print(self.equi_classes)
 					break
-		print(self.equi_classes)
 
 		newStates = []
 		newFinalStates = []
@@ -185,6 +187,8 @@ class Automaton:
 			if s in eq:
 				return str(eq)
 	def test_eqclass(self, eqclass):
+		garbage = set()
+		changed = False
 		for state in eqclass:
 			test_states = eqclass - {state}
 			for ts in test_states:
@@ -192,19 +196,40 @@ class Automaton:
 					n1 = state.next_state(symbol)
 					n2 = ts.next_state(symbol)
 					if not self.belong_same_equi_class(n1, n2):
+						added = False
+						for eq in self.equi_classes:
+							if eq == eqclass:
+								break
+							if self.belong_equi_class(ts, eq):
+								eq.add(ts)
+								added = True
+						if not added:
+							self.equi_classes.append({ts})
 						self.equi_classes.remove(eqclass)
 						eqclass = eqclass - {ts}
 						self.equi_classes.append(eqclass)
-						self.equi_classes.append({ts})
+
 						print("testando equivalencia de " + str(state) + \
 						" com " + str(ts) + " pelo simbolo " + symbol + \
 						" e eles nao vao p/ a msm classe " + str(n1) + " " + \
 						str(n2))
 						print(self.equi_classes)
-						return True
+						changed = True
 					else:
 						print("testando equivalencia de " + str(state) + \
 						" com " + str(ts) + " pelo simbolo " + symbol)
+		return changed
+	def belong_equi_class(self, ts, eq):
+		for s in eq:
+			if not (s.isAcceptance == ts.isAcceptance):
+				return False
+			belong = True
+			for symbol in self.Σ:
+				if not (self.belong_same_equi_class(s.next_state(symbol),\
+					ts.next_state(symbol))):
+					belong = False
+			if(belong):
+				return True
 		return False
 	def change_equi_classes(self, eqclass_remove, new_eqclass):
 		eqclass_remove = eqclass_remove - {new_eqclass}
