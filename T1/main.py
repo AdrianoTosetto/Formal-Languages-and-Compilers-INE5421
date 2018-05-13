@@ -209,6 +209,7 @@ if __name__ == "__main__":
 	a = Automaton([q0,q1,q2],[q0,q2], q0,['a','b'])
 	print(a)
 	a1 = a.minimize()
+	print(a.process_input("aaabaa"))
 
 	print(a1)
 	#print(a.process_input('aaaa'))

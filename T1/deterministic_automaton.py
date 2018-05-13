@@ -165,12 +165,21 @@ class Automaton:
 				if s.isAcceptance:
 					newFinalStates.append(news)
 				for symbol in self.Σ:
-					t = Transition(symbol, self.get_eq_class(next(iter(eq)).next_state(symbol)))
+					t = Transition(symbol, State(self.get_eq_class(next(iter(eq)).next_state(symbol))))
 					print(t)
 					news.add_transition(t)
+				'''
+					only one state and its transitions of the equivalence class is
+					needed. So break for and look for next class
+				'''
 				break
-		return Automaton(newStates, newFinalStates, newInitialState, self.Σ)
-
+		a = Automaton(newStates, newFinalStates, newInitialState, self.Σ)
+		a.equi_classes = [a.get_acceptance_states(), a.get_non_acceptance_states()]
+		a.remove_dead_states()
+		return a
+	'''
+		returns the equivalence class of a given state
+	'''
 	def get_eq_class(self, s):
 		for eq in self.equi_classes:
 			if s in eq:
