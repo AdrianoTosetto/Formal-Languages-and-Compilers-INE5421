@@ -21,19 +21,18 @@ if __name__ == "__main__":
 				   	Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
 	myGrammar1 = Grammar(productions1)
 
-	print(myGrammar1)
+	#print(myGrammar1)
 	a = myGrammar1.convert_to_automaton()
 	print(a.next_states('a')) #should output [A] and it does!
 	print(a.next_states('b')) #should output [C, λ] and it does!
 	print("")
 	print(myGrammar)
 	b = myGrammar.convert_to_automaton()
-	print(b.next_states('0'))
-	print(b.next_states('1'))
-	print(a)
-	print(b)
+	#print(a)
+	#print(b)
 	a1 = a.determinize()
-	print(a1)'''
+	#print(a1)
+	print(myGrammar1)'''
 
 	'''q0 = State('q0')
 	q1 = State('q1')
@@ -158,7 +157,7 @@ if __name__ == "__main__":
 	#print(a.equi_classes)
 	a.minimize()
 	print(a)'''
-	n1 = Node('a')
+	'''n1 = Node('a')
 	n2 = Node('b')
 	n3 = Node('.', n1, n2)
 
@@ -187,4 +186,29 @@ if __name__ == "__main__":
 	polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
 	print(traversal)
 
-	display(n19, 1)
+	display(n19, 1)'''
+	q0 = State('q0', True)
+	q1 = State('q1')
+	q2 = State('q2', True)
+
+	t1 = Transition('a', q1)
+	t2 = Transition('b', q2)
+	q0.add_transition(t1)
+	q0.add_transition(t2)
+
+	t3 = Transition('a', q0)
+	t4 = Transition('b', q1)
+	q1.add_transition(t3)
+	q1.add_transition(t4)
+
+	t5 = Transition('a', q1)
+	t6 = Transition('b', q2)
+	q2.add_transition(t5)
+	q2.add_transition(t6)
+
+	a = Automaton([q0,q1,q2],[q0,q2], q0,['a','b'])
+	print(a)
+	a1 = a.minimize()
+
+	print(a1)
+	#print(a.process_input('aaaa'))

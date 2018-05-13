@@ -12,11 +12,10 @@ class Automaton:
 
 	def process_input(self, input):
 		for symbol in input:
-			print(self.currentState)
 			self.currentState = self.currentState.next_state(symbol)
 			if self.currentState is None:
 				return False
-
+			print(self.currentState)
 		return self.currentState.isAcceptance
 
 	def next_state(self, symbol):
@@ -141,6 +140,7 @@ class Automaton:
 		return visited
 	def minimize(self):
 		self.complete()
+		print(self.get_eq_class(self.initialState))
 		print(self.equi_classes)
 		#self.remove_dead_states()
 		#self.remove_unreacheable_states()
@@ -153,6 +153,28 @@ class Automaton:
 					changed = True
 					break
 		print(self.equi_classes)
+
+		newStates = []
+		newFinalStates = []
+		newInitialState = State(self.get_eq_class(self.initialState))
+
+		for eq in self.equi_classes:
+			for s in eq:
+				news = State(self.get_eq_class(s), s.isAcceptance)
+				newStates.append(news)
+				if s.isAcceptance:
+					newFinalStates.append(news)
+				for symbol in self.Σ:
+					t = Transition(symbol, self.get_eq_class(next(iter(eq)).next_state(symbol)))
+					print(t)
+					news.add_transition(t)
+				break
+		return Automaton(newStates, newFinalStates, newInitialState, self.Σ)
+
+	def get_eq_class(self, s):
+		for eq in self.equi_classes:
+			if s in eq:
+				return str(eq)
 	def test_eqclass(self, eqclass):
 		for state in eqclass:
 			test_states = eqclass - {state}

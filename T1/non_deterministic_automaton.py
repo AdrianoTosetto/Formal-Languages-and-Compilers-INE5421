@@ -46,7 +46,6 @@ class NDState:
 		return None
 	def add_transition(self, t):
 		self.ndtransitions.append(t)
-		self.complete()
 
 	def __hash__(self):
 		return id(self)
@@ -78,7 +77,7 @@ class NDAutomaton:
 		temp = list(set(temp))
 		if go_ahead:
 			self.currentStates = temp
-			return self.curaddrentStates
+			return self.currentStates
 		else:
 			return temp
 
