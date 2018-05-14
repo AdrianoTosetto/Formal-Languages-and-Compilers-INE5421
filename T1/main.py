@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
 	print(a1)'''
 
-	q1 = State('q1')
+	'''q1 = State('q1')
 	q2 = State('q2', True)
 	q3 = State('q3', True)
 	q4 = State('q4')
@@ -223,12 +223,12 @@ if __name__ == "__main__":
 	q8 = State('q8', True)
 	q9 = State('q9', True)
 	q10 = State('q10')
-	#q11 = State('q11', True)
+	q11 = State('q11', True)
 
 	t1  = Transition('a',q2)
 	t2  = Transition('b',q3)
-	t3  = Transition('c',q6)
-	#t3  = Transition('c',q11)
+	#t3  = Transition('c',q6)
+	t3  = Transition('c',q11)
 
 	q1.add_transition(t1)
 	q1.add_transition(t2)
@@ -280,9 +280,68 @@ if __name__ == "__main__":
 	q10.add_transition(t18)
 
 	t19 = Transition('b',q5)
-	#q11.add_transition(t19)
+	q11.add_transition(t19)'''
 
-	a = Automaton([q1,q2,q3,q4,q5,q6,q7,q8,q9,q10], [q2,q3,q6,q8,q9], q1, ['a','b','c'])
+
+	q0 = State('q0', True)
+	q1 = State('q1')
+	q2 = State('q2')
+	q3 = State('q3')
+	q4 = State('q4', True)
+	q5 = State('q5')
+	q6 = State('q6', True)
+	
+	t1 = Transition('a', q1)
+	t2 = Transition('b', q2)
+	t3 = Transition('c', q3)
+	q0.add_transition(t1)
+	q0.add_transition(t2)
+	q0.add_transition(t3)
+
+	#t4 = Transition('a', q1)
+	t5 = Transition('b', q4)
+	t6 = Transition('c', q5)
+	#q1.add_transition(t4)
+	q1.add_transition(t5)
+	q1.add_transition(t6)
+
+	t7 = Transition('a', q6)
+	t8 = Transition('b', q4)
+	t9 = Transition('c', q5)
+	q2.add_transition(t7)
+	q2.add_transition(t8)
+	q2.add_transition(t9)
+
+	t10 = Transition('a', q6)
+	t11 = Transition('b', q4)
+	#t12 = Transition('c', q2)
+	q3.add_transition(t10)
+	q3.add_transition(t11)
+	#q3.add_transition(t12)
+
+
+	t13 = Transition('a', q1)
+	t14 = Transition('b', q2)
+	t15 = Transition('c', q3)
+	q4.add_transition(t13)
+	q4.add_transition(t14)
+	q4.add_transition(t15)
+
+	t16 = Transition('a', q1)
+	t17 = Transition('b', q2)
+	#t18 = Transition('c', q2)
+	q5.add_transition(t16)
+	q5.add_transition(t17)
+	#q5.add_transition(t19)
+
+	#t19 = Transition('a', q1)
+	t20 = Transition('b', q2)
+	t21 = Transition('c', q3)
+	#q6.add_transition(t19)
+	q6.add_transition(t20)
+	q6.add_transition(t21)
+
+	a = Automaton([q0,q1,q2,q3,q4,q5,q6], [q0,q4,q6], q0, ['a','b','c'])
 	print(a)
 	print(a.minimize())
 	#print(a.process_input('aaaa'))
