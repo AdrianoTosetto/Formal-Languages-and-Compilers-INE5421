@@ -6,14 +6,13 @@ from globals import *
 
 if __name__ == "__main__":
 
-	'''leftSides = ['S', 'A', 'B']
+	leftSides = ['S', 'A', 'B']
 	rightSides = ['0S', '1A', '0', '0B', '1S', '1', '0A', '1B']
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
 				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
 	myGrammar = Grammar(productions)
-
-	leftSides1 = ['S', 'A', 'B', 'C']
+	'''leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
 	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
 	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
@@ -283,7 +282,7 @@ if __name__ == "__main__":
 	q11.add_transition(t19)'''
 
 
-	q0 = State('q0', True)
+	'''q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2')
 	q3 = State('q3')
@@ -343,5 +342,22 @@ if __name__ == "__main__":
 
 	a = Automaton([q0,q1,q2,q3,q4,q5,q6], [q0,q4,q6], q0, ['a','b','c'])
 	print(a)
-	print(a.minimize())
-	#print(a.process_input('aaaa'))
+	print(a.minimize())'''
+
+	A = NDState('A')
+	B = NDState('B')
+	C = NDState('C')
+	D = NDState('D')
+	E = NDState('E')
+
+	A.add_transition(NDTransition('a', [C]))
+	A.add_transition(NDTransition('&', [B]))
+
+	B.add_transition(NDTransition('a', [D]))
+	
+	D.add_transition(NDTransition('&', [E]))
+
+	a = NDAutomaton([A,B,C,D,E], [], A, ['a','b'])
+
+	print(a.next_states('a'))
+	print(a.initialState.next_states('&'))

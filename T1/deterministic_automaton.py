@@ -1,5 +1,6 @@
 from globals import *
 
+
 class Automaton:
 
 	def __init__(self, states, finalStates, initialState, Σ=['0','1']):
@@ -305,6 +306,8 @@ class Transition:
 		return self.target_state
 	def __str__(self):
 		return self.symbol + " -> " + self.target_state.__str__()
+
+
 
 class State:
 

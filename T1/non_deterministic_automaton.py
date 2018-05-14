@@ -39,6 +39,18 @@ class NDState:
 			if t.get_symbol() == symbol:
 				return t.get_next_states()
 		return None
+
+	def next_states(self, symbol, already_visited=set()):
+		
+		next_states = set()
+		for t in self.ndtransitions:
+			if t.get_symbol() == symbol:
+				next_states = set(t.get_next_states()) - already_visited
+				already_visited = already_visited | next_states
+				for s in next_states:
+					already_visited = already_visited | s.next_states('&', already_visited)
+
+		return already_visited
 	def next_states_str(self, symbol):
 		for t in self.ndtransitions:
 			if t.get_symbol() == symbol:
@@ -48,10 +60,19 @@ class NDState:
 		self.ndtransitions.append(t)
 
 	def __hash__(self):
-		return id(self)
+		hashable = self.name
+		if self.name == 'λ':
+			hashable ='lambda'
+		return sum([ord(c) for c in hashable])
 
 	def __eq__(self, other):
 		return self.name == other.name
+
+	def has_epsilon_transition(self):
+		for t in self.ndtransitions:
+			if t.symbol == '&':
+				return True
+		return False
 
 
 class NDAutomaton:
@@ -59,7 +80,7 @@ class NDAutomaton:
 		self.states = (states)
 		self.finalStates = (finalStates)
 		self.initialState = initialState
-		self.currentStates = [initialState]
+		self.currentStates = {initialState} | initialState.next_states('&')
 		self.Σ = Σ
 
 	def process_input(self, input):
@@ -157,3 +178,21 @@ class NDAutomaton:
 		print(newStates)
 		print(finalStates)
 		return Automaton(newStates, finalStates, self.initialState, self.Σ)
+
+class EpsilonAutomaton(NDAutomaton):
+	def __init__(self, states, finalStates, initialState, Σ=['0','1']):
+		NDAutomaton.__init__(self,states, finalStates, initialState, Σ)
+
+	def next_states(self, symbol, go_ahead=True):
+		temp = []
+		for state in self.currentStates:
+			s = state.next_states(symbol)
+			if s is not None:
+				temp.extend(s)
+		#remove duplicated states
+		temp = list(set(temp))
+		if go_ahead:
+			self.currentStates = temp
+			return self.currentStates
+		else:
+			return temp
