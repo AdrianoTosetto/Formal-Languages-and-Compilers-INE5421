@@ -344,20 +344,8 @@ if __name__ == "__main__":
 	print(a)
 	print(a.minimize())'''
 
-	A = NDState('A')
-	B = NDState('B')
-	C = NDState('C')
-	D = NDState('D')
-	E = NDState('E')
 
-	A.add_transition(NDTransition('a', [C]))
-	A.add_transition(NDTransition('&', [B]))
-
-	B.add_transition(NDTransition('a', [D]))
-	
-	D.add_transition(NDTransition('&', [E]))
-
-	a = NDAutomaton([A,B,C,D,E], [], A, ['a','b'])
-
-	print(a.next_states('a'))
-	print(a.initialState.next_states('&'))
+	expr = 'A | ( B.B )'
+	t = BinaryTree()
+	nodo = t.build(polish_notation('( A | B ) * | ( B . B ) * . C'))
+	display(nodo,1)

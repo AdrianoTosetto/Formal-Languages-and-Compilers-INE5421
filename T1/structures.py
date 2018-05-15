@@ -61,8 +61,43 @@ def polish_notation(infixexpr):
 
 class BinaryTree:
 
-	def __init__(self, root_node):
+	def __init__(self, root_node=None):
 		self.root = root_node
+		self.symbol = 'a'
+
+	def is_operand(self, char):
+		return char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or char in "0123456789"
+	def is_operator(self, char):
+		return char == '*' or char == '|' or char == "." or char == "?"
+	def one_operand_operator(self, char):
+		return char == '*' or char == "?"
+	def build(self, expr):
+		stack = Stack()
+		for symbol in expr:
+			if symbol == " ":
+				print('hahah')
+				continue
+			if self.is_operand(symbol):
+				n = Node(symbol)
+				n.symbol = symbol
+				stack.push(n)
+			if self.is_operator(symbol):
+				if self.one_operand_operator(symbol):
+					t1 = stack.pop()
+					n  = Node(symbol)
+					n.symbol = symbol
+					n.left = t1
+					stack.push(n)
+				else:
+					t1 = stack.pop()
+					t2 = stack.pop()
+					n  = Node(symbol)
+					n.symbol = symbol
+					n.left = t1
+					n.right = t2
+					stack.push(n)
+
+		return stack.pop()
 
 class Node:
 
@@ -86,7 +121,7 @@ class Node:
 			self.right.post_order()
 		traversal.append(self.symbol)
 		return (self.symbol)
-
+        #print('haah')
 def display(root, level):
 	if root is None:
 		for i in range(0, level):
