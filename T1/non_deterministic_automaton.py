@@ -51,6 +51,10 @@ class NDState:
 					already_visited = already_visited | s.next_states('&', already_visited)
 
 		return already_visited
+	def next_states_no_epsilon(self, symbol):
+		next_states = set()
+		if symbol == "&":
+			return
 	def next_states_str(self, symbol):
 		for t in self.ndtransitions:
 			if t.get_symbol() == symbol:
@@ -196,3 +200,13 @@ class EpsilonAutomaton(NDAutomaton):
 			return self.currentStates
 		else:
 			return temp
+	def remove_epsilon_transition(self):
+		for s in self.states:
+			for symbol in self.Σ:
+				next_states_by_s = s.next_states('&')
+				for ns in next_states_by_s:
+					if ns.has_epsilon_transition():
+						s.add_transition(NDTransition(''))
+
+
+
