@@ -93,8 +93,8 @@ class BinaryTree:
 					t2 = stack.pop()
 					n  = Node(symbol)
 					n.symbol = symbol
-					n.left = t1
-					n.right = t2
+					n.left = t2
+					n.right = t1
 					stack.push(n)
 
 		return stack.pop()

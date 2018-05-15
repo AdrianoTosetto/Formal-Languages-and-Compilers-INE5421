@@ -345,7 +345,8 @@ if __name__ == "__main__":
 	print(a.minimize())'''
 
 
-	expr = 'A | ( B.B )'
+	expr = 'A | ( B . B )'
 	t = BinaryTree()
-	nodo = t.build(polish_notation('( A | B ) * | ( B . B ) * . C'))
+	nodo = t.build(polish_notation(expr))
+	#print(nodo.right.symbol)
 	display(nodo,1)
