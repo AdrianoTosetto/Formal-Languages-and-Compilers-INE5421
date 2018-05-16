@@ -282,14 +282,14 @@ if __name__ == "__main__":
 	q11.add_transition(t19)'''
 
 
-	'''q0 = State('q0', True)
+	q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2')
 	q3 = State('q3')
 	q4 = State('q4', True)
 	q5 = State('q5')
 	q6 = State('q6', True)
-	
+
 	t1 = Transition('a', q1)
 	t2 = Transition('b', q2)
 	t3 = Transition('c', q3)
@@ -342,11 +342,12 @@ if __name__ == "__main__":
 
 	a = Automaton([q0,q1,q2,q3,q4,q5,q6], [q0,q4,q6], q0, ['a','b','c'])
 	print(a)
-	print(a.minimize())'''
+	print(a.minimize())
 
-
+	'''
 	expr = 'A | ( B . B )'
 	t = BinaryTree()
 	nodo = t.build(polish_notation(expr))
 	#print(nodo.right.symbol)
 	display(nodo,1)
+	'''

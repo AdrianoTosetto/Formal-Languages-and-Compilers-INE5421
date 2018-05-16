@@ -70,7 +70,7 @@ class Automaton:
 		test_states = set(self.states) - {self.initialState}
 
 		for s in test_states.copy():
-			if not self.has_path(self.initialState, s) and not(s.name == "phi"):
+			if not self.has_path(self.initialState, s) and not(s.name == 'φ'):
 				self.states.remove(s)
 				self.remove_transitions_from(s)
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
@@ -85,7 +85,7 @@ class Automaton:
 	def remove_dead_states(self):
 		print("AWQUI: " + str(set(self.states) - set(self.finalStates)))
 		for s in set(self.states) - set(self.finalStates):
-			if s.name == "phi":
+			if s.name == 'φ':
 				continue
 			sremove = True
 			for fs in self.finalStates:
@@ -166,42 +166,64 @@ class Automaton:
 		newStates = set()
 		newFinalStates = set()
 		newInitialState = State(self.get_eq_class(self.initialState))
+		print("EU QUERO FUDERRRRRRRRRRRRRRRRR")
 		print(self.equi_classes)
 		for eq in self.equi_classes:
-			for s in eq:
-				'''print("TRANSIÇÃO 1: " + str(s.transitions[0].get_symbol()))
-				print("TRANSIÇÃO 2: " + str(s.transitions[1].get_symbol()))
-				print("TRANSIÇÃO 3: " + str(s.transitions[2].get_symbol()))
-				print(self.Σ[0])
-				print(self.Σ[1])
-				print(self.Σ[2])'''
-				news = State(self.get_eq_class(s), s.isAcceptance)
-				if s.isAcceptance:
-					newFinalStates.add(news)
+			freerealestate = next(iter(eq))
+			'''print("TRANSIÇÃO 1: " + str(s.transitions[0].get_symbol()))
+			print("TRANSIÇÃO 2: " + str(s.transitions[1].get_symbol()))
+			print("TRANSIÇÃO 3: " + str(s.transitions[2].get_symbol()))
+			print(self.Σ[0])
+			print(self.Σ[1])
+			print(self.Σ[2])'''
+			news = State(str(self.get_eq_class(freerealestate)), freerealestate.isAcceptance)
+			if freerealestate.isAcceptance:
+				newFinalStates.add(news)
+			newStates.add(news)
+			'''
+			for symbol in self.Σ:
+				ns = State(self.get_eq_class(s.next_state(symbol)))
+				#newStates.add(ns)
+				t = Transition(symbol, ns)
+				#print(t)
+				news.add_transition(t)
+			'''
+			'''
+				only one state and its transitions of the equivalence class is
+				needed. So break for and look for next class
+			'''
+			#print("TRANSIÇÃO 1: " + str(news.transitions[0].target_state))
+			#print("TRANSIÇÃO 2: " + str(news.transitions[1].target_state))
+			#print("TRANSIÇÃO 3: " + str(news.transitions[2].target_state))
+		print(newStates)
+		for s in newStates:
+			for eq in self.equi_classes:
+				freerealestate = next(iter(eq))
 				for symbol in self.Σ:
-					ns = State(self.get_eq_class(s.next_state(symbol)))
-					#newStates.add(ns)
-					t = Transition(symbol, ns)
-					#print(t)
-					news.add_transition(t)
-				'''
-					only one state and its transitions of the equivalence class is
-					needed. So break for and look for next class
-				'''
-				#print("TRANSIÇÃO 1: " + str(news.transitions[0].target_state))
-				#print("TRANSIÇÃO 2: " + str(news.transitions[1].target_state))
-				#print("TRANSIÇÃO 3: " + str(news.transitions[2].target_state))
-				newStates.add(news)
-				break
+					for ns in newStates:
+						if ns == State(str(self.get_eq_class(freerealestate.next_state(symbol)))):
+							t = Transition(symbol, ns)
+							if (s == State(str(eq))):
+								s.add_transition(t)
+		'''
+		for s in newStates:
+			print("NOME: " + s.name)
+
+			for symbol in self.Σ:
+				ns = State(str(self.get_eq_class(s.next_state(symbol))))
+				#newStates.add(ns)
+				t = Transition(symbol, ns)
+				print(t)
+				news.add_transition(t)
+		'''
 		a = Automaton(newStates, newFinalStates, newInitialState, self.Σ)
 		'''for ns in a.states:
 			print("TRANSIÇÃO 1: " + str(ns) + " + " + str(ns.transitions[0]))
 			print("TRANSIÇÃO 2: " + str(ns) + " + " + str(ns.transitions[1]))
 			print("TRANSIÇÃO 3: " + str(ns) + " + " + str(ns.transitions[2]))'''
-		print
+		a.remove_dead_states()
 		print("penis: " + str(a.depth_first_search(next(iter(newStates)))))
 		#print(self.Σ)
-		#a.remove_dead_states()
 		a.equi_classes = [a.get_acceptance_states(), a.get_non_acceptance_states()]
 
 		return a
@@ -341,11 +363,13 @@ class State:
 	def __hash__(self):
 		hashable = self.name
 		if self.name == 'λ':
-			hashable ='lambda'
+			hashable = 'lambda'
+		elif self.name == 'φ':
+			hashable = 'phi'
 		return sum([ord(c) for c in hashable])
 
 	def __eq__(self, other):
-		return self.name == other.name
+		return self.__hash__() == other.__hash__()
 	def complete(self, Σ):
 		add_t = True
 		for symbol in Σ:
@@ -366,11 +390,9 @@ class State:
 
 class φ(State):
 	def __init__(self, Σ):
-		State.__init__(self, "phi")
+		State.__init__(self, 'φ')
 		for symbol in Σ:
 			t = Transition(symbol, self)
 			self.transitions.append(t)
 	def next_state(self, symbol):
 		return self
-	def __str__(self):
-		return "φ"
