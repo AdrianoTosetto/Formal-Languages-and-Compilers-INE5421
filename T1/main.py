@@ -3,6 +3,7 @@ from regular_grammar import *
 from non_deterministic_automaton import *
 from deterministic_automaton import *
 from globals import *
+from operations_with_automata import *
 
 if __name__ == "__main__":
 
@@ -281,7 +282,7 @@ if __name__ == "__main__":
 	t19 = Transition('b',q5)
 	q11.add_transition(t19)'''
 
-
+	'''
 	q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2')
@@ -343,6 +344,7 @@ if __name__ == "__main__":
 	a = Automaton([q0,q1,q2,q3,q4,q5,q6], [q0,q4,q6], q0, ['a','b','c'])
 	print(a)
 	print(a.minimize())
+	'''
 
 	'''
 	expr = 'A | ( B . B )'
@@ -351,3 +353,32 @@ if __name__ == "__main__":
 	#print(nodo.right.symbol)
 	display(nodo,1)
 	'''
+
+	q0_1 = State('q0', True)
+	q1_1 = State('q1', True)
+
+	t1 = Transition('a', q0_1)
+	t2 = Transition('b', q1_1)
+	t3 = Transition('a', q0_1)
+
+	q0_1.add_transition(t1)
+	q0_1.add_transition(t2)
+	q1_1.add_transition(t3)
+
+	a1 = Automaton([q0_1, q1_1], [q0_1, q1_1], q0_1, ['a', 'b'])
+
+	q0_2 = State('q0', True)
+	q1_2 = State('q1', True)
+
+	t4 = Transition('b', q0_2)
+	t5 = Transition('a', q1_2)
+	t6 = Transition('b', q0_2)
+
+	q0_2.add_transition(t4)
+	q0_2.add_transition(t5)
+	q1_2.add_transition(t6)
+
+	a2 = Automaton([q0_2, q1_2], [q0_2, q1_2], q0_2, ['a', 'b'])
+
+	a3 = automata_union(a1, a2)
+	print(a3.remove_epsilon_transition())

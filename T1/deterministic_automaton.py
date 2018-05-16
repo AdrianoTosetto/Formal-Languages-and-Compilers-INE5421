@@ -25,7 +25,7 @@ class Automaton:
 
 	def __str__(self):
 		stringerson = "   δ"
-		Σ = sorted(self.Σ)
+		Σ = sorted(self.Σ) + ['&']
 		for σ in Σ:
 			stringerson = stringerson + " | " + σ
 		stringerson = stringerson + "\n"

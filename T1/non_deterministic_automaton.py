@@ -41,7 +41,7 @@ class NDState:
 		return None
 
 	def next_states(self, symbol, already_visited=set()):
-		
+
 		next_states = set()
 		for t in self.ndtransitions:
 			if t.get_symbol() == symbol:
@@ -61,16 +61,21 @@ class NDState:
 				return t.__str__()
 		return None
 	def add_transition(self, t):
-		self.ndtransitions.append(t)
+		if self.ndtransitions == None:
+			self.ndtransitions = [t]
+		else:
+			self.ndtransitions.append(t)
 
 	def __hash__(self):
 		hashable = self.name
 		if self.name == 'λ':
 			hashable ='lambda'
+		elif self.name == 'φ':
+			hashable = 'phi'
 		return sum([ord(c) for c in hashable])
 
 	def __eq__(self, other):
-		return self.name == other.name
+		return self.__hash__() == other.__hash__()
 
 	def has_epsilon_transition(self):
 		for t in self.ndtransitions:
@@ -112,7 +117,7 @@ class NDAutomaton:
 
 	def __str__(self):
 		stringerson = "   δ"
-		Σ = sorted(self.Σ)
+		Σ = sorted(self.Σ) + ['&']
 		for σ in Σ:
 			stringerson = stringerson + " |  " + σ + " "
 		stringerson = stringerson + "\n"
@@ -136,6 +141,28 @@ class NDAutomaton:
 
 	def __repr__(self):
 		return str(self)
+
+	def remove_epsilon_transition(self):
+		newStates = set()
+		newFinalStates = set()
+		for s in self.states:
+			news = s
+			if s == self.initialState:
+				newInitial = news
+			next_states_by_s = s.next_states('&')
+			for symbol in self.Σ:
+				target_states = list()
+				for ns in next_states_by_s:
+					target_states += ns.next_states(symbol)
+				for t in news.ndtransitions:
+					if t.symbol == '&':
+						news.ndtransitions = news.ndtransitions.remove(t)
+						news.add_transition(NDTransition(symbol, target_states))
+			newStates.add(news)
+			if news.isAcceptance:
+				newFinalStates.add(news)
+		return NDAutomaton(newStates, newFinalStates, newInitial, self.Σ)
+
 
 	'''
 		determinization functions:
@@ -164,6 +191,7 @@ class NDAutomaton:
 		return newState
 
 	def determinize(self):
+		newA = self.remove_epsilon_transition()
 		newStates = set()
 		finalStates = set()
 		for s in self.states:
@@ -200,13 +228,3 @@ class EpsilonAutomaton(NDAutomaton):
 			return self.currentStates
 		else:
 			return temp
-	def remove_epsilon_transition(self):
-		for s in self.states:
-			for symbol in self.Σ:
-				next_states_by_s = s.next_states('&')
-				for ns in next_states_by_s:
-					if ns.has_epsilon_transition():
-						s.add_transition(NDTransition(''))
-
-
-
