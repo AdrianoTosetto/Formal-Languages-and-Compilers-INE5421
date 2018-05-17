@@ -381,5 +381,7 @@ if __name__ == "__main__":
 	a2 = Automaton([q0_2, q1_2], [q0_2, q1_2], q0_2, ['a', 'b'])
 
 	a3 = automata_union(a1, a2)
-	print(a3.remove_epsilon_transition())
-	print(a3.determinize())
+	a3 = a3.determinize()
+	for s in a3.states:
+		print("state " + str(s) + " isAcceptance? " + str(s.isAcceptance))
+	print(a3.minimize())

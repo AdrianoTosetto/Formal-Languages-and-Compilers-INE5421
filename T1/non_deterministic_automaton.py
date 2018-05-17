@@ -185,13 +185,16 @@ class NDAutomaton:
 
 	def determinize_states(self, states, finalStates, newStates, determinizedStates):
 		if len(states) == 1:
-			newState = State(list(states)[0].name)
+			oldState = list(states)[0]
+			newState = State(oldState.name, oldState.isAcceptance)
 			newStates.add(newState)
-			if list(states)[0] in self.finalStates:
+			if oldState in self.finalStates:
 				finalStates.add(newState)
 			return newState
 		accpt = False
-		newState = State(states.__str__(), (accpt or s.isAcceptance for s in states))
+		for s in states:
+			accpt = accpt or s.isAcceptance
+		newState = State(states.__str__(), accpt)
 		if newState in determinizedStates:
 			return newState
 		determinizedStates.add(newState)
@@ -201,8 +204,7 @@ class NDAutomaton:
 				for t in s.ndtransitions:
 					if t.symbol == a:
 						nextStates = nextStates | set(t.target_states)
-			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, nextStates, determinizedStates)))
-			newStates |= nextStates
+			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, newStates, determinizedStates)))
 		if any(s in self.finalStates for s in states):
 			finalStates.add(newState)
 		if newState in newStates:
@@ -216,13 +218,13 @@ class NDAutomaton:
 		finalStates = set()
 		determinized = set()
 		for s in newA.states:
-			newState = State(s.name)
+			newState = State(s.name, s.isAcceptance)
 			newStates.add(newState)
 		for s in newA.finalStates:
-			newFinalState = State(s.name)
+			newFinalState = State(s.name, True)
 			finalStates.add(newFinalState)
 		for s in newA.states:
-			newState = State(s.name)
+			newState = State(s.name, s.isAcceptance)
 			for t in s.ndtransitions:
 				#print(t.target_states)
 				#return " "
@@ -230,8 +232,8 @@ class NDAutomaton:
 			if newState in newStates:
 				newStates.remove(newState)
 			newStates.add(newState)
-		print(newStates)
-		print(finalStates)
+		#print(newStates)
+		#finalStates = list(finalStates)
 		return Automaton(newStates, finalStates, newA.initialState, self.Σ)
 
 class EpsilonAutomaton(NDAutomaton):
