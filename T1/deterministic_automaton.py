@@ -366,7 +366,12 @@ class State:
 			hashable = 'lambda'
 		elif self.name == 'φ':
 			hashable = 'phi'
-		return sum([ord(c) for c in hashable])
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
 
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()

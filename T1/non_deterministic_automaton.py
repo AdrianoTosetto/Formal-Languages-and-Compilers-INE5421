@@ -1,5 +1,6 @@
 from deterministic_automaton import *
 from globals import *
+import copy
 
 class NDTransition:
 	def __init__(self, symbol, target_states):
@@ -72,7 +73,12 @@ class NDState:
 			hashable ='lambda'
 		elif self.name == 'φ':
 			hashable = 'phi'
-		return sum([ord(c) for c in hashable])
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
 
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()
@@ -146,18 +152,27 @@ class NDAutomaton:
 		newStates = set()
 		newFinalStates = set()
 		for s in self.states:
-			news = s
+			#print("s = " + str(s))
+			news = copy.deepcopy(s)
 			if s == self.initialState:
 				newInitial = news
 			next_states_by_s = s.next_states('&')
 			for symbol in self.Σ:
+				trans = copy.deepcopy(news.ndtransitions)
+				#print("symbol = " + str(symbol))
 				target_states = list()
 				for ns in next_states_by_s:
+					#print("ns = " + str(ns))
 					target_states += ns.next_states(symbol)
-				for t in news.ndtransitions:
+				for t in trans:
+					#print(trans)
+					#print("t = " + str(t))
+					#print("target_states = " + str(target_states))
 					if t.symbol == '&':
-						news.ndtransitions = news.ndtransitions.remove(t)
-						news.add_transition(NDTransition(symbol, target_states))
+						#print(news.ndtransitions)
+						news.ndtransitions = trans[:].remove(t)
+					if len(target_states) > 0:
+						news.add_transition(NDTransition(symbol, set(target_states)))
 			newStates.add(news)
 			if news.isAcceptance:
 				newFinalStates.add(news)
@@ -168,21 +183,26 @@ class NDAutomaton:
 		determinization functions:
 	'''
 
-	def determinize_states(self, states, finalStates, newStates):
+	def determinize_states(self, states, finalStates, newStates, determinizedStates):
 		if len(states) == 1:
 			newState = State(list(states)[0].name)
 			newStates.add(newState)
 			if list(states)[0] in self.finalStates:
 				finalStates.add(newState)
 			return newState
-		newState = State(states.__str__())
+		accpt = False
+		newState = State(states.__str__(), (accpt or s.isAcceptance for s in states))
+		if newState in determinizedStates:
+			return newState
+		determinizedStates.add(newState)
 		for a in self.Σ:
 			nextStates = set()
 			for s in states:
 				for t in s.ndtransitions:
 					if t.symbol == a:
 						nextStates = nextStates | set(t.target_states)
-			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, nextStates)))
+			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, nextStates, determinizedStates)))
+			newStates |= nextStates
 		if any(s in self.finalStates for s in states):
 			finalStates.add(newState)
 		if newState in newStates:
@@ -194,22 +214,25 @@ class NDAutomaton:
 		newA = self.remove_epsilon_transition()
 		newStates = set()
 		finalStates = set()
-		for s in self.states:
+		determinized = set()
+		for s in newA.states:
 			newState = State(s.name)
 			newStates.add(newState)
-		for s in self.finalStates:
+		for s in newA.finalStates:
 			newFinalState = State(s.name)
 			finalStates.add(newFinalState)
-		for s in self.states:
+		for s in newA.states:
 			newState = State(s.name)
 			for t in s.ndtransitions:
-				newState.add_transition(Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates)))
+				#print(t.target_states)
+				#return " "
+				newState.add_transition(Transition(t.symbol, newA.determinize_states(t.target_states, finalStates, newStates, determinized)))
 			if newState in newStates:
 				newStates.remove(newState)
 			newStates.add(newState)
 		print(newStates)
 		print(finalStates)
-		return Automaton(newStates, finalStates, self.initialState, self.Σ)
+		return Automaton(newStates, finalStates, newA.initialState, self.Σ)
 
 class EpsilonAutomaton(NDAutomaton):
 	def __init__(self, states, finalStates, initialState, Σ=['0','1']):

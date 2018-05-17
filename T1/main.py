@@ -382,3 +382,4 @@ if __name__ == "__main__":
 
 	a3 = automata_union(a1, a2)
 	print(a3.remove_epsilon_transition())
+	print(a3.determinize())
