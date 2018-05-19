@@ -1,5 +1,5 @@
 from globals import *
-
+from itertools import cycle
 class Stack:
      def __init__(self):
          self.items = []
@@ -59,7 +59,7 @@ def polish_notation(infixexpr):
     return " ".join(postfixList)
 
 
-class BinaryTree:
+class Tree:
 
 	def __init__(self, root_node=None):
 		self.root = root_node
@@ -95,8 +95,14 @@ class BinaryTree:
 					n.left = t2
 					n.right = t1
 					stack.push(n)
+		self.root = stack.pop()
+		self.root.enumerate()
+		return self.root
+	def most_left_node(self):
+		return self.root.most_left_node()
 
-		return stack.pop()
+	def costura(self):
+		self.root.costura()
 
 class Node:
 
@@ -106,27 +112,67 @@ class Node:
 		self.symbol = symbol
 		self.label = -1
 		self.traversal = []
+		self.costura_node = None
 	def set_left(self, left):
 		self.left = left
 	def set_right(self, right):
 		self.right = right
 	def __str__(self):
-		return self.symbol
+		return str(self.label) + " " + self.symbol
 	def __repr__(self):
-		return str(self.label) + " " + self.__str__()
+		return self.__str__()
+	def most_left_node(self):
+		if self.left is None:
+			return self
+		else:
+			return self.left.most_left_node()
 	def enumerate(self):
-		self.get_leaf_nodes()
-		print(traversal)
+		leaves = (self.get_leaf_nodes())
+		#print("leaves: " + str(self.get_leaf_nodes()))
 		i = 1
-		for leaf in traversal:
+		for leaf in leaves:
 			leaf.label = i
 			i+=1
 
-		return traversal
 
+	def in_order(self):
+		if self.left is not None:
+			self.traversal.extend(self.left.in_order())
+		
+		self.traversal.append(self)
+		if self.right is not None:
+			self.traversal.extend(self.right.in_order())
+		
+		ret = self.traversal
+		self.traversal = []
+		return (ret)
+
+	def stuff(self):
+		in_order_nodes = self.in_order()
+		iter_ = iter(in_order_nodes)
+		next(iter_)
+		n = None
+		for node in in_order_nodes:
+			try:
+				n = next(iter_)
+			except:
+				print(node, end="")
+				print(" costura para lambda")
+
+			if n.symbol == in_order_nodes[-1]:
+				print()
+			if node.symbol == "." or node.symbol == "|":
+
+				continue
+			print(str(node.symbol) + " costura para ", end="")
+			print(n.symbol)
+			#in_order_nodes[i].costura_node = in_order_nodes[i+1]
+			#print(str(in_order_nodes[i]) +" "+ str(in_order_nodes[i+1]))
+		#print(next(ion_cycle))
 	'''
 		this function is equivalent to the polish notation (reversed)
 	'''
+
 	def post_order(self):
 
 		if self.left is not None:
@@ -148,12 +194,11 @@ class Node:
 		return (ret)
 	def get_leaf_nodes(self):
 		if self.is_leaf():
-			traversal.append(self)
+			self.traversal.append(self)
 		if self.left is not None:
-
-			self.traversal.append(self.left.get_leaf_nodes())
+			self.traversal.extend(self.left.get_leaf_nodes())
 		if self.right is not None:
-			self.traversal.append(self.right.get_leaf_nodes())
+			self.traversal.extend(self.right.get_leaf_nodes())
 		ret = self.traversal
 		self.traversal = []
 		return (ret)
@@ -169,5 +214,8 @@ def display(root, level):
 
 	for i in range(0, level):
 		print("\t", end="")
-	print(root.symbol)
+	if root.is_leaf():
+		print(str(root.label) + root.symbol)
+	else:
+		print(root.symbol)
 	display(root.left, level+1)

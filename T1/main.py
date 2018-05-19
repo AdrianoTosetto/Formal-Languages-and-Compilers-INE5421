@@ -179,13 +179,22 @@ if __name__ == "__main__":
 	n18 = Node('*', n17)
 
 	n19 = Node('|',n11,n18)
+	#display(n19,1)
+	t = Tree()
+	s = polish_notation("( C . B | A ? ) *")
+	r = t.build(s)
+	r.stuff()
 
-	print(n19.enumerate())
+	#t.costura()
+	#display(t.root,1)
 
-	polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
-	print("traversal = " + str(traversal))
+	#print(n19.enumerate())
+	#print(n19.most_left_node())
 
-	display(n19, 1)
+	#-polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
+	#print("traversal = " + str(traversal))
+
+	#display(n19, 1)
 	'''q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2', True)
