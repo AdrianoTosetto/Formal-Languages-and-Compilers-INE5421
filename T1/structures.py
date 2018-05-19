@@ -75,7 +75,6 @@ class BinaryTree:
 		stack = Stack()
 		for symbol in expr:
 			if symbol == " ":
-				print('hahah')
 				continue
 			if self.is_operand(symbol):
 				n = Node(symbol)
@@ -105,23 +104,61 @@ class Node:
 		self.left = left
 		self.right = right
 		self.symbol = symbol
+		self.label = -1
 		self.traversal = []
 	def set_left(self, left):
 		self.left = left
 	def set_right(self, right):
 		self.right = right
+	def __str__(self):
+		return self.symbol
+	def __repr__(self):
+		return str(self.label) + " " + self.__str__()
+	def enumerate(self):
+		self.get_leaf_nodes()
+		print(traversal)
+		i = 1
+		for leaf in traversal:
+			leaf.label = i
+			i+=1
+
+		return traversal
+
 	'''
 		this function is equivalent to the polish notation (reversed)
 	'''
 	def post_order(self):
 
 		if self.left is not None:
-			self.left.post_order()
+			self.traversal.append(self.left.post_order())
 		if self.right is not None:
-			self.right.post_order()
+			self.traversal.append(self.right.post_order())
 		traversal.append(self.symbol)
-		return (self.symbol)
-        #print('haah')
+		ret = self.traversal
+		self.traversal = []
+		return (ret)
+	def pre_order(self):
+		traversal.append(self.symbol)
+		if self.left is not None:
+			self.traversal.append(self.left.post_order())
+		if self.right is not None:
+			self.traversal.append(self.right.post_order())
+		ret = self.traversal
+		self.traversal = []
+		return (ret)
+	def get_leaf_nodes(self):
+		if self.is_leaf():
+			traversal.append(self)
+		if self.left is not None:
+
+			self.traversal.append(self.left.get_leaf_nodes())
+		if self.right is not None:
+			self.traversal.append(self.right.get_leaf_nodes())
+		ret = self.traversal
+		self.traversal = []
+		return (ret)
+	def is_leaf(self):
+		return self.right is None and self.left is None
 def display(root, level):
 	if root is None:
 		for i in range(0, level):

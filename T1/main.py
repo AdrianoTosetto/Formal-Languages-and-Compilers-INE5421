@@ -157,7 +157,7 @@ if __name__ == "__main__":
 	#print(a.equi_classes)
 	a.minimize()
 	print(a)'''
-	'''n1 = Node('a')
+	n1 = Node('a')
 	n2 = Node('b')
 	n3 = Node('.', n1, n2)
 
@@ -180,13 +180,12 @@ if __name__ == "__main__":
 
 	n19 = Node('|',n11,n18)
 
-	n19.post_order()
-	print(n19.traversal)
+	print(n19.enumerate())
 
 	polish_notation("( A . B | A . C ) * . A ? | ( B A ? C ) *")
-	print(traversal)
+	print("traversal = " + str(traversal))
 
-	display(n19, 1)'''
+	display(n19, 1)
 	'''q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2', True)
@@ -354,7 +353,7 @@ if __name__ == "__main__":
 	display(nodo,1)
 	'''
 
-	q0_1 = State('q0', True)
+	'''q0_1 = State('q0', True)
 	q1_1 = State('q1', True)
 
 	t1 = Transition('a', q0_1)
@@ -384,4 +383,4 @@ if __name__ == "__main__":
 	a3 = a3.determinize()
 	for s in a3.states:
 		print("state " + str(s) + " isAcceptance? " + str(s.isAcceptance))
-	print(a3.minimize())
+	print(a3.minimize())'''
