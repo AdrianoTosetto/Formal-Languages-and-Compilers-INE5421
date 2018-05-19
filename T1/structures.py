@@ -147,8 +147,9 @@ class Node:
 		self.traversal = []
 		return (ret)
 
-	def stuff(self):
+	def costura(self):
 		in_order_nodes = self.in_order()
+		print(in_order_nodes)
 		iter_ = iter(in_order_nodes)
 		next(iter_)
 		n = None
@@ -156,19 +157,13 @@ class Node:
 			try:
 				n = next(iter_)
 			except:
-				print(node, end="")
+				print(str(node.symbol), end="")
 				print(" costura para lambda")
-
-			if n.symbol == in_order_nodes[-1]:
-				print()
+				return
 			if node.symbol == "." or node.symbol == "|":
-
 				continue
 			print(str(node.symbol) + " costura para ", end="")
 			print(n.symbol)
-			#in_order_nodes[i].costura_node = in_order_nodes[i+1]
-			#print(str(in_order_nodes[i]) +" "+ str(in_order_nodes[i+1]))
-		#print(next(ion_cycle))
 	'''
 		this function is equivalent to the polish notation (reversed)
 	'''

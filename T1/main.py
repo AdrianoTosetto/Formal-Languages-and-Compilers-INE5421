@@ -157,7 +157,7 @@ if __name__ == "__main__":
 	#print(a.equi_classes)
 	a.minimize()
 	print(a)'''
-	n1 = Node('a')
+	'''n1 = Node('a')
 	n2 = Node('b')
 	n3 = Node('.', n1, n2)
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 	t = Tree()
 	s = polish_notation("( C . B | A ? ) *")
 	r = t.build(s)
-	r.stuff()
+	r.costura()'''
 
 	#t.costura()
 	#display(t.root,1)
@@ -393,3 +393,29 @@ if __name__ == "__main__":
 	for s in a3.states:
 		print("state " + str(s) + " isAcceptance? " + str(s.isAcceptance))
 	print(a3.minimize())'''
+
+
+	q0 = State('q0', True)
+	q1 = State('q1')
+	q2 = State('q2', True)
+
+	t1 = Transition('a', q1)
+	t2 = Transition('b', q2)
+	q0.add_transition(t1)
+	q0.add_transition(t2)
+
+	t3 = Transition('a', q0)
+	t4 = Transition('b', q1)
+	q1.add_transition(t3)
+	q1.add_transition(t4)
+
+	t5 = Transition('a', q1)
+	t6 = Transition('b', q2)
+	q2.add_transition(t5)
+	q2.add_transition(t6)
+
+	a = Automaton([q0,q1,q2],[q0,q2], q0,['a','b'])
+	a1 = automata_complement(a)
+	#a1 = make_nondeterministic(a)
+	print(a)
+	print(a1)

@@ -309,7 +309,7 @@ class Automaton:
 	def complete(self):
 		for s in self.states:
 			s.complete(self.Σ)
-		self.states.add(φ(self.Σ))
+		self.states.append(φ(self.Σ))
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 	def set_(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]

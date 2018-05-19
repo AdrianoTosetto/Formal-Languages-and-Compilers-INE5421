@@ -75,3 +75,32 @@ def automata_union(fa1, fa2):
         result_final_states.add(newInitial)
 
     return NDAutomaton(result_states, result_final_states, newInitial, result_Σ)
+
+
+def automata_complement(af1):
+    af1.complete()
+
+    new_states = copy.deepcopy(af1.states)
+    for s in new_states:
+        if s == af1.initialState:
+            new_initial_state = s
+
+    '''for s in af1.states:
+        for t in s.transitions:
+            new_states.add(State(t.target_state.name))'''
+
+    '''for s in af1.states:
+        for ncs in new_states:
+            if s == ncs:
+                for t in s.transitions:
+                    for ncs1 in new_states:
+                        if ncs1 == t.target_state:
+                            ncs.add_transition(Transition(t.symbol, ncs1))'''
+    nfs = [s for s in new_states if s.isAcceptance == False]
+    for s in new_states:
+        s.isAcceptance = not s.isAcceptance
+    return Automaton(new_states, nfs, new_initial_state, af1.Σ)
+
+def automata_intersec(af1, af2):
+    nfa1 = af1.make_nondeterministic()
+    nfa2 = af2.make_nondeterministic()
