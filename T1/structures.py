@@ -113,6 +113,7 @@ class Node:
 		self.label = -1
 		self.traversal = []
 		self.costura_node = None
+		self.isThreaded = False
 	def set_left(self, left):
 		self.left = left
 	def set_right(self, right):
@@ -164,6 +165,14 @@ class Node:
 				continue
 			print(str(node.symbol) + " costura para ", end="")
 			print(n.symbol)
+			node.costura_node = n
+		self.isThreaded = True
+
+	def node_composition(node):
+		# nodo para quem o param node costura
+		thread_node = node.costura_node
+		if costura_node.symbol == ".":
+			print()
 	'''
 		this function is equivalent to the polish notation (reversed)
 	'''
