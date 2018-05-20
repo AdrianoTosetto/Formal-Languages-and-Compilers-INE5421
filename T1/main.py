@@ -18,17 +18,20 @@ if __name__ == "__main__":
 	myGrammar = Grammar(productions, 'G' + str(grammar_count))
 	grammar_count += 1
 	grammars.append(myGrammar)
-	m = MainWindow()
-	'''leftSides1 = ['S', 'A', 'B', 'C']
+
+	leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
 	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
 	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
 				   	Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
 				   	Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
-	myGrammar1 = Grammar(productions1)
+	myGrammar1 = Grammar(productions1, 'G' + str(grammar_count))
+	grammar_count += 1
+	grammars.append(myGrammar1)
+	m = MainWindow()
 
 	#print(myGrammar1)
-	a = myGrammar1.convert_to_automaton()
+	'''a = myGrammar1.convert_to_automaton()
 	print(a.next_states('a')) #should output [A] and it does!
 	print(a.next_states('b')) #should output [C, λ] and it does!
 	print("")

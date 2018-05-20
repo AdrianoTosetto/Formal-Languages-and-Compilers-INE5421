@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+import functools
 import sys
 sys.path.append('../')
 from globals import *
@@ -54,11 +55,15 @@ class MainWindow(QWidget):
 	def on_click(self):
 		print('PyQt5 button click')
 		self.add_gr()
+	def select_grammar(self, gram):
+		self.center.setText(str(gram))
+
 	def add_gr(self):
 		self.grList.clear()
 		for g in grammars:
 			item = QListWidgetItem(self.grList)
-			item_widget = QPushButton(g.name, self)
+			item_widget = GrammarButton(g.name, g)
+			item_widget.clicked.connect(functools.partial(self.select_grammar, g))
 			self.grList.setItemWidget(item, item_widget)
 			self.grList.addItem(item)
 
@@ -145,3 +150,8 @@ class MainWindow(QWidget):
 
 if __name__ == "__main__":
 	m = MainWindow()
+
+class GrammarButton(QPushButton):
+	def __init__(self, QString, grammar):
+		self.grammar = grammar
+		super().__init__(QString)
