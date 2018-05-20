@@ -55,6 +55,18 @@ class MainWindow(QWidget):
 	def on_click(self):
 		print('PyQt5 button click')
 		self.add_gr()
+	def showAFs(self):
+		self.erList.setHidden(True)
+		self.grList.setHidden(True)
+		self.afList.setHidden(False)
+	def showGRs(self):
+		self.erList.setHidden(True)
+		self.afList.setHidden(True)
+		self.grList.setHidden(False)
+	def showERs(self):
+		self.grList.setHidden(True)
+		self.afList.setHidden(True)
+		self.erList.setHidden(False)
 	def select_grammar(self, gram):
 		self.center.setText(str(gram))
 
@@ -124,28 +136,35 @@ class MainWindow(QWidget):
 
 		self.grButton = QPushButton('GR', self)
 		self.grButton.setToolTip('Exibir GRs')
-		self.grButton.clicked.connect(self.on_click)
+		self.grButton.clicked.connect(self.showGRs)
 		self.grLayout = QVBoxLayout()
 		self.grLayout.addWidget(self.grButton)
 		self.showGR.setLayout(self.grLayout)
 
 		self.afButton = QPushButton('AF', self)
 		self.afButton.setToolTip('Exibir AFs')
-		self.afButton.clicked.connect(self.on_click)
+		self.afButton.clicked.connect(self.showAFs)
 		self.afLayout = QVBoxLayout()
 		self.afLayout.addWidget(self.afButton)
 		self.showAF.setLayout(self.afLayout)
 
 		self.erButton = QPushButton('ER', self)
 		self.erButton.setToolTip('Exibir ERs')
-		self.erButton.clicked.connect(self.on_click)
+		self.erButton.clicked.connect(self.showERs)
 		self.erLayout = QVBoxLayout()
 		self.erLayout.addWidget(self.erButton)
 		self.showER.setLayout(self.erLayout)
 
 		self.grList = QListWidget(self)
+		self.afList = QListWidget(self)
+		self.erList = QListWidget(self)
 		self.listLayout = QVBoxLayout()
 		self.listLayout.addWidget(self.grList)
+		self.listLayout.addWidget(self.erList)
+		self.listLayout.addWidget(self.afList)
+		self.grList.setHidden(True)
+		self.afList.setHidden(True)
+		self.erList.setHidden(True)
 		self.listofentities.setLayout(self.listLayout)
 
 if __name__ == "__main__":
