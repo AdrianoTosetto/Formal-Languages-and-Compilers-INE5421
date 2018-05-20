@@ -11,6 +11,10 @@ class Automaton:
 		self.currentState = initialState
 		self.Σ = Σ
 		self.equi_classes = []
+		self.name = None
+
+	def set_name(name):
+		self.name = name
 
 	def process_input(self, input):
 		for symbol in input:
