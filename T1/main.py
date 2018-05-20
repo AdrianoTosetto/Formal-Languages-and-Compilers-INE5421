@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	myGrammar1 = Grammar(productions1, 'G' + str(grammar_count))
 	grammar_count += 1
 	grammars.append(myGrammar1)
-	m = MainWindow()
+	#m = MainWindow()
 
 	#print(myGrammar1)
 	'''a = myGrammar1.convert_to_automaton()
@@ -404,7 +404,7 @@ if __name__ == "__main__":
 	print(a3.minimize())'''
 
 
-	q0 = State('q0', True)
+	'''q0 = State('q0', True)
 	q1 = State('q1')
 	q2 = State('q2', True)
 
@@ -427,4 +427,13 @@ if __name__ == "__main__":
 	a1 = automata_complement(a)
 	#a1 = make_nondeterministic(a)
 	print(a)
-	print(a1)
+	print(a1)'''
+
+	expr = '( D . C * ) . ( A . B )'
+	t = Tree()
+	nodo = t.build(polish_notation(expr))
+	t.costura()
+	test = nodo.most_left_node()
+	print(test.handle_leaf())
+	#print(nodo.right.symbol)
+	display(nodo,1)

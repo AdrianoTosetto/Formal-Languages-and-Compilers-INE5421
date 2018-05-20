@@ -1,5 +1,9 @@
 from globals import *
 from itertools import cycle
+
+UP = 0
+DOWN = 1
+
 class Stack:
      def __init__(self):
          self.items = []
@@ -104,6 +108,15 @@ class Tree:
 	def costura(self):
 		self.root.costura()
 
+
+class Pendency:
+	def __init__(self, node, action):
+		self.node = node
+		self.action = action
+
+	def get_pendency(self):
+		return (self.node, self.action)
+
 class Node:
 
 	def __init__(self, symbol, left=None, right=None):
@@ -158,24 +171,62 @@ class Node:
 			try:
 				n = next(iter_)
 			except:
-				print(str(node.symbol), end="")
-				print(" costura para lambda")
+				#print(str(node.symbol), end="")
+				#print(" costura para lambda")
 				return
 			if node.symbol == "." or node.symbol == "|":
 				continue
-			print(str(node.symbol) + " costura para ", end="")
-			print(n.symbol)
+			#print(str(node.symbol) + " costura para ", end="")
+			#print(n.symbol)
 			node.costura_node = n
 		self.isThreaded = True
 
-	def node_composition(node):
-		# nodo para quem o param node costura
-		thread_node = node.costura_node
-		if costura_node.symbol == ".":
-			print()
-	'''
-		this function is equivalent to the polish notation (reversed)
-	'''
+	def handle_leaf(self):
+		if not self.is_leaf():
+			return set()
+		print(self.costura_node)
+		if self.costura_node.symbol == ".":
+			print(self.handle_concatenation(self.costura_node, UP))
+
+	def handle_concatenation(self, node, action):
+		node_composition = set()
+		pendencies = Stack()
+		if action == UP:
+			if node.right.is_leaf():
+				node_composition.add(node.right)
+			elif node.right.symbol == "*":
+				node_composition |= node.handle_star(node.right, DOWN)
+				print("pendencia com " + str(node.right) + " por cima")
+				pendencies.push(Pendency(node.right, UP))
+			elif node.right.symbol == ".":
+				node_composition |= node.handle_star(node.right, DOWN)
+		if action == DOWN:
+			if node.left.is_leaf():
+				node_composition.add(node.left)
+			if node.left.symbol == ".":
+				print("chegando numa esquerda")
+				node_composition |= node.handle_concatenation(node.left, DOWN)
+
+		while not pendencies.isEmpty():
+			p = pendencies.pop()
+
+			if p.action == UP:
+				if p.node.costura_node.symbol == ".":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
+					print("dps: " + str(node_composition))
+
+		return node_composition
+	def handle_star(self, node, action):
+		node_composition = set()
+		if action == DOWN:
+			if node.left.is_leaf():
+				node_composition.add(node.left)
+		if action == UP:
+			if node.costura_node.symbol == ".":
+				node_composition |= node.handle_concatenation(node.costura_node, UP)
+		return node_composition
+
 
 	def post_order(self):
 
@@ -208,6 +259,7 @@ class Node:
 		return (ret)
 	def is_leaf(self):
 		return self.right is None and self.left is None
+
 def display(root, level):
 	if root is None:
 		for i in range(0, level):
