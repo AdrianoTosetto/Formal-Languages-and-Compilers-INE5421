@@ -14,6 +14,7 @@ class MainWindow(QWidget):
 		self.move(300, 300)
 		self.setWindowTitle('Simple')
 		self.show()
+
 		self.leftSide = QWidget()
 		self.rightSide = QWidget()
 		self.leftSide.setStyleSheet("background-color:blue;")
@@ -30,6 +31,38 @@ class MainWindow(QWidget):
 
 		self.rightSide.setLayout(self.rightLayout)
 
+		self.generateLeftSide()
+
+		self.center = QLabel()
+		self.center.setText(str(grammars[0]))
+		self.center.setStyleSheet("background-color:white;")
+		self.centerLayout = QVBoxLayout()
+		self.centerLayout.addWidget(self.center)
+		self.displayScreen.setLayout(self.centerLayout)
+
+		self.mainLayout = QGridLayout()
+		self.mainLayout.setColumnStretch(0, 1)
+		self.mainLayout.setColumnStretch(1, 3)
+		self.mainLayout.addWidget(self.leftSide,0,0)
+		self.mainLayout.addWidget(self.rightSide,0,1)
+		self.setLayout(self.mainLayout)
+		self.leftSide.setLayout(self.leftLayout)
+		self.show()
+		sys.exit(self.app.exec_())
+
+	@pyqtSlot()
+	def on_click(self):
+		print('PyQt5 button click')
+		self.add_gr()
+	def add_gr(self):
+		self.grList.clear()
+		for g in grammars:
+			item = QListWidgetItem(self.grList)
+			item_widget = QPushButton(g.name, self)
+			self.grList.setItemWidget(item, item_widget)
+			self.grList.addItem(item)
+
+	def generateLeftSide(self):
 		self.options = QWidget()
 		self.entities = QWidget()
 		self.listofentities = QWidget()
@@ -55,46 +88,60 @@ class MainWindow(QWidget):
 		self.optionsLayout.addWidget(self.optionEdit,0,1)
 		self.options.setLayout(self.optionsLayout)
 
-		addButton = QPushButton('Adicionar', self)
-		addButton.setToolTip('Adicionar GR/ER/AF')
-		addButton.clicked.connect(self.on_click)
+		self.addButton = QPushButton('Adicionar', self)
+		self.addButton.setToolTip('Adicionar GR/ER/AF')
+		self.addButton.clicked.connect(self.on_click)
 		self.addLayout = QVBoxLayout()
-		self.addLayout.addWidget(addButton)
+		self.addLayout.addWidget(self.addButton)
 		self.optionAdd.setLayout(self.addLayout)
 
-		editButton = QPushButton('Editar', self)
-		editButton.setToolTip('Editar GR/ER/AF')
-		editButton.clicked.connect(self.on_click)
+		self.editButton = QPushButton('Editar', self)
+		self.editButton.setToolTip('Editar GR/ER/AF')
+		self.editButton.clicked.connect(self.on_click)
 		self.editLayout = QVBoxLayout()
-		self.editLayout.addWidget(editButton)
+		self.editLayout.addWidget(self.editButton)
 		self.optionEdit.setLayout(self.editLayout)
+
+		self.showGR = QWidget()
+		self.showER = QWidget()
+		self.showAF = QWidget()
+		self.showGR.setStyleSheet("background-color:crimson;")
+		self.showER.setStyleSheet("background-color:magenta;")
+		self.showAF.setStyleSheet("background-color:darkgreen;")
+		self.entitiesLayout = QGridLayout()
+		self.entitiesLayout.setColumnStretch(0,1)
+		self.entitiesLayout.setColumnStretch(1,1)
+		self.entitiesLayout.setColumnStretch(2,1)
+		self.entitiesLayout.addWidget(self.showGR,0,0)
+		self.entitiesLayout.addWidget(self.showER,0,1)
+		self.entitiesLayout.addWidget(self.showAF,0,2)
+		self.entities.setLayout(self.entitiesLayout)
+
+		self.grButton = QPushButton('GR', self)
+		self.grButton.setToolTip('Exibir GRs')
+		self.grButton.clicked.connect(self.on_click)
+		self.grLayout = QVBoxLayout()
+		self.grLayout.addWidget(self.grButton)
+		self.showGR.setLayout(self.grLayout)
+
+		self.afButton = QPushButton('AF', self)
+		self.afButton.setToolTip('Exibir AFs')
+		self.afButton.clicked.connect(self.on_click)
+		self.afLayout = QVBoxLayout()
+		self.afLayout.addWidget(self.afButton)
+		self.showAF.setLayout(self.afLayout)
+
+		self.erButton = QPushButton('ER', self)
+		self.erButton.setToolTip('Exibir ERs')
+		self.erButton.clicked.connect(self.on_click)
+		self.erLayout = QVBoxLayout()
+		self.erLayout.addWidget(self.erButton)
+		self.showER.setLayout(self.erLayout)
 
 		self.grList = QListWidget(self)
 		self.listLayout = QVBoxLayout()
 		self.listLayout.addWidget(self.grList)
 		self.listofentities.setLayout(self.listLayout)
-
-		self.mainLayout = QGridLayout()
-		self.mainLayout.setColumnStretch(0, 1)
-		self.mainLayout.setColumnStretch(1, 3)
-		self.mainLayout.addWidget(self.leftSide,0,0)
-		self.mainLayout.addWidget(self.rightSide,0,1)
-		self.setLayout(self.mainLayout)
-		self.leftSide.setLayout(self.leftLayout)
-		self.show()
-		sys.exit(self.app.exec_())
-
-	@pyqtSlot()
-	def on_click(self):
-		print('PyQt5 button click')
-		self.add_gr()
-	def add_gr(self):
-		self.grList.clear()
-		for g in grammars:
-			item = QListWidgetItem(self.grList)
-			item_widget = QPushButton(str(g), self)
-			self.grList.setItemWidget(item, item_widget)
-			self.grList.addItem(item)
 
 if __name__ == "__main__":
 	m = MainWindow()

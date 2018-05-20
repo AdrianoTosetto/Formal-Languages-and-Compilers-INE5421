@@ -4,6 +4,9 @@ from non_deterministic_automaton import *
 from deterministic_automaton import *
 from globals import *
 from operations_with_automata import *
+import sys
+sys.path.append('view/')
+from main_window import *
 
 if __name__ == "__main__":
 
@@ -12,7 +15,10 @@ if __name__ == "__main__":
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
 				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
-	myGrammar = Grammar(productions)
+	myGrammar = Grammar(productions, 'G' + str(grammar_count))
+	grammar_count += 1
+	grammars.append(myGrammar)
+	m = MainWindow()
 	'''leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
 	productions1 = [Production(leftSides1[0], rightSides1[0]), Production(leftSides1[0], rightSides1[1]),
