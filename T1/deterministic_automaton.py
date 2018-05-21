@@ -325,6 +325,9 @@ class Automaton:
 		newFinalStates = set()
 		oldStates = list(self.states)
 		newStates = copy.deepcopy(oldStates)
+		print("RENAME")
+		print(oldStates)
+		print(newStates)
 
 		i = 0
 
@@ -340,11 +343,11 @@ class Automaton:
 				it = 0
 				for os in oldStates:
 					if t.target_state == os:
-						t.target_state.name = newStates[it].name
+						t.target_state.name = 'q' + str(it)
 					it += 1
 
-		self.states = newStates
-		self.finalStates = newFinalStates
+		self.states = set(newStates)
+		self.finalStates = set(newFinalStates)
 		self.initialState = newInitialState
 
 
@@ -389,6 +392,12 @@ class State:
 
 	def add_transition(self, t):
 		self.transitions.append(t)
+	def remove_transition(self, t):
+		newT = []
+		for tran in self.transitions:
+			if tran != t:
+				newT.append(tran)
+		self.transitions = newT
 
 	def __hash__(self):
 		hashable = self.name

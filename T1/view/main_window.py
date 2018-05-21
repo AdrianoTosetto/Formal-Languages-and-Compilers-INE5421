@@ -162,7 +162,7 @@ class MainWindow(QWidget):
 		self.listLayout.addWidget(self.grList)
 		self.listLayout.addWidget(self.erList)
 		self.listLayout.addWidget(self.afList)
-		self.grList.setHidden(True)
+		#self.grList.setHidden(True)
 		self.afList.setHidden(True)
 		self.erList.setHidden(True)
 		self.listofentities.setLayout(self.listLayout)

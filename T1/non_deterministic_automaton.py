@@ -191,7 +191,9 @@ class NDAutomaton:
 				return newState
 			determinizedStates.add(newState)
 			for t in oldState.ndtransitions:
-				newState.add_transition(Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates, determinizedStates)))
+				newT = Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates, determinizedStates))
+				newState.add_transition(newT)
+				print(str(newState) + " + " + str(newT))
 			if newState in newStates:
 				newStates.remove(newState)
 			newStates.add(newState)
@@ -244,10 +246,13 @@ class NDAutomaton:
 		for s in newStates:
 			if s == newInitialState:
 				newInitialState = s
-			#print(s)
-		#print(newStates)
-		#finalStates = list(finalStates)
-		return Automaton(newStates, finalStates, newInitialState, self.Σ)
+		for s in newStates:
+			for t in s.transitions:
+				for os in newStates:
+					if t.target_state == os:
+						s.remove_transition(t)
+						s.add_transition(Transition(t.symbol, os))
+		return Automaton(set(newStates), set(finalStates), newInitialState, self.Σ)
 
 class EpsilonAutomaton(NDAutomaton):
 	def __init__(self, states, finalStates, initialState, Σ=['0','1']):

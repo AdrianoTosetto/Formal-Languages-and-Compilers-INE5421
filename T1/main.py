@@ -517,7 +517,7 @@ if __name__ == "__main__":
 	q0_1.add_transition(t1_1)
 	q1_1.add_transition(t2_1)
 
-	nbs = Automaton([q0_0,q1_0],[q0_0,q1_0],q0_0,['a','b'])
-	nas = Automaton([q0_1,q1_1],[q0_1,q1_1],q0_1,['a','b'])
+	nbs = Automaton(set([q0_0,q1_0]),set([q0_0,q1_0]),q0_0,['a','b'])
+	nas = Automaton(set([q0_1,q1_1]),set([q0_1,q1_1]),q0_1,['a','b'])
 
 	print(automata_intersec(nbs, nas))
