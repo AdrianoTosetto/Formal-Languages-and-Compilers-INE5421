@@ -186,8 +186,16 @@ class Node:
 			return set()
 		print(self.costura_node)
 		if self.costura_node.symbol == ".":
+			print("começando com a concatenação")
 			print(self.handle_concatenation(self.costura_node, UP))
+	def handle_optional(self, node, action):
+		node_composition = set()
+		if action == DOWN:
+			if node.left.is_leaf():
+				node_composition |= node_composition + {node.left}
 
+
+		return node_composition
 	def handle_concatenation(self, node, action):
 		node_composition = set()
 		pendencies = Stack()
@@ -200,12 +208,17 @@ class Node:
 				pendencies.push(Pendency(node.right, UP))
 			elif node.right.symbol == ".":
 				node_composition |= node.handle_star(node.right, DOWN)
+			elif node.right.symbol == "?":
+				node_composition |= node.handle_optional(node.right, DOWN)
+				pendencies.add(Pendency(node.right), UP)
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
 			if node.left.symbol == ".":
 				print("chegando numa esquerda")
 				node_composition |= node.handle_concatenation(node.left, DOWN)
+			if node.left == "*":
+				pendencies.push(Pendency(node.left), UP)
 
 		while not pendencies.isEmpty():
 			p = pendencies.pop()
@@ -215,6 +228,10 @@ class Node:
 					print("antes: " + str(node_composition))
 					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
 					print("dps: " + str(node_composition))
+				if p.node.costura_node == "*":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_star(p.node.costura_node, UP)
+					print("dps: " + str(node_composition))			
 
 		return node_composition
 	def handle_star(self, node, action):
