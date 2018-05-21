@@ -20,9 +20,12 @@ class Automaton:
 		for symbol in input:
 			self.currentState = self.currentState.next_state(symbol)
 			if self.currentState is None:
+				self.currentState = self.initialState
 				return False
 			#print(self.currentState)
-		return self.currentState.isAcceptance
+		output = self.currentState.isAcceptance
+		self.currentState = self.initialState
+		return output
 
 	def next_state(self, symbol):
 		self.currentState = self.currentState.next_state(symbol)
@@ -313,10 +316,37 @@ class Automaton:
 	def complete(self):
 		for s in self.states:
 			s.complete(self.Σ)
-		self.states.append(φ(self.Σ))
+		self.states.add(φ(self.Σ))
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 	def set_(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+	def rename_states(self):
+		newInitialState = self.initialState
+		newFinalStates = set()
+		oldStates = list(self.states)
+		newStates = copy.deepcopy(oldStates)
+
+		i = 0
+
+		for s in newStates:
+			if s == newInitialState:
+				newInitialState.name = 'q' + str(i)
+			s.name = 'q' + str(i)
+			i += 1
+			if s.isAcceptance:
+				newFinalStates.add(s)
+		for s in newStates:
+			for t in s.transitions:
+				it = 0
+				for os in oldStates:
+					if t.target_state == os:
+						t.target_state.name = newStates[it].name
+					it += 1
+
+		self.states = newStates
+		self.finalStates = newFinalStates
+		self.initialState = newInitialState
+
 
 class Transition:
 	def __init__(self, symbol, target_state):

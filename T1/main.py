@@ -429,11 +429,95 @@ if __name__ == "__main__":
 	print(a)
 	print(a1)'''
 
-	expr = '( D . C * ) . ( A . B )'
+	'''expr = '( D . C * ) . ( A . B )'
 	t = Tree()
 	nodo = t.build(polish_notation(expr))
 	t.costura()
 	test = nodo.most_left_node()
 	print(test.handle_leaf())
 	#print(nodo.right.symbol)
-	display(nodo,1)
+	display(nodo,1)'''
+
+	'''q0 = State('q0')
+	qr0 = State('qr0', True)
+	qr1 = State('qr1')
+	qr2 = State('qr2')
+
+	t1 = Transition('0', qr0)
+	t2 = Transition('1', qr1)
+	q0.add_transition(t1)
+	q0.add_transition(t2)
+
+	t3 = Transition('0', qr0)
+	t4 = Transition('1', qr1)
+
+	qr0.add_transition(t3)
+	qr0.add_transition(t4)
+
+	t5 = Transition('0', qr2)
+	t6 = Transition('1', qr0)
+
+	qr1.add_transition(t5)
+	qr1.add_transition(t6)
+
+	t7 = Transition('0', qr1)
+	t8 = Transition('1', qr2)
+
+	qr2.add_transition(t7)
+	qr2.add_transition(t8)
+
+	div3 = Automaton(set([q0, qr0, qr1, qr2]),set([qr0]), q0, ['0','1'])
+
+
+	_q0 = State('_q0')
+	_qr0 = State('_qr0', True)
+	_qr1 = State('_qr1')
+
+	_t1 = Transition('0', _qr0)
+	_t2 = Transition('1', _qr1)
+	_q0.add_transition(_t1)
+	_q0.add_transition(_t2)
+
+	_t3 = Transition('0', _qr0)
+	_t4 = Transition('1', _qr1)
+
+	_qr0.add_transition(_t3)
+	_qr0.add_transition(_t4)
+
+	_t5 = Transition('0', _qr0)
+	_t6 = Transition('1', _qr1)
+
+	_qr1.add_transition(_t5)
+	_qr1.add_transition(_t6)
+
+	div2 = Automaton(set([_q0, _qr0, _qr1]),set([_qr0]), _q0, ['0','1'])
+
+	print(div2)
+	print(div3)'''
+
+	q0_0 = State('q0_0', True)
+	q1_0 = State('q1_0', True)
+
+	t0_0 = Transition('a', q0_0)
+	t1_0 = Transition('b', q1_0)
+	t2_0 = Transition('a', q0_0)
+
+	q0_0.add_transition(t0_0)
+	q0_0.add_transition(t1_0)
+	q1_0.add_transition(t2_0)
+
+	q0_1 = State('q0_1', True)
+	q1_1 = State('q1_1', True)
+
+	t0_1 = Transition('b', q0_1)
+	t1_1 = Transition('a', q1_1)
+	t2_1 = Transition('b', q0_1)
+
+	q0_1.add_transition(t0_1)
+	q0_1.add_transition(t1_1)
+	q1_1.add_transition(t2_1)
+
+	nbs = Automaton([q0_0,q1_0],[q0_0,q1_0],q0_0,['a','b'])
+	nas = Automaton([q0_1,q1_1],[q0_1,q1_1],q0_1,['a','b'])
+
+	print(automata_intersec(nbs, nas))

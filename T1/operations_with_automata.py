@@ -4,6 +4,8 @@ from regular_grammar import *
 import copy
 
 def make_nondeterministic(fa):
+    if type(fa) is NDAutomaton:
+        return fa
     newStates = set()
     newFinalStates = set()
     for s in fa.states:
@@ -78,11 +80,16 @@ def automata_union(fa1, fa2):
 
 
 def automata_complement(af1):
-    af1.complete()
+    waf = None
+    if type(af1) is NDAutomaton:
+        waf = af1.determinize()
+    else:
+        waf = af1
+    waf.complete()
 
-    new_states = copy.deepcopy(af1.states)
+    new_states = copy.deepcopy(waf.states)
     for s in new_states:
-        if s == af1.initialState:
+        if s == waf.initialState:
             new_initial_state = s
 
     '''for s in af1.states:
@@ -99,8 +106,40 @@ def automata_complement(af1):
     nfs = [s for s in new_states if s.isAcceptance == False]
     for s in new_states:
         s.isAcceptance = not s.isAcceptance
-    return Automaton(new_states, nfs, new_initial_state, af1.Σ)
+    return Automaton((new_states), (nfs), new_initial_state, af1.Σ)
 
 def automata_intersec(af1, af2):
-    nfa1 = af1.make_nondeterministic()
-    nfa2 = af2.make_nondeterministic()
+    neg_fa1 = af1#automata_complement(af1)
+    neg_fa2 = af2#automata_complement(af2)
+
+    print(neg_fa1)
+    print(neg_fa2)
+
+    union = automata_union(neg_fa1, neg_fa2)#.determinize()#.minimize()
+    print(union)
+    union = union.determinize()
+    print(union)
+    #union.rename_states()
+    print(union)
+    print(type(union.currentState))
+    for s in union.states:
+        for t in s.transitions:
+            for st in t.target_state.transitions:
+                print(str(t.target_state) + " + " + str(st))
+    print(union.process_input(''))
+    print(union.process_input('a'))
+    print(union.process_input('b'))
+    print(union.process_input('aa'))
+    print(union.process_input('ab'))
+    print(union.process_input('ba'))
+    print(union.process_input('bb'))
+    print(union.process_input('aaa'))
+    print(union.process_input('aab'))
+    print(union.process_input('aba'))
+    print(union.process_input('abb'))
+    print(union.process_input('baa'))
+    print(union.process_input('bab'))
+    print(union.process_input('bba'))
+    print(union.process_input('bbb'))
+
+    #return automata_complement(union)
