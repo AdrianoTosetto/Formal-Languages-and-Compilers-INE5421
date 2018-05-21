@@ -190,10 +190,30 @@ class Node:
 			print(self.handle_concatenation(self.costura_node, UP))
 	def handle_optional(self, node, action):
 		node_composition = set()
+		pendencies = Stack()
 		if action == DOWN:
 			if node.left.is_leaf():
-				node_composition |= node_composition + {node.left}
+				node_composition |= {node.left}
+		if action == UP:
+			if node.costura_node.symbol == "*":
+				node_composition |= node.handle_star(node.costura_node, DOWN)
+				pendencies.push(Pendency(node, UP))
 
+		while not pendencies.isEmpty():
+			p = pendencies.pop()
+
+			if p.action == UP:
+				if p.node.costura_node.symbol == ".":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
+					print("dps: " + str(node_composition))
+				if p.node.costura_node.symbol == "*":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_star(p.node.costura_node, UP)
+					print("dps: " + str(node_composition))
+			if p.action == DOWN:
+				if p.node.symbol == "*":
+					node_composition |= p.node.handle_star(p.costura_node, DOWN)
 
 		return node_composition
 	def handle_concatenation(self, node, action):
@@ -210,7 +230,7 @@ class Node:
 				node_composition |= node.handle_star(node.right, DOWN)
 			elif node.right.symbol == "?":
 				node_composition |= node.handle_optional(node.right, DOWN)
-				pendencies.add(Pendency(node.right), UP)
+				pendencies.push(Pendency(node.right, UP))
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
@@ -228,10 +248,11 @@ class Node:
 					print("antes: " + str(node_composition))
 					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
 					print("dps: " + str(node_composition))
-				if p.node.costura_node == "*":
+				if p.node.costura_node.symbol == "*":
 					print("antes: " + str(node_composition))
 					node_composition |= p.node.handle_star(p.node.costura_node, UP)
 					print("dps: " + str(node_composition))			
+
 
 		return node_composition
 	def handle_star(self, node, action):
@@ -239,6 +260,9 @@ class Node:
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
+			if node.left.symbol == ".":
+				print("handle left")
+				node_composition |= node.handle_concatenation(node.left, DOWN)
 		if action == UP:
 			if node.costura_node.symbol == ".":
 				node_composition |= node.handle_concatenation(node.costura_node, UP)

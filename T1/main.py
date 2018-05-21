@@ -495,7 +495,7 @@ if __name__ == "__main__":
 	print(div2)
 	print(div3)'''
 
-	q0_0 = State('q0_0', True)
+	'''q0_0 = State('q0_0', True)
 	q1_0 = State('q1_0', True)
 
 	t0_0 = Transition('a', q0_0)
@@ -520,4 +520,14 @@ if __name__ == "__main__":
 	nbs = Automaton(set([q0_0,q1_0]),set([q0_0,q1_0]),q0_0,['a','b'])
 	nas = Automaton(set([q0_1,q1_1]),set([q0_1,q1_1]),q0_1,['a','b'])
 
-	print(automata_intersec(nbs, nas))
+	print(automata_intersec(nbs, nas))'''
+
+
+	expr = '( A . B ? ) * . C'
+	t = Tree()
+	nodo = t.build(polish_notation(expr))
+	t.costura()
+	test = nodo.most_left_node()
+	print(test.handle_leaf())
+	#print(nodo.right.symbol)
+	display(nodo,1)
