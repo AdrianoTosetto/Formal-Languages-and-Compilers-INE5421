@@ -528,6 +528,7 @@ if __name__ == "__main__":
 	nodo = t.build(polish_notation(expr))
 	t.costura()
 	test = nodo.most_left_node()
+	print("test = " + str(test))
 	print(test.handle_leaf())
 	#print(nodo.right.symbol)
 	display(nodo,1)

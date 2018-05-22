@@ -188,16 +188,38 @@ class Node:
 		if self.costura_node.symbol == ".":
 			print("começando com a concatenação")
 			print(self.handle_concatenation(self.costura_node, UP))
-	def handle_optional(self, node, action):
+		if self.costura_node.symbol == "?":
+			print(self.handle_optional(self.costura_node, UP))
+		if self.costura_node.symbol == "*":
+			print(self.handle_star(self.costura_node, DOWN))
+			print(self.handle_star(self.costura_node, UP))
+
+	def handle_optional(self, node, action, visited=set()):
+		#if node in visited:
+		#	return set()
+		print("visitando o nodo " + str(node))
+		visited.add(node)
 		node_composition = set()
 		pendencies = Stack()
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition |= {node.left}
+			if node.left.symbol == ".":
+				node_composition |= node.handle_concatenation(node.left, DOWN)
+			if node.left.symbol == "*":
+				node_composition |= node.handle_star(node.left, DOWN)
+				node_composition |= node.handle_star(node.left, UP)
+			if node.left.symbol == "?":
+				node_composition |= node.handle_optional(node.left, DOWN)
+				node_composition |= node.handle_optional(node.left, UP)
 		if action == UP:
 			if node.costura_node.symbol == "*":
-				node_composition |= node.handle_star(node.costura_node, DOWN)
-				pendencies.push(Pendency(node, UP))
+				node_composition |= node.handle_star(node.costura_node, DOWN, visited)
+				pendencies.push(Pendency(node.costura_node, UP))
+			if node.costura_node.symbol == ".":
+				node_composition |= node.handle_concatenation(node.costura_node, UP, visited)
+			if node.costura_node.symbol == "?":
+				node_composition |= node.handle_optional(node.costura_node, UP, visited)
 
 		while not pendencies.isEmpty():
 			p = pendencies.pop()
@@ -205,39 +227,50 @@ class Node:
 			if p.action == UP:
 				if p.node.costura_node.symbol == ".":
 					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
 					print("dps: " + str(node_composition))
 				if p.node.costura_node.symbol == "*":
 					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_star(p.node.costura_node, UP)
+					node_composition |= p.node.handle_star(p.node.costura_node, UP, visited)
 					print("dps: " + str(node_composition))
 			if p.action == DOWN:
 				if p.node.symbol == "*":
-					node_composition |= p.node.handle_star(p.costura_node, DOWN)
+					node_composition |= p.node.handle_star(p.costura_node, DOWN, visited)
+				if p.node.symbol == ".":
+					node_composition |= p.node.handle_concatenation(p.node.left, DOWN, visited)
 
 		return node_composition
-	def handle_concatenation(self, node, action):
+	def handle_concatenation(self, node, action, visited=set()):
+		#if node in visited:
+		#	return set()
+
+		visited.add(node)
 		node_composition = set()
 		pendencies = Stack()
 		if action == UP:
 			if node.right.is_leaf():
 				node_composition.add(node.right)
 			elif node.right.symbol == "*":
-				node_composition |= node.handle_star(node.right, DOWN)
+				node_composition |= node.handle_star(node.right, DOWN, visited)
 				print("pendencia com " + str(node.right) + " por cima")
 				pendencies.push(Pendency(node.right, UP))
 			elif node.right.symbol == ".":
-				node_composition |= node.handle_star(node.right, DOWN)
+				node_composition |= node.handle_star(node.right, DOWN, visited)
 			elif node.right.symbol == "?":
-				node_composition |= node.handle_optional(node.right, DOWN)
+				node_composition |= node.handle_optional(node.right, DOWN, visited)
 				pendencies.push(Pendency(node.right, UP))
+				print("? pendencia")
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
-			if node.left.symbol == ".":
+			elif node.left.symbol == ".":
 				print("chegando numa esquerda")
-				node_composition |= node.handle_concatenation(node.left, DOWN)
-			if node.left == "*":
+				node_composition |= node.handle_concatenation(node.left, DOWN, visited)
+			elif node.left.symbol == "*":
+				node_composition |=  node.handle_star(node.left, DOWN, visited)
+				pendencies.push(Pendency(node.left), UP)
+			elif node.left.symbol == "?":
+				node_composition |=  node.handle_optional(node.left, DOWN, visited)
 				pendencies.push(Pendency(node.left), UP)
 
 		while not pendencies.isEmpty():
@@ -246,29 +279,57 @@ class Node:
 			if p.action == UP:
 				if p.node.costura_node.symbol == ".":
 					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP)
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
 					print("dps: " + str(node_composition))
 				if p.node.costura_node.symbol == "*":
 					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_star(p.node.costura_node, UP)
-					print("dps: " + str(node_composition))			
+					node_composition |= p.node.handle_star(p.node.costura_node, UP, visited)
+					node_composition |= p.node.handle_star(p.node.costura_node, DOWN, visited)
+					print("dps: " + str(node_composition))
+				if p.node.costura_node.symbol == "?":
+					node_composition |= p.node.handle_optional(p.node.costura_node, UP)
+			if p.action == DOWN:
+				if p.node.symbol == ".":
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
 
 
 		return node_composition
-	def handle_star(self, node, action):
+	def handle_star(self, node, action, visited):
+		#if node in visited:
+		#	return set()
+		pendencies = Stack()
+		visited.add(node)
 		node_composition = set()
 		if action == DOWN:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
-			if node.left.symbol == ".":
+			elif node.left.symbol == ".":
 				print("handle left")
 				node_composition |= node.handle_concatenation(node.left, DOWN)
+			elif node.left.symbol == "?":
+				node_composition |= node.handle_optional(node.left, DOWN)
+				pendencies.push(node.left, UP)
 		if action == UP:
 			if node.costura_node.symbol == ".":
 				node_composition |= node.handle_concatenation(node.costura_node, UP)
+
+		while not pendencies.isEmpty():
+			p = pendencies.pop()
+
+			if p.action == UP:
+				if p.node.costura_node.symbol == ".":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
+					print("dps: " + str(node_composition))
+				if p.node.costura_node.symbol == "*":
+					print("antes: " + str(node_composition))
+					node_composition |= p.node.handle_star(p.node.costura_node, UP, visited)
+					print("dps: " + str(node_composition))
+			if p.action == DOWN:
+				if p.node.symbol == ".":
+					node_composition |= p.node.handle_concatenation(p.node.costura_node, DOWN, visited)
+
 		return node_composition
-
-
 	def post_order(self):
 
 		if self.left is not None:
