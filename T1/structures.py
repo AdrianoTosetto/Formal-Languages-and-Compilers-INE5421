@@ -194,10 +194,12 @@ class Node:
 		if self.costura_node.symbol == "*":
 			print(self.handle_star(self.costura_node, DOWN))
 			print(self.handle_star(self.costura_node, UP))
+		if self.costura_node.symbol == "|":
+			self.handle_union(self.costura_node, UP)
 
 	def handle_optional(self, node, action, visited=set()):
-		#if node in visited:
-		#	return set()
+		if node in visited:
+			return set()
 		print("visitando o nodo " + str(node))
 		visited.add(node)
 		node_composition = set()
@@ -213,6 +215,8 @@ class Node:
 			if node.left.symbol == "?":
 				node_composition |= node.handle_optional(node.left, DOWN)
 				node_composition |= node.handle_optional(node.left, UP)
+			if node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN)
 		if action == UP:
 			if node.costura_node.symbol == 'λ':
 				node_composition |= {node.costura_node}
@@ -221,10 +225,11 @@ class Node:
 				node_composition |= node.handle_star(node.costura_node, UP, visited)
 				#pendencies.push(Pendency(node.costura_node, UP))
 			if node.costura_node.symbol == ".":
-				node_composition |= node.handle_concatenation(node.costura_node, UP, visited)
+				node_composition |= node.handle_concatenation(node.costura_node, DOWN, visited)
 			if node.costura_node.symbol == "?":
 				node_composition |= node.handle_optional(node.costura_node, UP, visited)
-
+			if node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN)
 		while not pendencies.isEmpty():
 			p = pendencies.pop()
 
@@ -246,8 +251,8 @@ class Node:
 
 		return node_composition
 	def handle_concatenation(self, node, action, visited=set()):
-		#if node in visited:
-		#	return set()
+		if node in visited:
+			return set()
 
 		visited.add(node)
 		node_composition = set()
@@ -352,6 +357,24 @@ class Node:
 					node_composition |= p.node.handle_concatenation(p.node.costura_node, DOWN, visited)
 
 		return node_composition
+	def handle_union(self, node, action):
+		node_composition = set()
+		if action == UP:
+			right_most = node.right_most_node()
+			if right_most.costura_node.symbol == "*":
+				node_composition |= right_most.handle_star(right_most.costura_node, DOWN)
+				node_composition |= right_most.handle_star(right_most.costura_node, UP)
+			elif right_most.costura_node.symbol == ".":
+				node_composition |= right_most.handle_concatenation(right_most.costura_node, UP)
+			elif right_most.costura_node.symbol == "?":
+				print("Passou aqui")
+				#node_composition |= right_most.handle_optional(right_most.costura_node, DOWN)
+				node_composition |= right_most.handle_optional(right_most.costura_node, UP)
+		if action == DOWN:
+			if node.left.is_leaf():
+				print("hettt")
+				node_composition |= {node.left}
+		return node_composition
 	def post_order(self):
 
 		if self.left is not None:
@@ -383,6 +406,12 @@ class Node:
 		return (ret)
 	def is_leaf(self):
 		return self.right is None and self.left is None
+
+	def right_most_node(self):
+		if self.right is not None:
+			return self.right.right_most_node()
+		else:
+			return self
 
 def display(root, level):
 	if root is None:

@@ -523,7 +523,7 @@ if __name__ == "__main__":
 	print(automata_intersec(nbs, nas))'''
 
 
-	expr = '1 ? . 1 ? . ( 0 . 0 ? . 1 . 1 ? ) * . 0 ? . 0 ?'
+	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
 	t = Tree()
 	nodo = t.build(polish_notation(expr))
 	t.costura()
