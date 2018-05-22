@@ -527,7 +527,7 @@ if __name__ == "__main__":
 	t = Tree()
 	nodo = t.build(polish_notation(expr))
 	t.costura()
-	test = nodo.most_left_node()
+	test = nodo.most_left_node().costura_node.right
 	print("test = " + str(test))
 	print(test.handle_leaf())
 	#print(nodo.right.symbol)
