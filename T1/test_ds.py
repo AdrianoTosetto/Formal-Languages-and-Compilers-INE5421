@@ -10,7 +10,7 @@ if __name__ == "__main__":
 	t = Tree()
 	nodo = t.build(polish_notation(expr))
 	t.costura()
-	test = nodo.most_left_node().costura_node.right
+	test = nodo.left.right.left.right.right
 	print("test = " + str(test))
 	print(test.handle_leaf())
 	#display(nodo,1)

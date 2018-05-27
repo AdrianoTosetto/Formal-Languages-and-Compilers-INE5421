@@ -185,17 +185,18 @@ class Node:
 	def handle_leaf(self):
 		if not self.is_leaf():
 			return set()
-		print(self.costura_node)
+		node_composition = set()
 		if self.costura_node.symbol == ".":
-			print("começando com a concatenação")
-			print(self.handle_concatenation(self.costura_node, UP))
+			node_composition |= (self.handle_concatenation(self.costura_node, UP))
 		if self.costura_node.symbol == "?":
-			print(self.handle_optional(self.costura_node, UP))
+			node_composition |= (self.handle_optional(self.costura_node, UP))
 		if self.costura_node.symbol == "*":
-			print(self.handle_star(self.costura_node, DOWN))
-			print(self.handle_star(self.costura_node, UP))
+			node_composition |= self.handle_star(self.costura_node, DOWN)
+			node_composition |= (self.handle_star(self.costura_node, UP))
 		if self.costura_node.symbol == "|":
-			self.handle_union(self.costura_node, UP)
+			node_composition = self.handle_union(self.costura_node, UP)
+
+		return node_composition
 
 	def handle_optional(self, node, action, visited_down=set(), visited_up=set()):
 		if node in visited_down and action == DOWN:
@@ -346,22 +347,6 @@ class Node:
 			elif node.left.symbol == "*":
 				node_composition |= node.handle_star(node.left, DOWN,visited_down, visited_up)
 				node_composition |= node.handle_star(node.left, UP,  visited_down, visited_up)
-
-		while not pendencies.isEmpty():
-			p = pendencies.pop()
-
-			if p.action == UP:
-				if p.node.costura_node.symbol == ".":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
-					print("dps: " + str(node_composition))
-				if p.node.costura_node.symbol == "*":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_star(p.node.costura_node, UP, visited)
-					print("dps: " + str(node_composition))
-			if p.action == DOWN:
-				if p.node.symbol == ".":
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, DOWN, visited)
 
 		return node_composition
 	def handle_union(self, node, action, visited_down=set(), visited_up=set()):
