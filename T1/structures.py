@@ -271,7 +271,6 @@ class Node:
 				node_composition |= node.handle_star(node.right, DOWN, visited_down, visited_up)
 				print("pendencia com " + str(node.right) + " por cima")
 				node_composition |= node.handle_star(node.right, UP,  visited_down, visited_up)
-				#pendencies.push(Pendency(node.right, UP))
 			elif node.right.symbol == ".":
 				node_composition |= node.handle_star(node.right, DOWN,  visited_down, visited_up)
 			elif node.right.symbol == "?":
@@ -341,12 +340,12 @@ class Node:
 				node_composition |= {node.costura_node}
 			if node.costura_node.symbol == ".":
 				node_composition |= node.handle_concatenation(node.costura_node, UP)
-			elif node.left.symbol == "?":
-				node_composition |= node.handle_optional(node.left, UP,  visited_down, visited_up)
+			elif node.costura_node.symbol == "?":
+				node_composition |= node.handle_optional(node.costura_node, UP,  visited_down, visited_up)
 				#pendencies.push(node.left, UP)
-			elif node.left.symbol == "*":
-				node_composition |= node.handle_star(node.left, DOWN,visited_down, visited_up)
-				node_composition |= node.handle_star(node.left, UP,  visited_down, visited_up)
+			elif node.costura_node.symbol == "*":
+				node_composition |= node.handle_star(node.costura_node, DOWN,visited_down, visited_up)
+				node_composition |= node.handle_star(node.costura_node, UP,  visited_down, visited_up)
 
 		return node_composition
 	def handle_union(self, node, action, visited_down=set(), visited_up=set()):
