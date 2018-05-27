@@ -273,18 +273,15 @@ class Node:
 				#pendencies.push(Pendency(node.right, UP))
 			elif node.right.symbol == ".":
 				node_composition |= node.handle_star(node.right, DOWN,  visited_down, visited_up)
-				print(":?????")
 			elif node.right.symbol == "?":
 				node_composition |= node.handle_optional(node.right, DOWN,  visited_down, visited_up)
 				node_composition |= node.handle_optional(node.right, UP,  visited_down, visited_up)
 				#pendencies.push(Pendency(node.right, UP))
-				print("? pendencia")
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
 				node_composition.add(node.left)
 			elif node.left.symbol == ".":
-				print("chegando numa esquerda")
 				node_composition |= node.handle_concatenation(node.left, DOWN)
 			elif node.left.symbol == "*":
 				node_composition |=  node.handle_star(node.left, DOWN, visited_down, visited_up)
@@ -329,7 +326,6 @@ class Node:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
 			elif node.left.symbol == ".":
-				print("handle left")
 				node_composition |= node.handle_concatenation(node.left, DOWN,  visited_down, visited_up)
 			elif node.left.symbol == "?":
 				node_composition |= node.handle_optional(node.left, DOWN, visited_down, visited_up)
@@ -376,7 +372,6 @@ class Node:
 			return set()
 		node_composition = set()
 		if action == UP:
-			print("union upp")
 			visited_up.add(node)
 			right_most = node.right_most_node()
 			if right_most.costura_node.symbol == "*":
@@ -391,8 +386,9 @@ class Node:
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
-				print("hettt")
 				node_composition |= {node.left}
+			if node.right.is_leaf():
+				node_composition |= {node.right}
 		return node_composition
 	def post_order(self):
 
