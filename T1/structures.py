@@ -421,7 +421,7 @@ class Node:
 				print("aqui")
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
-			if self.right.symbol == "*":
+			if self.right.symbol == "|":
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
 			if self.right.symbol == "?":	
@@ -433,13 +433,25 @@ class Node:
 			if self.left.symbol == '*':
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.right.symbol == "*":
+			if self.left.symbol == "|":
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.right.symbol == "?":	
+			if self.left.symbol == "?":	
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
-			if self.right.symbol == ".":
+			if self.left.symbol == ".":
+				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+		if self.symbol == ".":
+			if self.left.symbol == '*':
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "|":
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "?":	
+				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
+			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
 		return node_composition
 class RegExp:
