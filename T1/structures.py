@@ -411,7 +411,50 @@ class Node:
 			return self.right.right_most_node()
 		else:
 			return self
+	def handle_root(self):
+		visited_up = set()
+		visited_down = set()
+		node_composition = set()
+		if self.symbol == '|':
+			print("haha")
+			if self.right.symbol == '*':
+				print("aqui")
+				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
+			if self.right.symbol == "*":
+				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
+			if self.right.symbol == "?":	
+				node_composition |= self.handle_optional(self.right,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.right,UP, visited_down,visited_up)
+			if self.right.symbol == ".":
+				node_composition |= self.handle_concatenation(self.right,DOWN, visited_down ,visited_up)
 
+			if self.left.symbol == '*':
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.right.symbol == "*":
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.right.symbol == "?":	
+				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
+			if self.right.symbol == ".":
+				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+		return node_composition
+class RegExp:
+	def __init__(self, regex):
+		self.regex = regex
+
+	def to_automaton(self):
+		t = Tree()
+		nodo = t.build(polish_notation(self.regex))
+		t.costura()
+		print(nodo.handle_root())
+		leaves = nodo.get_leaf_nodes()
+		compositions = {}
+		for leaf in leaves:
+			compositions[leaf] = leaf.handle_leaf()
 def display(root, level):
 	if root is None:
 		for i in range(0, level):
