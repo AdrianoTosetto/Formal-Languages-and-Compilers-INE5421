@@ -181,6 +181,10 @@ class Automaton:
 		#self.remove_unreacheable_states()
 		#self.remove_dead_states()
 		#self.remove_unreacheable_states()
+		if len(self.finalStates) is 0:
+			fakeFinal = State('', True)
+			self.finalStates = {fakeFinal}
+			self.states |= {fakeFinal}
 		self.complete()
 		changed = True
 		while(changed):
@@ -391,6 +395,27 @@ class Transition:
 		self.originState = state
 	def __str__(self):
 		return "δ(" + str(self.originState) + "," + str(self.symbol) + ") = " + self.target_state.__str__()
+	def __eq__(self, other):
+		return self.__hash__() == other.__hash__()
+	def __hash__(self):
+		hashable = self.originState.name
+		if self.originState.name == 'λ':
+			hashable = 'lambda'
+		elif self.originState.name == 'φ':
+			hashable = 'phi'
+		hashable += self.symbol
+		hashable2 = self.target_state.name
+		if self.target_state.name == 'λ':
+			hashable = 'lambda'
+		elif self.target_state.name == 'φ':
+			hashable = 'phi'
+		hashable += hashable2
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
 
 
 

@@ -520,7 +520,9 @@ if __name__ == "__main__":
 	nbs = Automaton(set([q0_0,q1_0]),set([q0_0,q1_0]),q0_0,['a','b'])
 	nas = Automaton(set([q0_1,q1_1]),set([q0_1,q1_1]),q0_1,['a','b'])
 
-	print(automata_intersec(nbs, nas))
+	print(automata_difference(nbs, nas))
+
+	print(areEqual(nbs, getReverse(nas)))
 
 
 	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'

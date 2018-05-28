@@ -119,20 +119,8 @@ def automata_intersec(af1, af2):
     neg_fa2 = automata_complement(af2)
 
     union = automata_union(neg_fa1, neg_fa2)
-    union = union.determinize()
-    union = union.minimize()
-    union = union.rename_states()
-    print(union)
-    union = automata_complement(union)
-    #union = union.rename_states()
-    print(union)
-    #for t in union.initialState.transitions:
-        #print(t)
-    #for s in union.states:
-        #for t in s.transitions:
-            #print(t)
-    #union.remove_unreacheable_states()
-    #print(union.states)
+    deterunion = union.determinize()
+    intersec = automata_complement(deterunion)
 
     '''print(union.process_input('aaaa'))
     print(union.process_input('aaab'))
@@ -150,4 +138,93 @@ def automata_intersec(af1, af2):
     print(union.process_input('bbba'))
     print(union.process_input('bbbb'))'''
 
-    return union
+    return intersec
+
+def automata_difference(af1, af2):
+    neg_af2 = automata_complement(af2)
+
+    diff = automata_intersec(af1, neg_af2)
+
+    #union = diff
+
+    '''print(union.process_input('aaaa'))
+    print(union.process_input('aaab'))
+    print(union.process_input('aaba'))
+    print(union.process_input('aabb'))
+    print(union.process_input('abaa'))
+    print(union.process_input('abab'))
+    print(union.process_input('abbb'))
+    print(union.process_input('baaa'))
+    print(union.process_input('baab'))
+    print(union.process_input('baba'))
+    print(union.process_input('babb'))
+    print(union.process_input('bbaa'))
+    print(union.process_input('bbab'))
+    print(union.process_input('bbba'))
+    print(union.process_input('bbbb'))'''
+
+    return diff
+
+def isLEmpty(af):
+    if type(af) is type(NDAutomaton(set(), set(), NDState(''))):
+        af = af.determinize()
+    af = af.minimize()
+
+    return len(af.finalStates) is 0
+
+def isContained(af1, af2):
+    return isLEmpty(automata_difference(af1, af2))
+
+def areEqual(af1, af2):
+    return isContained(af1, af2) and isContained(af2, af1)
+
+def getReverse(af):
+    if type(af) is type(NDAutomaton(set(), set(), NDState(''))):
+        newAF = af.determinize()
+    else:
+        newAF = af
+    acceptEpsilon = newAF.initialState.isAcceptance
+
+    for s in newAF.states:
+        s.isAcceptance = False
+
+    newAF.initialState.isAcceptance = True
+
+    newStates = copy.deepcopy(newAF.states)
+
+    for s in newAF.states:
+        for t in s.transitions:
+            for ns in newStates:
+                if ns == af.initialState:
+                    newFinal = ns
+                for os in newStates:
+                    if t.target_state == ns and s == os:
+                        for nt in ns.transitions:
+                            if nt == t:
+                                ns.remove_transition(nt)
+                        ns.add_transition(Transition(t.symbol, os))
+
+    newAF = make_nondeterministic(Automaton(newStates, {newFinal}, newFinal, af.Σ))
+
+    i = 0
+    changed = True
+    while changed:
+        changed = False
+        for s in newAF.states:
+            if s.name == 'q' + str(i):
+                i += 1
+                changed = True
+                continue
+    newInitial = NDState('q' + str(i), acceptEpsilon)
+
+    for f in af.finalStates:
+        for s in newAF.states:
+            if f == s:
+                newInitial.add_transition(NDTransition('&', {s}))
+
+    newAF.initialState = newInitial
+    newAF.states |= {newInitial}
+    if acceptEpsilon:
+        newAF.finalStates |= {newInitial}
+
+    return newAF
