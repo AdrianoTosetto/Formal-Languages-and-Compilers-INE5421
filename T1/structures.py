@@ -171,14 +171,14 @@ class Node:
 			try:
 				n = next(iter_)
 			except:
-				#print(str(node.symbol), end="")
-				#print(" costura para lambda")
+				print(str(node.symbol), end="")
+				print(" costura para lambda")
 				node.costura_node = Node('λ')
 				return
 			if node.symbol == "." or node.symbol == "|":
 				continue
-			#print(str(node.symbol) + " costura para ", end="")
-			#print(n.symbol)
+			print(str(node.symbol) + " costura para ", end="")
+			print(n.symbol)
 			node.costura_node = n
 		self.isThreaded = True
 
@@ -346,7 +346,9 @@ class Node:
 			elif node.costura_node.symbol == "*":
 				node_composition |= node.handle_star(node.costura_node, DOWN,visited_down, visited_up)
 				node_composition |= node.handle_star(node.costura_node, UP,  visited_down, visited_up)
-
+			elif node.costura_node.symbol == "|":
+				print("hereee")
+				node_composition |= node.handle_union(node.costura_node, UP, visited_down, visited_up)
 		return node_composition
 	def handle_union(self, node, action, visited_down=set(), visited_up=set()):
 
@@ -416,7 +418,8 @@ class Node:
 		visited_down = set()
 		node_composition = set()
 		if self.symbol == '|':
-			print("haha")
+			if self.right.is_leaf():
+				node_composition |= {self.left}
 			if self.right.symbol == '*':
 				print("aqui")
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
@@ -430,6 +433,8 @@ class Node:
 			if self.right.symbol == ".":
 				node_composition |= self.handle_concatenation(self.right,DOWN, visited_down ,visited_up)
 
+			if self.left.is_leaf():
+				node_composition |= {self.left}
 			if self.left.symbol == '*':
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
@@ -442,6 +447,8 @@ class Node:
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
 		if self.symbol == ".":
+			if self.left.is_leaf():
+				node_composition |= {self.left}
 			if self.left.symbol == '*':
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
@@ -453,6 +460,44 @@ class Node:
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+		
+		if self.symbol == "*":
+			if self.left.is_leaf():
+				node_composition |= {self.left}
+			if self.left.symbol == '*':
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "|":
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "?":	
+				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
+			if self.left.symbol == ".":
+				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+
+			if self.costura_node is not None:
+				node_composition |= {self.costura_node}
+
+		if self.symbol == "?":
+			if self.left.is_leaf():
+				node_composition |= {self.left}
+			if self.left.symbol == '*':
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "|":
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "?":	
+				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
+			if self.left.symbol == ".":
+				print("it gets here")
+				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+
+			if self.costura_node is not None:
+				node_composition |= {self.costura_node}
+
 		return node_composition
 class RegExp:
 	def __init__(self, regex):
@@ -462,11 +507,14 @@ class RegExp:
 		t = Tree()
 		nodo = t.build(polish_notation(self.regex))
 		t.costura()
+		print("handling root: " + str(nodo.handle_root()))
+		display(nodo, 1)
 		print(nodo.handle_root())
 		leaves = nodo.get_leaf_nodes()
 		compositions = {}
 		for leaf in leaves:
 			compositions[leaf] = leaf.handle_leaf()
+		print(compositions)
 def display(root, level):
 	if root is None:
 		for i in range(0, level):
