@@ -6,6 +6,9 @@ import functools
 import sys
 sys.path.append('../')
 from globals import *
+from regular_grammar import *
+
+
 
 class MainWindow(QWidget):
 	def __init__(self):
@@ -35,7 +38,7 @@ class MainWindow(QWidget):
 		self.generateLeftSide()
 
 		self.center = QLabel()
-		self.center.setText(str(grammars[0]))
+		self.center.setText(str(Globals.grammars[0]))
 		self.center.setStyleSheet("background-color:white;")
 		self.centerLayout = QVBoxLayout()
 		self.centerLayout.addWidget(self.center)
@@ -59,26 +62,56 @@ class MainWindow(QWidget):
 		self.erList.setHidden(True)
 		self.grList.setHidden(True)
 		self.afList.setHidden(False)
+		Globals.displayed = 3
 	def showGRs(self):
 		self.erList.setHidden(True)
 		self.afList.setHidden(True)
 		self.grList.setHidden(False)
+		Globals.displayed = 1
 	def showERs(self):
 		self.grList.setHidden(True)
 		self.afList.setHidden(True)
 		self.erList.setHidden(False)
+		Globals.displayed = 2
 	def select_grammar(self, gram):
 		self.center.setText(str(gram))
+		Globals.selected = gram
+	def addStuff(self):
+		if Globals.displayed == 1:
+			self.add_gr()
+		elif Globals.displayed == 2:
+			print("Adicionadas ERs")
+		elif Globals.displayed == 3:
+			print("Adicionados AFs")
+		else:
+			print("Erro")
+	def deleteStuff(self):
+		if Globals.selected != None:
+			if type(Globals.selected) == type(Grammar([])):
+				grams = []
+				for g in Globals.grammars:
+					if g.name != Globals.selected.name:
+						grams.append(g)
+				Globals.grammars = grams
+				self.add_gr()
+		self.center.setText('')
+		Globals.selected = None
 
 	def add_gr(self):
 		self.grList.clear()
-		for g in grammars:
+		for g in Globals.grammars:
 			item = QListWidgetItem(self.grList)
 			item_widget = GrammarButton(g.name, g)
 			item_widget.clicked.connect(functools.partial(self.select_grammar, g))
 			self.grList.setItemWidget(item, item_widget)
 			self.grList.addItem(item)
 
+	def generateRightSide(self):
+		self.optionsAF = QWidget()
+		self.optionsGR = QWidget()
+		self.optionsER = QWidget()
+
+		self.afLayout = QGridLayout()
 	def generateLeftSide(self):
 		self.options = QWidget()
 		self.entities = QWidget()
@@ -96,18 +129,22 @@ class MainWindow(QWidget):
 
 		self.optionAdd = QWidget()
 		self.optionEdit = QWidget()
+		self.optionDelete = QWidget()
 		self.optionAdd.setStyleSheet("background-color:indigo;")
 		self.optionEdit.setStyleSheet("background-color:cyan;")
+		self.optionDelete.setStyleSheet("background-color:fuchsia;")
 		self.optionsLayout = QGridLayout()
 		self.optionsLayout.setColumnStretch(0,1)
 		self.optionsLayout.setColumnStretch(1,1)
+		self.optionsLayout.setColumnStretch(2,1)
 		self.optionsLayout.addWidget(self.optionAdd,0,0)
 		self.optionsLayout.addWidget(self.optionEdit,0,1)
+		self.optionsLayout.addWidget(self.optionDelete,0,2)
 		self.options.setLayout(self.optionsLayout)
 
 		self.addButton = QPushButton('Adicionar', self)
 		self.addButton.setToolTip('Adicionar GR/ER/AF')
-		self.addButton.clicked.connect(self.on_click)
+		self.addButton.clicked.connect(self.addStuff)
 		self.addLayout = QVBoxLayout()
 		self.addLayout.addWidget(self.addButton)
 		self.optionAdd.setLayout(self.addLayout)
@@ -118,6 +155,13 @@ class MainWindow(QWidget):
 		self.editLayout = QVBoxLayout()
 		self.editLayout.addWidget(self.editButton)
 		self.optionEdit.setLayout(self.editLayout)
+
+		self.deleteButton = QPushButton('Deletar', self)
+		self.deleteButton.setToolTip('Deletar GR/ER/AF')
+		self.deleteButton.clicked.connect(self.deleteStuff)
+		self.deleteLayout = QVBoxLayout()
+		self.deleteLayout.addWidget(self.deleteButton)
+		self.optionDelete.setLayout(self.deleteLayout)
 
 		self.showGR = QWidget()
 		self.showER = QWidget()
