@@ -19,11 +19,12 @@ class Automaton:
 	def process_input(self, input):
 		for symbol in input:
 			self.currentState = self.currentState.next_state(symbol)
+			#print(self.currentState)
 			if self.currentState is None:
 				self.currentState = self.initialState
 				return False
-			#print(self.currentState)
 		output = self.currentState.isAcceptance
+		#print(str(self.currentState) + " is " + str(output))
 		self.currentState = self.initialState
 		return output
 
@@ -75,13 +76,42 @@ class Automaton:
 				return True
 		return False
 	def remove_unreacheable_states(self):
-		test_states = set(self.states) - {self.initialState}
+		reachStates = {self.initialState}
+		newStates = {self.initialState}
+		temp = set()
+		for s in newStates:
+			for σ in self.Σ:
+				for t in s.transitions:
+					#print(t)
+					if t.symbol == σ:
+						temp = temp | {t.target_state}
+						#print(t.target_state)
+		newStates = temp - reachStates
+		reachStates = reachStates | newStates
+		while len(newStates) != 0:
+			#print(newStates)
+			temp = set()
+			for s in newStates:
+				for σ in self.Σ:
+					for t in s.transitions:
+						if t.symbol == σ:
+							temp = temp | {t.target_state}
+			newStates = temp - reachStates
+			reachStates = reachStates | newStates
 
-		for s in copy.deepcopy(test_states):
-			if not self.has_path(self.initialState, s) and not(s.name == 'φ'):
-				self.states.remove(s)
-				self.remove_transitions_from(s)
-		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+		self.states = reachStates
+		for s in self.states:
+			for t in s.transitions:
+				if t.target_state not in self.states:
+					s.remove_transition(t)
+		finals = copy.deepcopy(self.finalStates)
+		for s in self.finalStates:
+			if s not in self.states:
+				finals -= {s}
+		self.finalStates = finals
+		'''self.rename_states()
+		print(self.states)
+		print(self.finalStates)'''
 
 	def remove_transitions_from(self, st):
 		for state in self.states:
@@ -112,26 +142,8 @@ class Automaton:
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 
 	def has_path(self, q0, q1):
-		'''if q0 == q1:
-			return True
-		visited = set([q0])
-		to_visit = visited
-		temp = to_visit
-		while(len(to_visit) != 0):
-			for symbol in self.Σ:
-				for s in to_visit.copy():
-					temp = to_visit - {s}
-					ns = s.next_state(symbol)
-					if ns is None:
-						continue
-					if ns not in visited:
-						temp.add(ns)
-					visited.add(ns)
-				to_visit = temp
-				temp = set()
-		return q1 in visited'''
-
 		return q1 in self.depth_first_search(q0)
+
 	def next_states_all(self, s):
 		ret = []
 		for symbol in self.Σ:
@@ -155,6 +167,13 @@ class Automaton:
 				stack.extend((self.next_states_all(vertex)))
 
 		return visited
+	def minimize1(self):
+		acceptStates = self.finalStates
+		nonAcceptStates = self.states - self.finalStates
+		classes = {nonAcceptStates, acceptStates}
+		acceptClasses = {acceptStates}
+		while len(acceptClasses):
+			print("oi")
 	def minimize(self):
 		#print(self.get_eq_class(self.initialState))
 		#print(self.equi_classes)
@@ -314,53 +333,64 @@ class Automaton:
 		eqclass_remove = eqclass_remove - {new_eqclass}
 		self.equi_classes.append({new_eqclass})
 	def complete(self):
+		addPhi = False
 		for s in self.states:
-			s.complete(self.Σ)
-		self.states.add(φ(self.Σ))
+			addPhi = addPhi or s.complete(self.Σ)
+		if addPhi:
+			self.states.add(φ(self.Σ))
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 	def set_(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 	def rename_states(self):
 		newInitialState = self.initialState
 		newFinalStates = set()
-		oldStates = list(self.states)
-		newStates = copy.deepcopy(oldStates)
-		print("RENAME")
-		print(oldStates)
-		print(newStates)
+		oldStates = []
+		newStates = copy.deepcopy(self.states)
 
 		i = 0
 
 		for s in newStates:
 			if s == newInitialState:
 				newInitialState.name = 'q' + str(i)
+			oldStates.append(s)
 			s.name = 'q' + str(i)
 			i += 1
 			if s.isAcceptance:
 				newFinalStates.add(s)
 		for s in newStates:
+			trans = []
 			for t in s.transitions:
 				it = 0
 				for os in oldStates:
 					if t.target_state == os:
-						t.target_state.name = 'q' + str(it)
+						for ns in newStates:
+							if ns == State('q' + str(it)):
+								trans.append(Transition(t.symbol, ns))
 					it += 1
+			s.transitions = []
+			for t in trans:
+				s.add_transition(t)
+			if s == newInitialState:
+				newInitialState = s
+				#for tt in t.target_state.transitions:
+					#print(tt.target_state)
 
-		self.states = set(newStates)
-		self.finalStates = set(newFinalStates)
-		self.initialState = newInitialState
+		return Automaton(set(newStates), set(newFinalStates), newInitialState, self.Σ)
 
 
 class Transition:
 	def __init__(self, symbol, target_state):
 		self.target_state = target_state
 		self.symbol = symbol
+		self.originState = State('')
 	def get_symbol(self):
 		return self.symbol
 	def get_next_state(self):
 		return self.target_state
+	def setOriginState(self, state):
+		self.originState = state
 	def __str__(self):
-		return self.symbol + " -> " + self.target_state.__str__()
+		return "δ(" + str(self.originState) + "," + str(self.symbol) + ") = " + self.target_state.__str__()
 
 
 
@@ -392,12 +422,16 @@ class State:
 
 	def add_transition(self, t):
 		self.transitions.append(t)
+		t.setOriginState(self)
+
 	def remove_transition(self, t):
 		newT = []
 		for tran in self.transitions:
 			if tran != t:
 				newT.append(tran)
-		self.transitions = newT
+		self.transitions = []
+		for t in newT:
+			self.add_transition(t)
 
 	def __hash__(self):
 		hashable = self.name
@@ -415,26 +449,25 @@ class State:
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()
 	def complete(self, Σ):
-		add_t = True
+		ret = False
 		for symbol in Σ:
+			absent = True
 			for t in self.transitions:
 				if t.symbol == symbol:
-					add_t = False
-					continue
-				else:
-					add_t = True
-			if add_t:
+					absent = False
+			if absent:
 				nt = Transition(symbol, φ(Σ))
 				self.transitions.append(nt)
-				add_t = False
+				ret = True
+		return ret
 
 '''
 	error state
 '''
 
 class φ(State):
-	def __init__(self, Σ):
-		State.__init__(self, 'φ')
+	def __init__(self, Σ, isAcceptance = False):
+		State.__init__(self, 'φ', isAcceptance)
 		for symbol in Σ:
 			t = Transition(symbol, self)
 			self.transitions.append(t)

@@ -15,9 +15,9 @@ if __name__ == "__main__":
 	productions = [Production(leftSides[0], rightSides[0]), Production(leftSides[0], rightSides[1]), Production(leftSides[0], rightSides[2]),
 				   Production(leftSides[1], rightSides[3]), Production(leftSides[1], rightSides[4]), Production(leftSides[1], rightSides[5]),
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
-	myGrammar = Grammar(productions, 'G' + str(grammar_count))
-	grammar_count += 1
-	grammars.append(myGrammar)
+	#print(Globals.grammar_count)
+	myGrammar = Grammar(productions)
+	Globals.grammars.append(myGrammar)
 
 	leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
@@ -25,9 +25,9 @@ if __name__ == "__main__":
 	 				Production(leftSides1[1], rightSides1[2]), Production(leftSides1[1], rightSides1[3]), Production(leftSides1[1], rightSides1[4]),
 				   	Production(leftSides1[2], rightSides1[5]), Production(leftSides1[2], rightSides1[6]), Production(leftSides1[2], rightSides1[7]),
 				   	Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
-	myGrammar1 = Grammar(productions1, 'G' + str(grammar_count))
-	grammar_count += 1
-	grammars.append(myGrammar1)
+	#print(Globals.grammar_count)
+	myGrammar1 = Grammar(productions1)
+	Globals.grammars.append(myGrammar1)
 	#m = MainWindow()
 
 	#print(myGrammar1)
@@ -495,7 +495,7 @@ if __name__ == "__main__":
 	print(div2)
 	print(div3)'''
 
-	'''q0_0 = State('q0_0', True)
+	q0_0 = State('q0_0', True)
 	q1_0 = State('q1_0', True)
 
 	t0_0 = Transition('a', q0_0)
@@ -520,7 +520,7 @@ if __name__ == "__main__":
 	nbs = Automaton(set([q0_0,q1_0]),set([q0_0,q1_0]),q0_0,['a','b'])
 	nas = Automaton(set([q0_1,q1_1]),set([q0_1,q1_1]),q0_1,['a','b'])
 
-	print(automata_intersec(nbs, nas))'''
+	print(automata_intersec(nbs, nas))
 
 
 	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
@@ -528,7 +528,7 @@ if __name__ == "__main__":
 	nodo = t.build(polish_notation(expr))
 	t.costura()
 	test = nodo.most_left_node().costura_node.right
-	print("test = " + str(test))
-	print(test.handle_leaf())
+	#print("test = " + str(test))
+	#print(test.handle_leaf())
 	#print(nodo.right.symbol)
-	display(nodo,1)
+	#display(nodo,1)

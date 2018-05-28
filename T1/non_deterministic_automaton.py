@@ -11,8 +11,11 @@ class NDTransition:
 	def get_next_states(self):
 		return self.target_states
 
+	def setOriginState(self, state):
+		self.originState = state
+
 	def __str__(self):
-		ret = self.symbol + " -> ["
+		ret = "δ(" + str(self.originState) + "," + str(self.symbol) + ") = ["
 		ret = ret + ",".join(s.__str__() for s in self.target_states)
 		ret = ret + "]"
 		return ret
@@ -66,6 +69,7 @@ class NDState:
 			self.ndtransitions = [t]
 		else:
 			self.ndtransitions.append(t)
+		t.setOriginState(self)
 
 	def __hash__(self):
 		hashable = self.name
@@ -99,10 +103,21 @@ class NDAutomaton:
 		self.Σ = Σ
 
 	def process_input(self, input):
-		return None
-		#for symbol in input:
-		#	print(self.currentState)
-		#	self.currentState = self.currentState.next_state(symbol)
+		for symbol in input:
+			ns = set()
+			for cs in self.currentStates:
+				ns = ns | cs.next_states(symbol)
+			self.currentStates = ns
+			#print(self.currentStates)
+			if self.currentStates is set():
+				self.currentStates = {self.initialState} | self.initialState.next_states('&')
+				return False
+		output = False
+		for s in self.currentStates:
+			if s.isAcceptance:
+				output = True
+		self.currentStates = {self.initialState} | self.initialState.next_states('&')
+		return output
 	def next_states(self, symbol, go_ahead=True):
 		temp = []
 		for state in self.currentStates:
@@ -193,7 +208,7 @@ class NDAutomaton:
 			for t in oldState.ndtransitions:
 				newT = Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates, determinizedStates))
 				newState.add_transition(newT)
-				print(str(newState) + " + " + str(newT))
+				#print(str(newState) + " + " + str(newT))
 			if newState in newStates:
 				newStates.remove(newState)
 			newStates.add(newState)

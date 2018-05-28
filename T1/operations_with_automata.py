@@ -4,7 +4,7 @@ from regular_grammar import *
 import copy
 
 def make_nondeterministic(fa):
-    if type(fa) is NDAutomaton:
+    if type(fa) is type(NDAutomaton(set(), set(), NDState(''))):
         return fa
     newStates = set()
     newFinalStates = set()
@@ -27,6 +27,7 @@ def make_nondeterministic(fa):
 def automata_union(fa1, fa2):
     nfa1 = make_nondeterministic(fa1)
     nfa2 = make_nondeterministic(fa2)
+
     result_Σ = list(set(fa1.Σ) | set(fa2.Σ))
     result_states = set()
     result_final_states = set()
@@ -61,8 +62,13 @@ def automata_union(fa1, fa2):
     for s in result_states:
         for op in operand_states:
             for t in op.ndtransitions:
+                target = set()
+                for ts in t.target_states:
+                    for s2 in result_states:
+                        if ts == s2:
+                            target.add(ts)
                 if s == op:
-                    s.add_transition(NDTransition(t.symbol, t.target_states))
+                    s.add_transition(NDTransition(t.symbol, target))
         if s.isAcceptance:
             result_final_states.add(s)
 
@@ -81,62 +87,54 @@ def automata_union(fa1, fa2):
 
 def automata_complement(af1):
     waf = None
-    if type(af1) is NDAutomaton:
+    if type(af1) is type(NDAutomaton(set(), set(), NDState(''))):
         waf = af1.determinize()
     else:
         waf = af1
     waf.complete()
 
     new_states = copy.deepcopy(waf.states)
+    #print(new_states)
     for s in new_states:
         if s == waf.initialState:
             new_initial_state = s
 
-    '''for s in af1.states:
-        for t in s.transitions:
-            new_states.add(State(t.target_state.name))'''
-
-    '''for s in af1.states:
-        for ncs in new_states:
-            if s == ncs:
-                for t in s.transitions:
-                    for ncs1 in new_states:
-                        if ncs1 == t.target_state:
-                            ncs.add_transition(Transition(t.symbol, ncs1))'''
-    nfs = [s for s in new_states if s.isAcceptance == False]
     for s in new_states:
-        s.isAcceptance = not s.isAcceptance
-    return Automaton((new_states), (nfs), new_initial_state, af1.Σ)
+        trans = []
+        for ns in new_states:
+            for t in s.transitions:
+                if ns == t.target_state:
+                    trans.append(Transition(t.symbol, ns))
+        s.transitions = trans
+
+    nfs = [s for s in new_states if s.isAcceptance == False]
+    #print(new_states)
+    for s in new_states:
+        s.isAcceptance = s in nfs
+
+    return Automaton(new_states, nfs, new_initial_state, af1.Σ)
 
 def automata_intersec(af1, af2):
     neg_fa1 = automata_complement(af1)
     neg_fa2 = automata_complement(af2)
 
-    print(neg_fa1)
-    print(neg_fa2)
-
-    union = automata_union(neg_fa1, neg_fa2)#.determinize()#.minimize()
-    print(union)
+    union = automata_union(neg_fa1, neg_fa2)
     union = union.determinize()
-    print(union)
-    union.rename_states()
-    print(union)
     union = union.minimize()
+    union = union.rename_states()
     print(union)
-    union.rename_states()
+    union = automata_complement(union)
+    #union = union.rename_states()
     print(union)
-    '''union = automata_complement(union)
-    print(union)
-    union = union.minimize()
-    print(union)'''
-    '''union.rename_states()
-    print(union)'''
-    '''print(type(union.currentState))
-    for s in union.states:
-        for t in s.transitions:
-            for st in t.target_state.transitions:
-                print(str(t.target_state) + " + " + str(st))'''
-    print(union.process_input('aaaa'))
+    #for t in union.initialState.transitions:
+        #print(t)
+    #for s in union.states:
+        #for t in s.transitions:
+            #print(t)
+    #union.remove_unreacheable_states()
+    #print(union.states)
+
+    '''print(union.process_input('aaaa'))
     print(union.process_input('aaab'))
     print(union.process_input('aaba'))
     print(union.process_input('aabb'))
@@ -150,6 +148,6 @@ def automata_intersec(af1, af2):
     print(union.process_input('bbaa'))
     print(union.process_input('bbab'))
     print(union.process_input('bbba'))
-    print(union.process_input('bbbb'))
+    print(union.process_input('bbbb'))'''
 
-    #return automata_complement(union)
+    return union
