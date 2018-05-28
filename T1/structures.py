@@ -1,6 +1,7 @@
 from globals import *
 from itertools import cycle
-
+from non_deterministic_automaton import *
+from deterministic_automaton import *
 UP = 0
 DOWN = 1
 
@@ -260,7 +261,6 @@ class Node:
 			return set()
 		if node in visited_up and action == UP:
 			return set()
-
 		node_composition = set()
 		pendencies = Stack()
 		if action == UP:
@@ -282,7 +282,7 @@ class Node:
 			if node.left.is_leaf():
 				node_composition.add(node.left)
 			elif node.left.symbol == ".":
-				node_composition |= node.handle_concatenation(node.left, DOWN)
+				node_composition |= node.handle_concatenation(node.left, DOWN, visited_down,visited_up)
 			elif node.left.symbol == "*":
 				node_composition |=  node.handle_star(node.left, DOWN, visited_down, visited_up)
 				node_composition |=  node.handle_star(node.left, UP, visited_down, visited_up)
@@ -347,7 +347,6 @@ class Node:
 				node_composition |= node.handle_star(node.costura_node, DOWN,visited_down, visited_up)
 				node_composition |= node.handle_star(node.costura_node, UP,  visited_down, visited_up)
 			elif node.costura_node.symbol == "|":
-				print("hereee")
 				node_composition |= node.handle_union(node.costura_node, UP, visited_down, visited_up)
 		return node_composition
 	def handle_union(self, node, action, visited_down=set(), visited_up=set()):
@@ -360,6 +359,7 @@ class Node:
 		if action == UP:
 			visited_up.add(node)
 			right_most = node.right_most_node()
+			print("right most "+str(right_most))
 			if right_most.costura_node.symbol == "*":
 				node_composition |= right_most.handle_star(right_most.costura_node, DOWN)
 				node_composition |= right_most.handle_star(right_most.costura_node, UP)
@@ -369,6 +369,8 @@ class Node:
 				#node_composition |= right_most.handle_optional(right_most.costura_node, DOWN)
 				node_composition |= right_most.handle_optional(right_most.costura_node, UP,visited_down,\
 				 visited_up)
+			elif right_most.costura_node.symbol == "λ":
+				node_composition |= {right_most.costura_node}				
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
@@ -421,7 +423,6 @@ class Node:
 			if self.right.is_leaf():
 				node_composition |= {self.left}
 			if self.right.symbol == '*':
-				print("aqui")
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
 			if self.right.symbol == "|":
@@ -492,7 +493,6 @@ class Node:
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
-				print("it gets here")
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
 
 			if self.costura_node is not None:
@@ -502,19 +502,30 @@ class Node:
 class RegExp:
 	def __init__(self, regex):
 		self.regex = regex
-
+	def get_compositions_from(self,compositions, symbol):
+		for c in compositions:
+			print(c)
 	def to_automaton(self):
 		t = Tree()
 		nodo = t.build(polish_notation(self.regex))
 		t.costura()
-		print("handling root: " + str(nodo.handle_root()))
 		display(nodo, 1)
-		print(nodo.handle_root())
 		leaves = nodo.get_leaf_nodes()
+		states_counter = 0
 		compositions = {}
+		states_compositions = {}
+		states = set()
+		print("what = " + str(nodo.handle_root()))
 		for leaf in leaves:
 			compositions[leaf] = leaf.handle_leaf()
+		q0 = State('q' + str(states_counter))
+		states_compositions[q0] = nodo.handle_root()
+		states.add(q0)
 		print(compositions)
+		self.get_compositions_from(compositions, 'A')
+		#print(states_compositions)
+
+
 def display(root, level):
 	if root is None:
 		for i in range(0, level):
