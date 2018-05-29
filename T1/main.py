@@ -4,6 +4,7 @@ from non_deterministic_automaton import *
 from deterministic_automaton import *
 from globals import *
 from operations_with_automata import *
+from operations_with_grammars import *
 import sys
 sys.path.append('view/')
 from main_window import *
@@ -28,6 +29,9 @@ if __name__ == "__main__":
 	#print(Globals.grammar_count)
 	myGrammar1 = Grammar(productions1)
 	Globals.grammars.append(myGrammar1)
+	print(grammar_union(myGrammar, myGrammar1))
+	for p in grammar_union(myGrammar, myGrammar1).produce(5):
+		print(p)
 	#m = MainWindow()
 
 	#print(myGrammar1)
