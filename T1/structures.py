@@ -504,9 +504,10 @@ class RegExp:
 		self.regex = regex
 	def get_compositions_from(self,compositions, symbol):
 		for c in compositions:
-			print(c)
-	def to_automaton(self):
+			print()
+	def parse_to_automaton(self):
 		t = Tree()
+		Σ = set()
 		nodo = t.build(polish_notation(self.regex))
 		t.costura()
 		display(nodo, 1)
@@ -515,16 +516,36 @@ class RegExp:
 		compositions = {}
 		states_compositions = {}
 		states = set()
-		print("what = " + str(nodo.handle_root()))
 		for leaf in leaves:
 			compositions[leaf] = leaf.handle_leaf()
-		q0 = State('q' + str(states_counter))
-		states_compositions[q0] = nodo.handle_root()
-		states.add(q0)
-		print(compositions)
-		self.get_compositions_from(compositions, 'A')
-		#print(states_compositions)
+			Σ.add(leaf.symbol)
+		q0_composition = nodo.handle_root()
 
+		return (compositions, q0_composition, Σ)
+	def by(self, symbol, compositions):
+		ret = []
+		for c in compositions:
+			if c.symbol == symbol:
+				ret.append(c)
+		return ret
+	def to_automaton(self):
+		ret = self.parse_to_automaton()
+		compositions = ret[0]
+		q0_composition = ret[1]
+		Σ = ret[2]
+
+class StateComposition:
+
+	def __init__(self, state_composition):
+		self.state_composition =state_composition
+
+	def get_compositions_by(self, symbol, tree_composition):
+		symbol_composition = self.by(symbol, tree_composition)
+		print(symbol_composition)
+
+	def by(self, symbol, compositions):
+		ret = []
+		return ret
 
 def display(root, level):
 	if root is None:
