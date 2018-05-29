@@ -29,8 +29,9 @@ if __name__ == "__main__":
 	#print(Globals.grammar_count)
 	myGrammar1 = Grammar(productions1)
 	Globals.grammars.append(myGrammar1)
-	print(grammar_concatenation(myGrammar, myGrammar1))
-	for p in grammar_concatenation(myGrammar, myGrammar1).produce(5):
+	print(grammar_kleene_star(myGrammar))
+	print(myGrammar)
+	for p in grammar_kleene_star(myGrammar).produce(5):
 		print(p)
 	#m = MainWindow()
 

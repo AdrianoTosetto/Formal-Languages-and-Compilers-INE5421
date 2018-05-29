@@ -171,3 +171,15 @@ class Production:
 
 	def isTerminalProduction(self):
 		return len(self.rightSide) == 1
+
+	def __hash__(self):
+		hashable = self.leftSide + self.rightSide
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
+
+	def __eq__(self, other):
+		return self.__hash__() == other.__hash__()

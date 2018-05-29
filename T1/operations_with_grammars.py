@@ -14,7 +14,6 @@ def grammar_union(gr1, gr2):
     oldProds2 = copy.deepcopy(gr2.productions)
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
-    visited = set()
     count = 0
     for p1 in oldProds1:
         if p1.rightSide is '&':
@@ -98,7 +97,6 @@ def grammar_concatenation(gr1, gr2):
     oldProds2 = copy.deepcopy(gr2.productions)
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
-    visited = set()
     count = 0
     for p2 in oldProds2:
         if p2.rightSide is '&':
@@ -163,3 +161,57 @@ def grammar_concatenation(gr1, gr2):
     newProds = oldProds1 + oldProds2
 
     return Grammar(newProds, gr1.name + "." + gr2.name)
+
+def grammar_kleene_star(gr):
+    oldProds = copy.deepcopy(gr.productions)
+    initial = copy.deepcopy(gr.productions[0].leftSide)
+    oldNonTerminals = set()
+    count = 0
+    for p in oldProds:
+        if p.rightSide is '&':
+            oldProds1 = oldProds - p
+            break
+        oldProds1 = oldProds
+    oldProds = oldProds1
+    for p in gr.productions:
+        oldNonTerminals.add(p.leftSide)
+        if len(p.rightSide) > 1:
+            oldNonTerminals.add(p.rightSide[-1])
+    #---------------------------------------------------------------------------
+    for n in oldNonTerminals:
+        #print(n)
+        for p in oldProds:
+            if p.leftSide == n:
+                if n == initial:
+                    initial = str(count)
+                p.leftSide = str(count)
+            if len(p.rightSide) > 1 and p.rightSide[-1] == n:
+                p.rightSide = p.rightSide[0] + str(count)
+        count += 1
+    #---------------------------------------------------------------------------
+    for n in range(count):
+        for p in oldProds:
+            if p.leftSide == str(n):
+                if str(n) == initial:
+                    initial = alphabet[n]
+                p.leftSide = alphabet[n]
+            if len(p.rightSide) > 1 and p.rightSide[-1] == str(n):
+                p.rightSide = p.rightSide[0] + alphabet[n]
+
+    for p in oldProds:
+        print(p)
+    newProds = []
+
+    for p in oldProds:
+        if p.leftSide == initial:
+            newProds.append(Production('S', p.rightSide))
+    newProds.append(Production('S', '&'))
+    for p in oldProds:
+        if len(p.rightSide) == 1:
+            newP = Production(p.leftSide, p.rightSide + initial)
+            if newP not in oldProds:
+                oldProds.append(newP)
+
+    newProds = newProds + oldProds
+
+    return Grammar(newProds, gr.name + "*")
