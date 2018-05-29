@@ -1,6 +1,7 @@
 from deterministic_automaton import *
 from non_deterministic_automaton import *
 from regular_grammar import *
+from globals import *
 import copy
 
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -87,7 +88,13 @@ def grammar_union(gr1, gr2):
 
     newProds = newProds + oldProds1 + oldProds2
 
-    return Grammar(newProds, gr1.name + " ∪ " + gr2.name)
+    newG = Grammar(newProds, gr1.name + " ∪ " + gr2.name)
+
+    if newG not in Globals.grammars:
+        Globals.grammars.append(newG)
+        Globals.grammar_count += 1
+
+    return newG
 
 def grammar_concatenation(gr1, gr2):
     hasEpsilon = False
@@ -160,7 +167,13 @@ def grammar_concatenation(gr1, gr2):
 
     newProds = oldProds1 + oldProds2
 
-    return Grammar(newProds, gr1.name + "." + gr2.name)
+    newG = Grammar(newProds, gr1.name + "." + gr2.name)
+
+    if newG not in Globals.grammars:
+        Globals.grammars.append(newG)
+        Globals.grammar_count += 1
+
+    return newG
 
 def grammar_kleene_star(gr):
     oldProds = copy.deepcopy(gr.productions)
@@ -214,4 +227,10 @@ def grammar_kleene_star(gr):
 
     newProds = newProds + oldProds
 
-    return Grammar(newProds, gr.name + "*")
+    newG = Grammar(newProds, gr.name + "*")
+
+    if newG not in Globals.grammars:
+        Globals.grammars.append(newG)
+        Globals.grammar_count += 1
+
+    return newG
