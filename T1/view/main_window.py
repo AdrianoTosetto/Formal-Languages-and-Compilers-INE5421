@@ -228,8 +228,8 @@ class MyTableWidget(QWidget):
  
         # Initialize tab screen
         self.tabs = QTabWidget()
-        self.tab1 = QWidget()	
-        self.tab2 = QWidget()
+        self.tab1 = addGrammarTab()
+        self.tab2 = addGrammarTab()
         self.tabs.resize(300,200) 
  
         # Add tabs
@@ -237,10 +237,10 @@ class MyTableWidget(QWidget):
         self.tabs.addTab(self.tab2,"Tab 2")
  
         # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
-        self.tab1.layout.addWidget(self.pushButton1)
-        self.tab1.setLayout(self.tab1.layout)
+        #self.tab1.layout = QVBoxLayout(self)
+        #self.pushButton1 = QPushButton("PyQt5 button")
+        #self.tab1.layout.addWidget(self.pushButton1)
+        #self.tab1.setLayout(self.tab1.layout)
  
         # Add tabs to widget        
         self.layout.addWidget(self.tabs)
@@ -251,3 +251,27 @@ class MyTableWidget(QWidget):
         print("\n")
         for currentQTableWidgetItem in self.tableWidget.selectedItems():
             print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
+
+
+class addGrammarTab(QWidget):
+	def __init__(self):
+		super(QWidget, self).__init__()
+		self.line = 0
+		self.layout = QGridLayout()
+		self.bottom_layout = QGridLayout()
+		self.add_grammar = QPushButton("Add grammar")
+		self.add_prod    = QPushButton("Add prod")
+		self.bottom_layout.addWidget(self.add_grammar, 0, 0)
+		self.bottom_layout.addWidget(self.add_prod, 0, 1)
+		self.bottom = QWidget()
+		self.bottom.setStyleSheet("background-color:white;")
+		self.bottom.setLayout(self.bottom_layout)
+		self.layout.addWidget(self.bottom)
+		self.firstNT = QPushButton("1")
+		self.firstProd = QPushButton("1")
+		#self.layout.addWidget(self.addProdButton, self.line, 0)
+		self.setLayout(self.layout)
+	def test_c(self):
+		self.line+=1
+		self.layout.addWidget(QPushButton("haha"), self.line, 0)
+		self.layout.addWidget(QPushButton("haha"), self.line, 1)
