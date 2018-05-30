@@ -228,8 +228,8 @@ class MyTableWidget(QWidget):
  
         # Initialize tab screen
         self.tabs = QTabWidget()
-        self.tab1 = addGrammarTab()
-        self.tab2 = addGrammarTab()
+        self.tab1 = addGrammarTab(["S", "B", "C"], [["aS", "B"], ["bB", "C"], ["cC", "c"]])
+        self.tab2 = QWidget()
         self.tabs.resize(300,200) 
  
         # Add tabs
@@ -254,23 +254,51 @@ class MyTableWidget(QWidget):
 
 
 class addGrammarTab(QWidget):
-	def __init__(self):
+	def __init__(self, listNT, listProd=None):
 		super(QWidget, self).__init__()
+
+		self.listNT = listNT
+		self.listProd = listProd
 		self.line = 0
 		self.layout = QGridLayout()
+		self.top_layout = QGridLayout()
+		self.setProdWidgets(listNT, listProd)
+		self.top = QWidget()
+		self.top.setLayout(self.top_layout)
 		self.bottom_layout = QGridLayout()
 		self.add_grammar = QPushButton("Add grammar")
 		self.add_prod    = QPushButton("Add prod")
+		self.setPolicyButtons()
 		self.bottom_layout.addWidget(self.add_grammar, 0, 0)
 		self.bottom_layout.addWidget(self.add_prod, 0, 1)
 		self.bottom = QWidget()
-		self.bottom.setStyleSheet("background-color:white;")
 		self.bottom.setLayout(self.bottom_layout)
-		self.layout.addWidget(self.bottom)
-		self.firstNT = QPushButton("1")
-		self.firstProd = QPushButton("1")
+
+		self.bottom.setStyleSheet("background-color:white;")
+		p = QPushButton("haha")
+		#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+		self.layout.addWidget(self.top,0,0)
+		self.layout.addWidget(self.bottom,1,0)
+
+		self.layout.setRowStretch(0,9)
+		self.layout.setRowStretch(1,1)
 		#self.layout.addWidget(self.addProdButton, self.line, 0)
 		self.setLayout(self.layout)
+	def setProdWidgets(self, listNT, listProd):
+		print(listNT)
+		i = 0
+		for nt in listNT:
+			p = QLineEdit(nt)
+			p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+			p1 = QPushButton(nt)
+			p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+			self.top_layout.addWidget(p,i, 0)
+			self.top_layout.addWidget(p1, i, 1)
+			i+=1
+	def setPolicyButtons(self):
+		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 	def test_c(self):
 		self.line+=1
 		self.layout.addWidget(QPushButton("haha"), self.line, 0)
