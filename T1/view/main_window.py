@@ -233,8 +233,8 @@ class MyTableWidget(QWidget):
         self.tabs.resize(300,200) 
  
         # Add tabs
-        self.tabs.addTab(self.tab1,"Tab 1")
-        self.tabs.addTab(self.tab2,"Tab 2")
+        self.tabs.addTab(self.tab1,"Add Grammar")
+        self.tabs.addTab(self.tab2,"Add AF")
  
         # Create first tab
         #self.tab1.layout = QVBoxLayout(self)
@@ -265,20 +265,24 @@ class addGrammarTab(QWidget):
 		self.setProdWidgets(listNT, listProd)
 		self.top = QWidget()
 		self.top.setLayout(self.top_layout)
+		self.sarea = QScrollArea()
+		self.sarea.setWidget(self.top)
+		self.sarea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+		self.sarea.setWidgetResizable(True)
 		self.bottom_layout = QGridLayout()
 		self.add_grammar = QPushButton("Add grammar")
 		self.add_prod    = QPushButton("Add prod")
+		self.add_prod.clicked.connect(self.add_production)
 		self.setPolicyButtons()
 		self.bottom_layout.addWidget(self.add_grammar, 0, 0)
 		self.bottom_layout.addWidget(self.add_prod, 0, 1)
 		self.bottom = QWidget()
 		self.bottom.setLayout(self.bottom_layout)
-
 		self.bottom.setStyleSheet("background-color:white;")
 		p = QPushButton("haha")
 		#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-		self.layout.addWidget(self.top,0,0)
+		self.layout.addWidget(self.sarea,0,0)
 		self.layout.addWidget(self.bottom,1,0)
 
 		self.layout.setRowStretch(0,9)
@@ -291,15 +295,21 @@ class addGrammarTab(QWidget):
 		for nt in listNT:
 			p = QLineEdit(nt)
 			p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-			p1 = QPushButton(nt)
+			strProd = ""
+			for ii in range(0, len(listProd[i]) - 1):
+				strProd += listProd[i][ii] + "|"
+			strProd += listProd[i][len(listProd[i]) - 1]
+			p1 = QLineEdit(strProd)
 			p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+			p.resize(100,200)
 			self.top_layout.addWidget(p,i, 0)
 			self.top_layout.addWidget(p1, i, 1)
 			i+=1
+		self.line = i
 	def setPolicyButtons(self):
 		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-	def test_c(self):
+	def add_production(self):
 		self.line+=1
-		self.layout.addWidget(QPushButton("haha"), self.line, 0)
-		self.layout.addWidget(QPushButton("haha"), self.line, 1)
+		self.top_layout.addWidget(QPushButton("haha"), self.line, 0)
+		self.top_layout.addWidget(QPushButton("haha"), self.line, 1)
