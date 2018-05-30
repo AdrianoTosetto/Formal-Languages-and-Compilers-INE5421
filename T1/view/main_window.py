@@ -29,10 +29,10 @@ class MainWindow(QWidget):
 		self.editPanel.setStyleSheet("background-color:pink;")
 		self.rightLayout = QGridLayout()
 		self.rightLayout.addWidget(self.displayScreen, 0, 0)
-		self.rightLayout.addWidget(self.editPanel, 0, 1)
+		#self.rightLayout.addWidget(self.editPanel, 0, 1)
 		self.rightLayout.setColumnStretch(0,5)
 		self.rightLayout.setColumnStretch(1,3)
-
+		self.rightLayout.addWidget(MyTableWidget(self.rightSide),0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
 		self.generateLeftSide()
@@ -218,3 +218,36 @@ class GrammarButton(QPushButton):
 	def __init__(self, QString, grammar):
 		self.grammar = grammar
 		super().__init__(QString)
+
+
+class MyTableWidget(QWidget):        
+ 
+    def __init__(self, parent):   
+        super(QWidget, self).__init__(parent)
+        self.layout = QVBoxLayout(self)
+ 
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()	
+        self.tab2 = QWidget()
+        self.tabs.resize(300,200) 
+ 
+        # Add tabs
+        self.tabs.addTab(self.tab1,"Tab 1")
+        self.tabs.addTab(self.tab2,"Tab 2")
+ 
+        # Create first tab
+        self.tab1.layout = QVBoxLayout(self)
+        self.pushButton1 = QPushButton("PyQt5 button")
+        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.setLayout(self.tab1.layout)
+ 
+        # Add tabs to widget        
+        self.layout.addWidget(self.tabs)
+        self.setLayout(self.layout)
+ 
+    @pyqtSlot()
+    def on_click(self):
+        print("\n")
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())

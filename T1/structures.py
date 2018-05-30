@@ -522,29 +522,30 @@ class RegExp:
 		q0_composition = nodo.handle_root()
 
 		return (compositions, q0_composition, Σ)
-	def by(self, symbol, compositions):
-		ret = []
-		for c in compositions:
-			if c.symbol == symbol:
-				ret.append(c)
-		return ret
+
 	def to_automaton(self):
 		ret = self.parse_to_automaton()
 		compositions = ret[0]
 		q0_composition = ret[1]
 		Σ = ret[2]
 
+		print(q0_composition)
 class StateComposition:
 
-	def __init__(self, state_composition):
-		self.state_composition =state_composition
+	def __init__(self, state_composition, Σ):
+		self.state_composition = state_composition
+		self.symbol_composition = {}
+		
+		for symbol in Σ:
+			print(self.get_compositions_from_symbol(symbol, self.state_composition))
+			self.symbol_composition[symbol] = self.get_compositions_from_symbol(symbol, self.state_composition)
 
-	def get_compositions_by(self, symbol, tree_composition):
-		symbol_composition = self.by(symbol, tree_composition)
-		print(symbol_composition)
+	def get_compositions_from_symbol(self, symbol, composition):
+		for tc in composition:
+			ret = []
+			if tc.symbol == symbol:
+				ret.append(tc)
 
-	def by(self, symbol, compositions):
-		ret = []
 		return ret
 
 def display(root, level):
