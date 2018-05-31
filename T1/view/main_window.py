@@ -372,7 +372,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui = QTableWidget() # layout transition table
 		self.transition_table = TransitionTable() # real transition table
 		self.layout = QGridLayout()
-		self.transition_table_ui.setRowCount(4)
+		self.transition_table_ui.setRowCount(20)
 		self.transition_table_ui.setColumnCount(2)
 		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
 		self.transition_table_ui.setItem(0,1, QTableWidgetItem("Cell (1,2)"))
@@ -382,24 +382,54 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setItem(2,1, QTableWidgetItem("Cell (3,2)"))
 		self.transition_table_ui.setItem(3,0, QTableWidgetItem("Cell (4,1)"))
 		self.transition_table_ui.setItem(3,1, QTableWidgetItem("Cell (4,2)"))
-		self.transition_table_ui.move(0,0)
 
+
+		self.transition_table_ui.setItem(4,0, QTableWidgetItem("Cell (1,1)"))
+		self.transition_table_ui.setItem(4,1, QTableWidgetItem("Cell (1,2)"))
+		self.transition_table_ui.setItem(5,0, QTableWidgetItem("Cell (2,1)"))
+		self.transition_table_ui.setItem(5,1, QTableWidgetItem("Cell (2,2)"))
+		self.transition_table_ui.setItem(6,0, QTableWidgetItem("Cell (3,1)"))
+		self.transition_table_ui.setItem(6,1, QTableWidgetItem("Cell (3,2)"))
+		self.transition_table_ui.setItem(7,0, QTableWidgetItem("Cell (4,1)"))
+		self.transition_table_ui.setItem(7,1, QTableWidgetItem("Cell (4,2)"))
+		#self.transition_table_ui.move(0,0)
+
+
+		self.add_automaton_button = QPushButton("Adicionar")
+		self.create_transition_table_button = \
+			QPushButton("Criar tabela") # botao para criar a tabela com o alfabeto inserido
+		self.bottom_layout = QGridLayout()
+		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
+		self.bottom_layout.addWidget(self.add_automaton_button, 0,1)
+		self.bottom_panel = QWidget()
+		self.bottom_panel.setLayout(self.bottom_layout)
 
 		self.top_layout = QGridLayout()
 		self.top_panel = QWidget()
 		self.edit_name = QLineEdit()
 		self.edit_alphabet = QLineEdit()
-		self.add_new_state = QPushButton()
+		self.add_new_state = QPushButton("Adicionar estado")
 		self.top_layout.addWidget(self.edit_name, 0, 0)
 		self.top_layout.addWidget(self.edit_alphabet, 0, 1)
 		self.top_layout.addWidget(self.add_new_state, 1,0)
+		self.list_states = QListWidget()
+		self.list_states.setDragEnabled(True)
+
+		for i in range(0, 10):
+			item = QListWidgetItem("Item %i" % i)
+			self.list_states.addItem(item)
+		self.top_layout.addWidget(self.list_states, 1,1)
+
 		self.top_panel.setStyleSheet("background:green;")
 		self.top_panel.setLayout(self.top_layout)
 		self.layout.setRowStretch(0, 1)
 		self.layout.setRowStretch(1, 5)
-		self.layout.addWidget(self.top_panel, 0,0)
+		self.layout.addWidget(self.top_panel,0,0)
 		self.layout.addWidget(self.transition_table_ui, 1, 0)
+		self.layout.addWidget(self.bottom_panel, 2, 0)
 		self.setLayout(self.layout)
+	def generate_table(self, alphabet, states_names):
+		print()
 
 class TransitionTable:
 	def __init__(self):
