@@ -32,7 +32,8 @@ class MainWindow(QWidget):
 		#self.rightLayout.addWidget(self.editPanel, 0, 1)
 		self.rightLayout.setColumnStretch(0,5)
 		self.rightLayout.setColumnStretch(1,3)
-		self.rightLayout.addWidget(MyTableWidget(self.rightSide),0,1)
+		self.MyTableWidget = MyTableWidget(self.rightSide)
+		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
 		self.generateLeftSide()
@@ -76,6 +77,12 @@ class MainWindow(QWidget):
 	def select_grammar(self, gram):
 		self.center.setText(str(gram))
 		Globals.selected = gram
+		print(gram.get_productions_from('A'))
+		nts = gram.get_non_terminals()
+		prods = []
+		for nt in nts:
+			prods.append(gram.get_productions_from(nt))
+		self.MyTableWidget.update(nts, prods)
 	def addStuff(self):
 		if Globals.displayed == 1:
 			self.add_gr()
@@ -220,21 +227,18 @@ class GrammarButton(QPushButton):
 		super().__init__(QString)
 
 
-class MyTableWidget(QWidget):        
- 
-    def __init__(self, parent):   
-        super(QWidget, self).__init__(parent)
-        self.layout = QVBoxLayout(self)
- 
-        # Initialize tab screen
-        self.tabs = QTabWidget()
-        self.tab1 = addGrammarTab(["S", "B", "C"], [["aS", "B"], ["bB", "C"], ["cC", "c"]])
-        self.tab2 = QWidget()
-        self.tabs.resize(300,200) 
+class MyTableWidget(QWidget): 
+	def __init__(self, parent):   
+		super(QWidget, self).__init__(parent)
+		self.layout = QVBoxLayout(self)
+		self.tabs = QTabWidget()
+		self.tab1 = addGrammarTab(["S", "B", "C"], [["aS", "B"], ["bB", "C"], ["cC", "c"]])
+		self.tab2 = QWidget()
+		self.tabs.resize(300,200) 
  
         # Add tabs
-        self.tabs.addTab(self.tab1,"Add Grammar")
-        self.tabs.addTab(self.tab2,"Add AF")
+		self.tabs.addTab(self.tab1,"Add Grammar")
+		self.tabs.addTab(self.tab2,"Add AF")
  
         # Create first tab
         #self.tab1.layout = QVBoxLayout(self)
@@ -243,28 +247,32 @@ class MyTableWidget(QWidget):
         #self.tab1.setLayout(self.tab1.layout)
  
         # Add tabs to widget        
-        self.layout.addWidget(self.tabs)
-        self.setLayout(self.layout)
- 
-    @pyqtSlot()
-    def on_click(self):
-        print("\n")
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
-
+		self.layout.addWidget(self.tabs)
+		self.setLayout(self.layout)
+	def update(self, nts, prods):
+		self.tab1.setProdWidgets(nts, prods)
+	@pyqtSlot()
+	def on_click(self):
+		print("\n")
+		for currentQTableWidgetItem in self.tableWidget.selectedItems():
+			print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
 class addGrammarTab(QWidget):
-	def __init__(self, listNT, listProd=None):
+	def __init__(self, listNT = None, listProd=None):
 		super(QWidget, self).__init__()
-		self.nt_line_edit = []
-		self.arrow_labels = []
-		self.prod_nt_line_edit = []
-		self.remv_prods_button = []
+		self.nt_line_edit = listNT # nao-terminais da gramatica
+		self.arrow_labels = [] # nao esta sendo usado
+		self.prod_nt_line_edit = listProd # producoes do nao-terminal correspondente
+		self.remv_prods_button = [] # nao esta sendo usado
 
 		self.line = 0
 		self.layout = QGridLayout()
 		self.top_layout = QGridLayout()
-		self.setProdWidgets(listNT, listProd)
+		self.top_layout.setColumnStretch(0,1)
+		self.top_layout.setColumnStretch(1,1)
+		self.top_layout.setColumnStretch(2,6)
+		self.top_layout.setColumnStretch(3,1)
+		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit)
 		self.top = QWidget()
 		self.top.setLayout(self.top_layout)
 		self.sarea = QScrollArea()
@@ -281,54 +289,71 @@ class addGrammarTab(QWidget):
 		self.bottom = QWidget()
 		self.bottom.setLayout(self.bottom_layout)
 		self.bottom.setStyleSheet("background-color:white;")
-		p = QPushButton("haha")
-		#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 		self.layout.addWidget(self.sarea,0,0)
 		self.layout.addWidget(self.bottom,1,0)
 
 		self.layout.setRowStretch(0,9)
 		self.layout.setRowStretch(1,1)
-		#self.layout.addWidget(self.addProdButton, self.line, 0)
 		self.setLayout(self.layout)
 	def setProdWidgets(self, listNT, listProd):
-		print(listNT)
+		for i in reversed(range(self.top_layout.count())): 
+		    self.top_layout.itemAt(i).widget().setParent(None)
 		i = 0
+		self.nt_line_edit = listNT
+		self.nt_line_prod = listProd
 		for nt in listNT:
 			p = QLineEdit(nt)
-			p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-			self.nt_line_edit.append(p)
+			#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+			self.top_layout.addWidget(p, i, 0)
 
 			strProd = ""
 			for ii in range(0, len(listProd[i]) - 1):
 				strProd += listProd[i][ii] + "|"
 			strProd += listProd[i][len(listProd[i]) - 1]
 			p1 = QLineEdit(strProd)
-			p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-			self.prod_nt_line_edit(p1)
-			
-			self.top_layout.addWidget(p,i, 0)
-			self.top_layout.addWidget(QLabel("->"), i,1)
-			self.top_layout.addWidget(p1, i, 2)
+			#p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+			self.top_layout.addWidget(p1,i, 2)
+
+			label_arrow = QLabel("->")
+			self.top_layout.addWidget(label_arrow, i, 1)
+
 			btn_remove = RemoveProdButton("x", i)
 			btn_remove.clicked.connect(functools.partial(self.remove_prod_button_clicked, btn_remove.line))
-			self.top_layout.addWidget(btn_remove,i,3)
+			self.top_layout.addWidget(btn_remove, i, 3)
 			i+=1
 		self.line = i
+		print("linhas " + str(self.line))
 	def setPolicyButtons(self):
 		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 	def add_production(self):
-		self.top_layout.addWidget(QLineEdit(""), self.line, 0)
-		self.top_layout.addWidget(QLabel("->"), self.line, 1)
-		self.top_layout.addWidget(QLineEdit(""), self.line, 2)
-		self.top_layout.addWidget(RemoveProdButton("x", self.line), self.line, 3)
+		self.nt_line_edit.append("")
+		self.prod_nt_line_edit.append([""])
+		for i in reversed(range(self.top_layout.count())): 
+		    self.top_layout.itemAt(i).widget().setParent(None)
+		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit)
 		self.line+=1
 	def remove_prod_button_clicked(self, line):
-		print(line)
-		for i in reversed(range(line*4, line*4+4)): 
+		print("linha = " + str(line))
+		self.nt_line_edit.pop(line)
+		self.prod_nt_line_edit.pop(line)
+		for i in reversed(range(self.top_layout.count())): 
 		    self.top_layout.itemAt(i).widget().setParent(None)
+		print(self.nt_line_edit)
+		print(self.prod_nt_line_edit)
+		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit)
 
+	def save_grammar(self):
+		'''
+			aqui voce pega tudo o que esta escrito nas caixas de texto e atualiza o
+			self.nt_line_edit e self.nt_line_prod e adiciona a gramatica que foi colocada.
+			Precisa do QLineEdit para o nome da gramatica. Pensei em fazer o seguinte: se o nome nao
+			estiver na lista de gramaticas, ele salva uma nova. Se estiver, ele atualiza.
+			A gramatica seleciona aparece na edição assim que ocorrer o click
+		'''
+		print('saving')
 
 class RemoveProdButton(QPushButton):
 	def __init__(self, text, line):

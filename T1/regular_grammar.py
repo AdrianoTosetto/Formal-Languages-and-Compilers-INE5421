@@ -90,9 +90,10 @@ class Grammar:
 	def get_non_terminals(self):
 		ret = []
 		for p in self.productions:
-			ret.append(p.leftSide)
+			if not p.leftSide == 'S':
+				ret.append(p.leftSide)
 
-		return list(set(ret))
+		return ['S'] + sorted(list(set(ret)), key=str.lower)
 
 	'''
 		this function outputs the productions of a given non-terminal
