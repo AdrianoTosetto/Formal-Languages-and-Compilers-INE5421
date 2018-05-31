@@ -236,21 +236,25 @@ class MyTableWidget(QWidget):
 		self.tab2 = QWidget()
 		self.tabs.resize(300,200) 
  
-        # Add tabs
 		self.tabs.addTab(self.tab1,"Add Grammar")
 		self.tabs.addTab(self.tab2,"Add AF")
  
-        # Create first tab
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
         #self.tab1.layout.addWidget(self.pushButton1)
         #self.tab1.setLayout(self.tab1.layout)
- 
-        # Add tabs to widget        
+       
 		self.layout.addWidget(self.tabs)
 		self.setLayout(self.layout)
 	def update(self, nts, prods):
-		self.tab1.setProdWidgets(nts, prods)
+		print(nts)
+		print(prods)
+		self.nt_line_edit = nts
+		self.nt_line_prod = prods
+		self.tab1.setProdWidgets(self.nt_line_edit, self.nt_line_prod)
+		#self.tab1.line = len(nts)
+		print("auhauhaua=", end="")
+		print(self.tab1.line)
 	@pyqtSlot()
 	def on_click(self):
 		print("\n")
@@ -297,11 +301,13 @@ class addGrammarTab(QWidget):
 		self.layout.setRowStretch(1,1)
 		self.setLayout(self.layout)
 	def setProdWidgets(self, listNT, listProd):
+		self.nt_line_edit = listNT
+		self.prod_nt_line_edit = listProd
 		for i in reversed(range(self.top_layout.count())): 
 		    self.top_layout.itemAt(i).widget().setParent(None)
 		i = 0
 		self.nt_line_edit = listNT
-		self.nt_line_prod = listProd
+		self.prod_nt_line_edit = listProd
 		for nt in listNT:
 			p = QLineEdit(nt)
 			#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -320,6 +326,7 @@ class addGrammarTab(QWidget):
 			self.top_layout.addWidget(label_arrow, i, 1)
 
 			btn_remove = RemoveProdButton("x", i)
+			print("nt = " + nt + " line " + str(i))
 			btn_remove.clicked.connect(functools.partial(self.remove_prod_button_clicked, btn_remove.line))
 			self.top_layout.addWidget(btn_remove, i, 3)
 			i+=1
@@ -337,12 +344,10 @@ class addGrammarTab(QWidget):
 		self.line+=1
 	def remove_prod_button_clicked(self, line):
 		print("linha = " + str(line))
-		self.nt_line_edit.pop(line)
-		self.prod_nt_line_edit.pop(line)
-		for i in reversed(range(self.top_layout.count())): 
-		    self.top_layout.itemAt(i).widget().setParent(None)
-		print(self.nt_line_edit)
-		print(self.prod_nt_line_edit)
+		print(self.nt_line_edit.pop(line))
+		print(self.prod_nt_line_edit.pop(line))
+		#print(self.nt_line_edit)
+		#print(self.prod_nt_line_edit)
 		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit)
 
 	def save_grammar(self):
