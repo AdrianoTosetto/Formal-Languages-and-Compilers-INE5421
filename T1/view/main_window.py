@@ -374,6 +374,7 @@ class addAutomatonTab(QWidget):
 		self.layout = QGridLayout()
 		self.transition_table_ui.setRowCount(20)
 		self.transition_table_ui.setColumnCount(2)
+		self.transition_table_ui.setAcceptDrops(True)
 		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
 		self.transition_table_ui.setItem(0,1, QTableWidgetItem("Cell (1,2)"))
 		self.transition_table_ui.setItem(1,0, QTableWidgetItem("Cell (2,1)"))
@@ -405,19 +406,25 @@ class addAutomatonTab(QWidget):
 		self.bottom_panel.setLayout(self.bottom_layout)
 
 		self.top_layout = QGridLayout()
+		self.add_remove_state_layout = QGridLayout()
+		self.add_remove_panel = QWidget()
 		self.top_panel = QWidget()
 		self.edit_name = QLineEdit()
 		self.edit_alphabet = QLineEdit()
 		self.add_new_state = QPushButton("Adicionar estado")
+		self.remove_state_button = QPushButton("Remover estado selecionado")
+		self.add_remove_state_layout.addWidget(self.add_new_state, 0,0)
+		self.add_remove_state_layout.addWidget(self.remove_state_button, 1, 0)
+		self.add_remove_panel.setLayout(self.add_remove_state_layout)
 		self.top_layout.addWidget(self.edit_name, 0, 0)
 		self.top_layout.addWidget(self.edit_alphabet, 0, 1)
-		self.top_layout.addWidget(self.add_new_state, 1,0)
+		self.top_layout.addWidget(self.add_remove_panel, 1,0)
 		self.list_states = QListWidget()
 		self.list_states.setDragEnabled(True)
 
-		for i in range(0, 10):
-			item = QListWidgetItem("Item %i" % i)
-			self.list_states.addItem(item)
+		item = QListWidgetItem("Q0")
+		item.setFlags(item.flags() | Qt.ItemIsEditable)
+		self.list_states.addItem(item)
 		self.top_layout.addWidget(self.list_states, 1,1)
 
 		self.top_panel.setStyleSheet("background:green;")
@@ -428,8 +435,19 @@ class addAutomatonTab(QWidget):
 		self.layout.addWidget(self.transition_table_ui, 1, 0)
 		self.layout.addWidget(self.bottom_panel, 2, 0)
 		self.setLayout(self.layout)
+		self.set_button_events()
+	def set_button_events(self):
+		self.add_new_state.clicked.connect(self.create_state)
+		self.remove_state_button.clicked.connect(self.remove_state)
 	def generate_table(self, alphabet, states_names):
 		print()
+
+	def create_state(self):
+		item = QListWidgetItem("Q0")
+		item.setFlags(item.flags() | Qt.ItemIsEditable)
+		self.list_states.addItem(item)
+	def remove_state(self):
+		self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
 
 class TransitionTable:
 	def __init__(self):
