@@ -256,9 +256,11 @@ class MyTableWidget(QWidget):
 class addGrammarTab(QWidget):
 	def __init__(self, listNT, listProd=None):
 		super(QWidget, self).__init__()
+		self.nt_line_edit = []
+		self.arrow_labels = []
+		self.prod_nt_line_edit = []
+		self.remv_prods_button = []
 
-		self.listNT = listNT
-		self.listProd = listProd
 		self.line = 0
 		self.layout = QGridLayout()
 		self.top_layout = QGridLayout()
@@ -295,21 +297,40 @@ class addGrammarTab(QWidget):
 		for nt in listNT:
 			p = QLineEdit(nt)
 			p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+			self.nt_line_edit.append(p)
+
 			strProd = ""
 			for ii in range(0, len(listProd[i]) - 1):
 				strProd += listProd[i][ii] + "|"
 			strProd += listProd[i][len(listProd[i]) - 1]
 			p1 = QLineEdit(strProd)
 			p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-			p.resize(100,200)
+			self.prod_nt_line_edit(p1)
+			
 			self.top_layout.addWidget(p,i, 0)
-			self.top_layout.addWidget(p1, i, 1)
+			self.top_layout.addWidget(QLabel("->"), i,1)
+			self.top_layout.addWidget(p1, i, 2)
+			btn_remove = RemoveProdButton("x", i)
+			btn_remove.clicked.connect(functools.partial(self.remove_prod_button_clicked, btn_remove.line))
+			self.top_layout.addWidget(btn_remove,i,3)
 			i+=1
 		self.line = i
 	def setPolicyButtons(self):
 		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 	def add_production(self):
+		self.top_layout.addWidget(QLineEdit(""), self.line, 0)
+		self.top_layout.addWidget(QLabel("->"), self.line, 1)
+		self.top_layout.addWidget(QLineEdit(""), self.line, 2)
+		self.top_layout.addWidget(RemoveProdButton("x", self.line), self.line, 3)
 		self.line+=1
-		self.top_layout.addWidget(QPushButton("haha"), self.line, 0)
-		self.top_layout.addWidget(QPushButton("haha"), self.line, 1)
+	def remove_prod_button_clicked(self, line):
+		print(line)
+		for i in reversed(range(line*4, line*4+4)): 
+		    self.top_layout.itemAt(i).widget().setParent(None)
+
+
+class RemoveProdButton(QPushButton):
+	def __init__(self, text, line):
+		super().__init__(text)
+		self.line = line
