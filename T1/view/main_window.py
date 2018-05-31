@@ -7,6 +7,7 @@ import sys
 sys.path.append('../')
 from globals import *
 from regular_grammar import *
+from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 
 
 
@@ -233,7 +234,7 @@ class MyTableWidget(QWidget):
 		self.layout = QVBoxLayout(self)
 		self.tabs = QTabWidget()
 		self.tab1 = addGrammarTab(["S", "B", "C"], [["aS", "B"], ["bB", "C"], ["cC", "c"]])
-		self.tab2 = QWidget()
+		self.tab2 = addAutomatonTab()
 		self.tabs.resize(300,200) 
  
 		self.tabs.addTab(self.tab1,"Add Grammar")
@@ -364,3 +365,42 @@ class RemoveProdButton(QPushButton):
 	def __init__(self, text, line):
 		super().__init__(text)
 		self.line = line
+
+class addAutomatonTab(QWidget):
+	def __init__(self):
+		super(QWidget,self).__init__()
+		self.transition_table_ui = QTableWidget() # layout transition table
+		self.transition_table = TransitionTable() # real transition table
+		self.layout = QGridLayout()
+		self.transition_table_ui.setRowCount(4)
+		self.transition_table_ui.setColumnCount(2)
+		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
+		self.transition_table_ui.setItem(0,1, QTableWidgetItem("Cell (1,2)"))
+		self.transition_table_ui.setItem(1,0, QTableWidgetItem("Cell (2,1)"))
+		self.transition_table_ui.setItem(1,1, QTableWidgetItem("Cell (2,2)"))
+		self.transition_table_ui.setItem(2,0, QTableWidgetItem("Cell (3,1)"))
+		self.transition_table_ui.setItem(2,1, QTableWidgetItem("Cell (3,2)"))
+		self.transition_table_ui.setItem(3,0, QTableWidgetItem("Cell (4,1)"))
+		self.transition_table_ui.setItem(3,1, QTableWidgetItem("Cell (4,2)"))
+		self.transition_table_ui.move(0,0)
+
+
+		self.top_layout = QGridLayout()
+		self.top_panel = QWidget()
+		self.edit_name = QLineEdit()
+		self.edit_alphabet = QLineEdit()
+		self.add_new_state = QPushButton()
+		self.top_layout.addWidget(self.edit_name, 0, 0)
+		self.top_layout.addWidget(self.edit_alphabet, 0, 1)
+		self.top_layout.addWidget(self.add_new_state, 1,0)
+		self.top_panel.setStyleSheet("background:green;")
+		self.top_panel.setLayout(self.top_layout)
+		self.layout.setRowStretch(0, 1)
+		self.layout.setRowStretch(1, 5)
+		self.layout.addWidget(self.top_panel, 0,0)
+		self.layout.addWidget(self.transition_table_ui, 1, 0)
+		self.setLayout(self.layout)
+
+class TransitionTable:
+	def __init__(self):
+		print('something')
