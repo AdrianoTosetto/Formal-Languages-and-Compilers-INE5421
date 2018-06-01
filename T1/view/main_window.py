@@ -370,6 +370,7 @@ class RemoveProdButton(QPushButton):
 class addAutomatonTab(QWidget):
 	def __init__(self):
 		super(QWidget,self).__init__()
+		self.initial_state_radio_group = QButtonGroup()
 		self.transition_table_ui = AutomatonTable() # layout transition table
 		self.transition_table = TransitionTable() # real transition table
 		self.layout = QGridLayout()
@@ -437,6 +438,7 @@ class addAutomatonTab(QWidget):
 		self.last_selected = None
 		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("Q0"))
 		self.set_placeholders()
+		self.alphabet = []
 
 	def setPolicyEdits(self):
 		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -461,8 +463,17 @@ class addAutomatonTab(QWidget):
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
 		count = self.transition_table_ui.rowCount()
+		column_count = len(self.alphabet)
 		self.transition_table_ui.setRowCount(count+1)
 		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("Q" + str(self.i)))
+		for i in range(0, len(self.alphabet)):
+			self.transition_table_ui.setItem(count,i,QTableWidgetItem("-"))
+		for i in range(0, count+1):
+			r = QRadioButton()
+			c = QCheckBox()
+			self.initial_state_radio_group.addButton(r)
+			self.transition_table_ui.setCellWidget(i,column_count,QRadioButton())
+			self.transition_table_ui.setCellWidget(i,column_count+1,c)
 
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
@@ -476,16 +487,23 @@ class addAutomatonTab(QWidget):
 		column_count = self.transition_table_ui.columnCount()
 		# este for muda o header da tabela
 		for i in range(0, row_count):
-			if self.transition_table_ui.verticalHeaderItem(i).text() == item.oldName:
-				print("haha")
-				self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(item.text()))
+			try:
+				if self.transition_table_ui.verticalHeaderItem(i).text() == item.oldName:
+					print("haha")
+					self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(item.text()))
+			except:
+				pass
 		for i in range(0, row_count):
 			for j in range(0, column_count):
-				if self.transition_table_ui.item(i, j).text() == item.oldName:
-					self.transition_table_ui.item(i,j).setText(item.text())
+				try:
+					if self.transition_table_ui.item(i, j).text() == item.oldName:
+						self.transition_table_ui.item(i,j).setText(item.text())
+				except:
+					pass
 
 
 		item.oldName = item.text()
+		MainWindow.jesus = item.text()
 	def selectChanged(self):
 		'''
 			no momento, este método não tem uso algum
@@ -499,17 +517,24 @@ class addAutomatonTab(QWidget):
 		raw_text = self.edit_alphabet.text()
 		alphabet = raw_text.split(",")
 		alphabet = sorted(list(set(alphabet)), key=str.lower)
-		self.transition_table_ui.setColumnCount(len(alphabet))
+		self.transition_table_ui.setColumnCount(len(alphabet) + 2)
 		self.setColsLabels(alphabet)
+		self.alphabet = alphabet
 		header = self.transition_table_ui.horizontalHeader()
 		for i in range(0, self.transition_table_ui.columnCount()): 
 			header.setSectionResizeMode(i, QHeaderView.Stretch)
-
 		row_count = self.transition_table_ui.rowCount()
-		column_count = self.transition_table_ui.columnCount()
+		column_count = self.transition_table_ui.columnCount() - 2
 		for i in range(0, row_count):
 			for j in range(0, column_count):
 				self.transition_table_ui.setItem(i,j,QTableWidgetItem("(" + str(i) + "," + str(j) + ")"))
+		initial_state_radio_group = QButtonGroup()
+		for i in range(0, row_count):
+			r = QRadioButton()
+			c = QCheckBox()
+			self.initial_state_radio_group.addButton(r)
+			self.transition_table_ui.setCellWidget(i,column_count,QRadioButton())
+			self.transition_table_ui.setCellWidget(i,column_count+1,c)
 
 	def setColsLabels(self, labels):
 		i = 0
@@ -517,7 +542,9 @@ class addAutomatonTab(QWidget):
 			self.transition_table_ui.setHorizontalHeaderItem(i, StateTableItem(label))
 			#self.transition_table_ui.setColumnWidth(i, 1)
 			i+=1
-		
+
+		self.transition_table_ui.setHorizontalHeaderItem(i, StateTableItem("Inicial"))
+		self.transition_table_ui.setHorizontalHeaderItem(i+1, StateTableItem("Final"))
 	def alphabet_changed(self):
 		text = self.edit_alphabet.text()
 		if len(text) == 1:
