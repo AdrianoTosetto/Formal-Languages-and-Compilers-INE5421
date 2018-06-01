@@ -404,6 +404,12 @@ class addAutomatonTab(QWidget):
 		self.top_layout.addWidget(self.edit_name, 0, 0)
 		self.top_layout.addWidget(self.edit_alphabet, 0, 1)
 		self.top_layout.addWidget(self.add_remove_panel, 1,0)
+		self.setPolicyEdits()
+		self.setPolicyButtons()
+		self.top_layout.setColumnStretch(0, 1)
+		self.top_layout.setColumnStretch(1, 2)
+
+
 		self.list_states = QListWidget()
 		self.list_states.setDragEnabled(True)
 		self.list_states.itemChanged.connect(self.itemChanged)
@@ -414,7 +420,7 @@ class addAutomatonTab(QWidget):
 
 		self.list_states.itemSelectionChanged.connect(self.selectChanged)
 		self.top_layout.addWidget(self.list_states, 1,1)
-
+		self.list_states.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.top_panel.setStyleSheet("background:green;")
 		self.top_panel.setLayout(self.top_layout)
 		self.layout.setRowStretch(0, 1)
@@ -428,6 +434,17 @@ class addAutomatonTab(QWidget):
 		self.i = 0
 		self.last_selected = None
 		self.transition_table_ui.setVerticalHeaderItem(0, QTableWidgetItem("Q0"))
+		self.set_placeholders()
+
+	def setPolicyEdits(self):
+		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.edit_alphabet.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+	def setPolicyButtons(self):
+		self.add_new_state.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.remove_state_button.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+	def set_placeholders(self):
+		self.edit_name.setPlaceholderText("Digite o nome do automato")
+		self.edit_alphabet.setPlaceholderText("Digite o alfabeto")
 	def set_button_events(self):
 		self.add_new_state.clicked.connect(self.create_state)
 		self.remove_state_button.clicked.connect(self.remove_state)
@@ -441,11 +458,16 @@ class addAutomatonTab(QWidget):
 		item = StateItem("Q" + str(self.i))
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
-		where = self.transition_table_ui.rowCount()
-		self.transition_table_ui.addRow(where)
+		count = self.transition_table_ui.rowCount()
+		self.transition_table_ui.setRowCount(count+1)
+		self.transition_table_ui.setVerticalHeaderItem(count, QTableWidgetItem("Q" + str(self.i)))
 
 	def remove_state(self):
-		self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
+		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
+		row_count = self.transition_table_ui.rowCount()
+		for i in range(0, row_count):
+			if self.transition_table_ui.verticalHeaderItem(i).text() == item.text():
+				self.transition_table_ui.removeRow(i)
 	def itemChanged(self, item):
 		print(item.oldName + " mudou para " + item.text())
 		row_count = self.transition_table_ui.rowCount()
@@ -465,7 +487,18 @@ class addAutomatonTab(QWidget):
 		raw_text = self.edit_alphabet.text()
 		alphabet = raw_text.split(",")
 		alphabet = sorted(list(set(alphabet)), key=str.lower)
-		self.transition_table_ui.setVerticalHeaderItem(0, QTableWidgetItem("what"))
+		self.transition_table_ui.setColumnCount(len(alphabet))
+		self.setColsLabels(alphabet)
+		header = self.transition_table_ui.horizontalHeader()
+		for i in range(0, self.transition_table_ui.columnCount()): 
+			header.setSectionResizeMode(i, QHeaderView.Stretch)
+
+	def setColsLabels(self, labels):
+		i = 0
+		for label in labels:
+			self.transition_table_ui.setHorizontalHeaderItem(i, QTableWidgetItem(label))
+			#self.transition_table_ui.setColumnWidth(i, 1)
+			i+=1
 		
 	def alphabet_changed(self):
 		text = self.edit_alphabet.text()
