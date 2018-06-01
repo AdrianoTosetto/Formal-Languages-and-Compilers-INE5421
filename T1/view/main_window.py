@@ -369,13 +369,13 @@ class RemoveProdButton(QPushButton):
 class addAutomatonTab(QWidget):
 	def __init__(self):
 		super(QWidget,self).__init__()
-		self.transition_table_ui = QTableWidget() # layout transition table
+		self.transition_table_ui = AutomatonTable() # layout transition table
 		self.transition_table = TransitionTable() # real transition table
 		self.layout = QGridLayout()
 		self.transition_table_ui.setRowCount(1)
 		self.transition_table_ui.setColumnCount(0)
 		self.transition_table_ui.setAcceptDrops(True)
-		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Q0"))
+		self.transition_table_ui.setItem(0,0, StateTableItem("Q0"))
 
 		#self.transition_table_ui.move(0,0)
 
@@ -410,7 +410,7 @@ class addAutomatonTab(QWidget):
 		self.top_layout.setColumnStretch(1, 2)
 
 
-		self.list_states = QListWidget()
+		self.list_states = StateList()
 		self.list_states.setDragEnabled(True)
 		self.list_states.itemChanged.connect(self.itemChanged)
 		item = StateItem("Q0")
@@ -433,7 +433,7 @@ class addAutomatonTab(QWidget):
 		self.set_edits_events()
 		self.i = 0
 		self.last_selected = None
-		self.transition_table_ui.setVerticalHeaderItem(0, QTableWidgetItem("Q0"))
+		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("Q0"))
 		self.set_placeholders()
 
 	def setPolicyEdits(self):
@@ -460,7 +460,7 @@ class addAutomatonTab(QWidget):
 		self.list_states.addItem(item)
 		count = self.transition_table_ui.rowCount()
 		self.transition_table_ui.setRowCount(count+1)
-		self.transition_table_ui.setVerticalHeaderItem(count, QTableWidgetItem("Q" + str(self.i)))
+		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("Q" + str(self.i)))
 
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
@@ -471,11 +471,15 @@ class addAutomatonTab(QWidget):
 	def itemChanged(self, item):
 		print(item.oldName + " mudou para " + item.text())
 		row_count = self.transition_table_ui.rowCount()
+		column_count = self.transition_table_ui.columnCount()
+		# este for muda o header da tabela
 		for i in range(0, row_count):
 			if self.transition_table_ui.verticalHeaderItem(i).text() == item.oldName:
 				print("haha")
-				self.transition_table_ui.setVerticalHeaderItem(i, QTableWidgetItem(item.text()))
-
+				self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(item.text()))
+		for i in range(0, row_count):
+			for j in range(0, column_count):
+				print(self.transition_table_ui.cellWidget(i, j).text())
 		item.oldName = item.text()
 	def selectChanged(self):
 		'''
@@ -493,10 +497,16 @@ class addAutomatonTab(QWidget):
 		for i in range(0, self.transition_table_ui.columnCount()): 
 			header.setSectionResizeMode(i, QHeaderView.Stretch)
 
+		row_count = self.transition_table_ui.rowCount()
+		column_count = self.transition_table_ui.columnCount()
+		for i in range(0, row_count):
+			for j in range(0, column_count):
+				self.transition_table_ui.setItem(i,j,QTableWidgetItem("(" + str(i) + "," + str(j) + ")"))
+
 	def setColsLabels(self, labels):
 		i = 0
 		for label in labels:
-			self.transition_table_ui.setHorizontalHeaderItem(i, QTableWidgetItem(label))
+			self.transition_table_ui.setHorizontalHeaderItem(i, StateTableItem(label))
 			#self.transition_table_ui.setColumnWidth(i, 1)
 			i+=1
 		
@@ -507,11 +517,35 @@ class addAutomatonTab(QWidget):
 		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
 		self.edit_alphabet.setText(new_text)
 
+
+class StateList(QListWidget):
+	def __init__(self):
+		super(QListWidget, self).__init__()
+		self.setDragEnabled(True)
+	def dragMoveEvent(self, event):
+		print("dragging")
 class StateItem(QListWidgetItem):
 	def __init__(self, text):
 		super().__init__(text)
 		self.oldName = text
 
+class StateTableItem(QTableWidgetItem):
+	def __init__(self, text):
+		super(QTableWidgetItem, self).__init__(text)
+class AutomatonTable(QTableWidget):
+	def __init__(self):
+		super(QTableWidget, self).__init__()
+		self.setAcceptDrops(True)
+	def dropEvent(self, event):
+		position = event.pos()
+		print(self.rowAt(position.y()))
+		print(self.columnAt(position.x()))
+		print(e.mimeData().text())
+		#event.setDropAction(Qt.MoveAction)
+		event.accept()
+	def dragEnterEvent(self, e):
+		print("enter")
+		print(e.mimeData().text())
 class TransitionTable:
 	def __init__(self):
 		print('something')
