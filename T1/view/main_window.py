@@ -372,7 +372,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui = QTableWidget() # layout transition table
 		self.transition_table = TransitionTable() # real transition table
 		self.layout = QGridLayout()
-		self.transition_table_ui.setRowCount(20)
+		self.transition_table_ui.setRowCount(1)
 		self.transition_table_ui.setColumnCount(2)
 		self.transition_table_ui.setAcceptDrops(True)
 		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Q0"))
@@ -385,6 +385,7 @@ class addAutomatonTab(QWidget):
 			QPushButton("Criar tabela") # botao para criar a tabela com o alfabeto inserido
 		self.bottom_layout = QGridLayout()
 		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
+		self.create_transition_table_button.clicked.connect(self.create_transition_table)
 		self.bottom_layout.addWidget(self.add_automaton_button, 0,1)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
@@ -423,11 +424,14 @@ class addAutomatonTab(QWidget):
 		self.layout.addWidget(self.bottom_panel, 2, 0)
 		self.setLayout(self.layout)
 		self.set_button_events()
+		self.set_edits_events()
 		self.i = 0
 		self.last_selected = None
 	def set_button_events(self):
 		self.add_new_state.clicked.connect(self.create_state)
 		self.remove_state_button.clicked.connect(self.remove_state)
+	def set_edits_events(self):
+		self.edit_alphabet.textEdited.connect(self.alphabet_changed)
 	def generate_table(self, alphabet, states_names):
 		print()
 
@@ -436,15 +440,31 @@ class addAutomatonTab(QWidget):
 		item = StateItem("Q" + str(self.i))
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
+		where = self.transition_table_ui.rowCount()
+		self.transition_table_ui.addRow(where)
+
 	def remove_state(self):
 		self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
 	def itemChanged(self, item):
 		print(item.oldName + " mudou para " + item.text())
 		item.oldName = item.text()
 	def selectChanged(self):
+		'''
+			no momento, este método não tem uso algum
+		'''
 		print("quem mudou= " + self.list_states.selectedItems()[0].text())
 		self.last_selected = self.list_states.selectedItems()[0]
-
+	def create_transition_table(self):
+		raw_text = self.edit_alphabet.text()
+		alphabet = raw_text.split(",")
+		alphabet = sorted(list(set(alphabet)), key=str.lower)
+		print(alphabet)
+	def alphabet_changed(self):
+		text = self.edit_alphabet.text()
+		if len(text) == 1:
+			return
+		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
+		self.edit_alphabet.setText(new_text)
 
 class StateItem(QListWidgetItem):
 	def __init__(self, text):
