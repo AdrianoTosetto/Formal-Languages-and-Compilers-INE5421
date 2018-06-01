@@ -9,9 +9,10 @@ from globals import *
 from regular_grammar import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 
-
+hey = "haha"
 
 class MainWindow(QWidget):
+	jesus = "-"
 	def __init__(self):
 		self.app = QApplication(sys.argv)
 		super().__init__()
@@ -395,6 +396,7 @@ class addAutomatonTab(QWidget):
 		self.add_remove_panel = QWidget()
 		self.top_panel = QWidget()
 		self.edit_name = QLineEdit()
+		self.edit_name.setDragEnabled(True)
 		self.edit_alphabet = QLineEdit()
 		self.add_new_state = QPushButton("Adicionar estado")
 		self.remove_state_button = QPushButton("Remover estado selecionado")
@@ -479,7 +481,10 @@ class addAutomatonTab(QWidget):
 				self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(item.text()))
 		for i in range(0, row_count):
 			for j in range(0, column_count):
-				print(self.transition_table_ui.cellWidget(i, j).text())
+				if self.transition_table_ui.item(i, j).text() == item.oldName:
+					self.transition_table_ui.item(i,j).setText(item.text())
+
+
 		item.oldName = item.text()
 	def selectChanged(self):
 		'''
@@ -487,6 +492,9 @@ class addAutomatonTab(QWidget):
 		'''
 		print("quem mudou= " + self.list_states.selectedItems()[0].text())
 		self.last_selected = self.list_states.selectedItems()[0]
+		MainWindow.jesus = self.list_states.selectedItems()[0].text()
+		print(MainWindow.jesus)
+
 	def create_transition_table(self):
 		raw_text = self.edit_alphabet.text()
 		alphabet = raw_text.split(",")
@@ -521,9 +529,6 @@ class addAutomatonTab(QWidget):
 class StateList(QListWidget):
 	def __init__(self):
 		super(QListWidget, self).__init__()
-		self.setDragEnabled(True)
-	def dragMoveEvent(self, event):
-		print("dragging")
 class StateItem(QListWidgetItem):
 	def __init__(self, text):
 		super().__init__(text)
@@ -532,20 +537,22 @@ class StateItem(QListWidgetItem):
 class StateTableItem(QTableWidgetItem):
 	def __init__(self, text):
 		super(QTableWidgetItem, self).__init__(text)
+	def dropEvent(self, event):
+		print("misc")
+
 class AutomatonTable(QTableWidget):
 	def __init__(self):
 		super(QTableWidget, self).__init__()
 		self.setAcceptDrops(True)
 	def dropEvent(self, event):
 		position = event.pos()
-		print(self.rowAt(position.y()))
-		print(self.columnAt(position.x()))
-		print(e.mimeData().text())
-		#event.setDropAction(Qt.MoveAction)
+		x = self.rowAt(position.y())
+		y = self.columnAt(position.x())
+		self.item(x,y).setText(MainWindow.jesus)
 		event.accept()
-	def dragEnterEvent(self, e):
-		print("enter")
-		print(e.mimeData().text())
+	def dragEnterEvent(self, event):
+		print('ender')
+		event.accept()
 class TransitionTable:
 	def __init__(self):
 		print('something')
