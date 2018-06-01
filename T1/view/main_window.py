@@ -373,7 +373,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table = TransitionTable() # real transition table
 		self.layout = QGridLayout()
 		self.transition_table_ui.setRowCount(1)
-		self.transition_table_ui.setColumnCount(2)
+		self.transition_table_ui.setColumnCount(0)
 		self.transition_table_ui.setAcceptDrops(True)
 		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Q0"))
 
@@ -427,6 +427,7 @@ class addAutomatonTab(QWidget):
 		self.set_edits_events()
 		self.i = 0
 		self.last_selected = None
+		self.transition_table_ui.setVerticalHeaderItem(0, QTableWidgetItem("Q0"))
 	def set_button_events(self):
 		self.add_new_state.clicked.connect(self.create_state)
 		self.remove_state_button.clicked.connect(self.remove_state)
@@ -447,6 +448,12 @@ class addAutomatonTab(QWidget):
 		self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
 	def itemChanged(self, item):
 		print(item.oldName + " mudou para " + item.text())
+		row_count = self.transition_table_ui.rowCount()
+		for i in range(0, row_count):
+			if self.transition_table_ui.verticalHeaderItem(i).text() == item.oldName:
+				print("haha")
+				self.transition_table_ui.setVerticalHeaderItem(i, QTableWidgetItem(item.text()))
+
 		item.oldName = item.text()
 	def selectChanged(self):
 		'''
@@ -458,7 +465,8 @@ class addAutomatonTab(QWidget):
 		raw_text = self.edit_alphabet.text()
 		alphabet = raw_text.split(",")
 		alphabet = sorted(list(set(alphabet)), key=str.lower)
-		print(alphabet)
+		self.transition_table_ui.setVerticalHeaderItem(0, QTableWidgetItem("what"))
+		
 	def alphabet_changed(self):
 		text = self.edit_alphabet.text()
 		if len(text) == 1:
