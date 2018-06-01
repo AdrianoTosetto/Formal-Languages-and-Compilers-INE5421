@@ -375,24 +375,8 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setRowCount(20)
 		self.transition_table_ui.setColumnCount(2)
 		self.transition_table_ui.setAcceptDrops(True)
-		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
-		self.transition_table_ui.setItem(0,1, QTableWidgetItem("Cell (1,2)"))
-		self.transition_table_ui.setItem(1,0, QTableWidgetItem("Cell (2,1)"))
-		self.transition_table_ui.setItem(1,1, QTableWidgetItem("Cell (2,2)"))
-		self.transition_table_ui.setItem(2,0, QTableWidgetItem("Cell (3,1)"))
-		self.transition_table_ui.setItem(2,1, QTableWidgetItem("Cell (3,2)"))
-		self.transition_table_ui.setItem(3,0, QTableWidgetItem("Cell (4,1)"))
-		self.transition_table_ui.setItem(3,1, QTableWidgetItem("Cell (4,2)"))
+		self.transition_table_ui.setItem(0,0, QTableWidgetItem("Q0"))
 
-
-		self.transition_table_ui.setItem(4,0, QTableWidgetItem("Cell (1,1)"))
-		self.transition_table_ui.setItem(4,1, QTableWidgetItem("Cell (1,2)"))
-		self.transition_table_ui.setItem(5,0, QTableWidgetItem("Cell (2,1)"))
-		self.transition_table_ui.setItem(5,1, QTableWidgetItem("Cell (2,2)"))
-		self.transition_table_ui.setItem(6,0, QTableWidgetItem("Cell (3,1)"))
-		self.transition_table_ui.setItem(6,1, QTableWidgetItem("Cell (3,2)"))
-		self.transition_table_ui.setItem(7,0, QTableWidgetItem("Cell (4,1)"))
-		self.transition_table_ui.setItem(7,1, QTableWidgetItem("Cell (4,2)"))
 		#self.transition_table_ui.move(0,0)
 
 
@@ -421,10 +405,13 @@ class addAutomatonTab(QWidget):
 		self.top_layout.addWidget(self.add_remove_panel, 1,0)
 		self.list_states = QListWidget()
 		self.list_states.setDragEnabled(True)
-
-		item = QListWidgetItem("Q0")
+		self.list_states.itemChanged.connect(self.itemChanged)
+		item = StateItem("Q0")
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
+		#self.list_states.setCurrentItem(item)
+
+		self.list_states.itemSelectionChanged.connect(self.selectChanged)
 		self.top_layout.addWidget(self.list_states, 1,1)
 
 		self.top_panel.setStyleSheet("background:green;")
@@ -436,6 +423,8 @@ class addAutomatonTab(QWidget):
 		self.layout.addWidget(self.bottom_panel, 2, 0)
 		self.setLayout(self.layout)
 		self.set_button_events()
+		self.i = 0
+		self.last_selected = None
 	def set_button_events(self):
 		self.add_new_state.clicked.connect(self.create_state)
 		self.remove_state_button.clicked.connect(self.remove_state)
@@ -443,11 +432,24 @@ class addAutomatonTab(QWidget):
 		print()
 
 	def create_state(self):
-		item = QListWidgetItem("Q0")
+		self.i += 1
+		item = StateItem("Q" + str(self.i))
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
 	def remove_state(self):
 		self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
+	def itemChanged(self, item):
+		print(item.oldName + " mudou para " + item.text())
+		item.oldName = item.text()
+	def selectChanged(self):
+		print("quem mudou= " + self.list_states.selectedItems()[0].text())
+		self.last_selected = self.list_states.selectedItems()[0]
+
+
+class StateItem(QListWidgetItem):
+	def __init__(self, text):
+		super().__init__(text)
+		self.oldName = text
 
 class TransitionTable:
 	def __init__(self):
