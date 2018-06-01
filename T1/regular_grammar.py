@@ -7,12 +7,40 @@ from globals import *
 
 class Grammar:
 	def __init__(self, productions, name = None):
-		self.productions = productions
+		if len(productions) is 0:
+			return None
+		self.productions = self.validate_productions(productions)
 		if name is None:
 			self.name = 'G' + str(Globals.grammar_count)
 			Globals.grammar_count += 1
 		else:
 			self.name = name
+		if self not in Globals.grammars:
+			Globals.grammars.append(self)
+
+	def validate_productions(self, productions):
+		prods = []
+		hasEpsilon = False
+		for p in productions:
+			if len(p.rightSide) > 2 or len(p.rightSide) < 1 or len(p.leftSide) != 1 or\
+				(p.rightSide[0] is '&' and p.leftSide != productions[0].leftSide) or\
+				p.rightSide[0].isupper() or (len(p.rightSide) is 2 and not p.rightSide[-1].isupper()) or\
+				not p.leftSide.isupper() or not (p.rightSide[0].islower() or p.rightSide[0].isdigit() or\
+				p.rightSide[0] is '&'):
+				continue
+			else:
+				if p.rightSide[0] is '&':
+					hasEpsilon = True
+				prods.append(p)
+		if hasEpsilon:
+			prods2 = []
+			for p in prods:
+				if len(p.rightSide) is 2 and p.rightSide[-1] is productions[0].leftSide[0]:
+					continue
+				else:
+					prods2.append(p)
+			prods = prods2
+		return prods
 
 
 	def __hash__(self):
@@ -32,6 +60,8 @@ class Grammar:
 		size less than or equal to the argument "size"
 	'''
 	def produce(self, size, comment = False):
+		if len(self.productions) == 0:
+			return []
 		sentences = []
 		if size is 0:
 			for p in self.productions:
@@ -69,6 +99,8 @@ class Grammar:
 		return False
 
 	def __str__(self):
+		if len(self.productions) == 0:
+			return ""
 		stringerson = ""
 		leftSides = set()
 		first = True
@@ -171,6 +203,9 @@ class Grammar:
 			finalStates.append(initialState)
 
 		return NDAutomaton(states.values(), finalStates, initialState, alphabet)
+
+	def add_production(self, prod):
+		self.productions.append(prod)
 
 class Production:
 	def __init__(self, leftSide, rightSide):

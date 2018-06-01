@@ -4,3 +4,4 @@ class Globals:
     grammar_count = 1
     displayed = 0
     selected = None
+    m = None

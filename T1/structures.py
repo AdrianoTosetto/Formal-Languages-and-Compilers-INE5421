@@ -153,11 +153,11 @@ class Node:
 	def in_order(self):
 		if self.left is not None:
 			self.traversal.extend(self.left.in_order())
-		
+
 		self.traversal.append(self)
 		if self.right is not None:
 			self.traversal.extend(self.right.in_order())
-		
+
 		ret = self.traversal
 		self.traversal = []
 		return (ret)
@@ -310,7 +310,7 @@ class Node:
 			if p.action == DOWN:
 				if p.node.symbol == ".":
 					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited_down, visited_up)
-				#if p.node.symbol == 
+				#if p.node.symbol ==
 
 
 		return node_composition
@@ -370,7 +370,7 @@ class Node:
 				node_composition |= right_most.handle_optional(right_most.costura_node, UP,visited_down,\
 				 visited_up)
 			elif right_most.costura_node.symbol == "λ":
-				node_composition |= {right_most.costura_node}				
+				node_composition |= {right_most.costura_node}
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
@@ -428,7 +428,7 @@ class Node:
 			if self.right.symbol == "|":
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
-			if self.right.symbol == "?":	
+			if self.right.symbol == "?":
 				node_composition |= self.handle_optional(self.right,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.right,UP, visited_down,visited_up)
 			if self.right.symbol == ".":
@@ -442,7 +442,7 @@ class Node:
 			if self.left.symbol == "|":
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.left.symbol == "?":	
+			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
@@ -456,12 +456,12 @@ class Node:
 			if self.left.symbol == "|":
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.left.symbol == "?":	
+			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
-		
+
 		if self.symbol == "*":
 			if self.left.is_leaf():
 				node_composition |= {self.left}
@@ -471,7 +471,7 @@ class Node:
 			if self.left.symbol == "|":
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.left.symbol == "?":	
+			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
@@ -489,7 +489,7 @@ class Node:
 			if self.left.symbol == "|":
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
-			if self.left.symbol == "?":	
+			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
@@ -499,10 +499,11 @@ class Node:
 				node_composition |= {self.costura_node}
 
 		return node_composition
+
 class RegExp:
 	def __init__(self, regex):
 		self.regex = regex
-	def get_compositions_from(self,compositions, symbol):
+	def get_compositions_from(self, compositions, symbol):
 		for c in compositions:
 			print()
 	def parse_to_automaton(self):
@@ -528,14 +529,14 @@ class RegExp:
 		compositions = ret[0]
 		q0_composition = ret[1]
 		Σ = ret[2]
-
+        
 		print(q0_composition)
 class StateComposition:
 
 	def __init__(self, state_composition, Σ):
 		self.state_composition = state_composition
 		self.symbol_composition = {}
-		
+
 		for symbol in Σ:
 			print(self.get_compositions_from_symbol(symbol, self.state_composition))
 			self.symbol_composition[symbol] = self.get_compositions_from_symbol(symbol, self.state_composition)

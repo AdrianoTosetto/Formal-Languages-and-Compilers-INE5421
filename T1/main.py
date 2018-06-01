@@ -18,7 +18,7 @@ if __name__ == "__main__":
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
 	#print(Globals.grammar_count)
 	myGrammar = Grammar(productions)
-	Globals.grammars.append(myGrammar)
+	#Globals.grammars.append(myGrammar)
 
 	leftSides1 = ['S', 'A', 'B', 'C']
 	rightSides1 = ['aA', 'bB', 'aS', 'bC', 'b', 'bS', 'aC', 'a', 'aB', 'bA']
@@ -28,12 +28,12 @@ if __name__ == "__main__":
 				   	Production(leftSides1[3], rightSides1[8]), Production(leftSides1[3], rightSides1[9])]
 	#print(Globals.grammar_count)
 	myGrammar1 = Grammar(productions1)
-	Globals.grammars.append(myGrammar1)
+	#Globals.grammars.append(myGrammar1)
 	print(grammar_kleene_star(myGrammar))
 	print(myGrammar)
 	for p in grammar_kleene_star(myGrammar).produce(5):
 		print(p)
-	#m = MainWindow()
+	m = MainWindow()
 
 	#print(myGrammar1)
 	'''a = myGrammar1.convert_to_automaton()
