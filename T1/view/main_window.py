@@ -655,3 +655,42 @@ class AutomatonTable(QTableWidget):
 class TransitionTable:
 	def __init__(self):
 		print('something')
+
+class AutomataOperationsTab(QWidget): 
+	def __init__(self, parent=None):   
+		super(QWidget, self).__init__(parent)
+		self.layout = QVBoxLayout(self)
+		self.tabs = QTabWidget()
+		self.tab1 = QWidget()
+		self.tab2 = QWidget()
+		self.tabs.resize(300,200) 
+ 
+		self.tabs.addTab(self.tab1,"Union")
+		self.tabs.addTab(self.tab2,"Concatenation")
+ 
+        #self.tab1.layout = QVBoxLayout(self)
+        #self.pushButton1 = QPushButton("PyQt5 button")
+        #self.tab1.layout.addWidget(self.pushButton1)
+        #self.tab1.setLayout(self.tab1.layout)
+       
+		self.layout.addWidget(self.tabs)
+		self.setLayout(self.layout)
+	@pyqtSlot()
+	def on_click(self):
+		print("\n")
+		for currentQTableWidgetItem in self.tableWidget.selectedItems():
+			print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
+
+class UnionTab(QWidget):
+	def __init__(self):
+		super(QWidget,self).__init__()
+		self.top_panel = QWidget()
+		self.bottom_panel = QWidget()
+		self.button_af1 = QPushButton()
+		self.button_af2 = QPushButton()
+		self.top_layout = QGridLayout()
+		self.bottom_layout = QGridLayout()
+		self.set_top_panel()
+	def set_top_panel(self):
+		self.top_layout.addWidget(self.button_af1, 0, 0)
+		self.top_layout.addWidget(self.button_af2, 1, 0)
