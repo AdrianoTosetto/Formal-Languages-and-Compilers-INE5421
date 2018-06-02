@@ -81,19 +81,27 @@ class MainWindow(QWidget):
 		self.update_gr()
 		self.center.setText(str(gram))
 		Globals.selected = copy.deepcopy(gram)
-		print(gram.get_productions_from('A'))
 		nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
 			prods.append(gram.get_productions_from(nt))
 		self.MyTableWidget.update(nts, prods)
+	def select_automaton(self, aut):
+		self.update_af()
+		self.center.setText(str(aut))
+		Globals.selected = copy.deepcopy(aut)
+		'''nts = gram.get_non_terminals()
+		prods = []
+		for nt in nts:
+			prods.append(gram.get_productions_from(nt))
+		self.MyTableWidget.update(nts, prods)'''
 	def addStuff(self):
 		if Globals.displayed == 1:
 			self.add_gr()
 		elif Globals.displayed == 2:
 			print("Adicionadas ERs")
 		elif Globals.displayed == 3:
-			print("Adicionados AFs")
+			self.add_af()
 		else:
 			print("Erro")
 	def update_stuff(self):
@@ -102,7 +110,7 @@ class MainWindow(QWidget):
 		elif Globals.displayed == 2:
 			print("Atualizadas ERs")
 		elif Globals.displayed == 3:
-			print("Atualizadas AFs")
+			self.update_af()
 		else:
 			print("Erro")
 	def deleteStuff(self):
@@ -114,11 +122,18 @@ class MainWindow(QWidget):
 						grams.append(g)
 				Globals.grammars = grams
 				self.update_gr()
+			if type(Globals.selected) == type(Automaton([],[], State(""))):
+				auts = []
+				for a in Globals.automata:
+					if a.name != Globals.selected.name:
+						auts.append(a)
+				Globals.automata = auts
+				self.update_af()
 		self.center.setText('')
 		Globals.selected = None
 
 	def add_gr(self):
-		newG = Grammar([Production('S', '&')])
+		newG = Grammar([Production('S', '&')], add = True)
 		Globals.selected = newG
 		self.update_gr()
 
@@ -130,6 +145,21 @@ class MainWindow(QWidget):
 			item_widget.clicked.connect(functools.partial(self.select_grammar, g))
 			self.grList.setItemWidget(item, item_widget)
 			self.grList.addItem(item)
+
+	def add_af(self):
+		q0 = State("q0", True)
+		newM = Automaton([q0], [q0], q0, add = True)
+		Globals.selected = newM
+		self.update_af()
+
+	def update_af(self):
+		self.afList.clear()
+		for a in Globals.automata:
+			item = QListWidgetItem(self.afList)
+			item_widget = AutomatonButton(a.name, a)
+			item_widget.clicked.connect(functools.partial(self.select_automaton, a))
+			self.afList.setItemWidget(item, item_widget)
+			self.afList.addItem(item)
 
 	def generateRightSide(self):
 		self.optionsAF = QWidget()
@@ -232,6 +262,7 @@ class MainWindow(QWidget):
 		self.listLayout.addWidget(self.erList)
 		self.listLayout.addWidget(self.afList)
 		self.update_gr()
+		self.update_af()
 		self.grList.setHidden(True)
 		self.afList.setHidden(True)
 		self.erList.setHidden(True)
@@ -245,6 +276,11 @@ if __name__ == "__main__":
 class GrammarButton(QPushButton):
 	def __init__(self, QString, grammar):
 		self.grammar = grammar
+		super().__init__(QString)
+
+class AutomatonButton(QPushButton):
+	def __init__(self, QString, automaton):
+		self.automaton = automaton
 		super().__init__(QString)
 
 
@@ -656,23 +692,23 @@ class TransitionTable:
 	def __init__(self):
 		print('something')
 
-class AutomataOperationsTab(QWidget): 
-	def __init__(self, parent=None):   
+class AutomataOperationsTab(QWidget):
+	def __init__(self, parent=None):
 		super(QWidget, self).__init__(parent)
 		self.layout = QVBoxLayout(self)
 		self.tabs = QTabWidget()
 		self.tab1 = QWidget()
 		self.tab2 = QWidget()
-		self.tabs.resize(300,200) 
- 
+		self.tabs.resize(300,200)
+
 		self.tabs.addTab(self.tab1,"Union")
 		self.tabs.addTab(self.tab2,"Concatenation")
- 
+
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
         #self.tab1.layout.addWidget(self.pushButton1)
         #self.tab1.setLayout(self.tab1.layout)
-       
+
 		self.layout.addWidget(self.tabs)
 		self.setLayout(self.layout)
 	@pyqtSlot()

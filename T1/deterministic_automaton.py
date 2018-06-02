@@ -4,14 +4,23 @@ import copy
 
 class Automaton:
 
-	def __init__(self, states, finalStates, initialState, Σ=['0','1']):
+	def __init__(self, states, finalStates, initialState, Σ=['0','1'], name = None, add = False):
+		if len(states) < 1:
+			return None
+		if name is None and add:
+			self.name = 'M' + str(Globals.automaton_count)
+			if add:
+				Globals.automaton_count += 1
+		else:
+			self.name = name
 		self.states = (states)
 		self.finalStates = (finalStates)
 		self.initialState = initialState
 		self.currentState = initialState
 		self.Σ = Σ
 		self.equi_classes = []
-		self.name = None
+		if self not in Globals.automata and add:
+			Globals.automata.append(self)
 
 	def set_name(name):
 		self.name = name
