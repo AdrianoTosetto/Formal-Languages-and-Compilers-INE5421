@@ -14,6 +14,7 @@ hey = "haha"
 
 class MainWindow(QWidget):
 	jesus = "-"
+	updateAF = QtCore.pyqtSignal(Automaton)
 	def __init__(self):
 		self.app = QApplication(sys.argv)
 		super().__init__()
@@ -37,6 +38,7 @@ class MainWindow(QWidget):
 		self.rightLayout.setColumnStretch(1,3)
 		self.MyTableWidget = MyTableWidget(self.rightSide)
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
+		self.updateAF.connect(self.MyTableWidget.tab2.showAutomaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
@@ -90,6 +92,7 @@ class MainWindow(QWidget):
 		self.update_af()
 		self.center.setText(str(aut))
 		Globals.selected = copy.deepcopy(aut)
+		self.updateAF.emit(Globals.selected)
 		'''nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
@@ -592,7 +595,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("Q0"))
 		self.set_placeholders()
 		self.alphabet = []
-		self.showAutomaton(Globals.automata[0])
+		#self.showAutomaton(Globals.automata[0])
 	def setPolicyEdits(self):
 		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.edit_alphabet.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -704,6 +707,7 @@ class addAutomatonTab(QWidget):
 			return
 		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
 		self.edit_alphabet.setText(new_text)
+
 	def showAutomaton(self, af):
 		self.list_states.clear()
 
