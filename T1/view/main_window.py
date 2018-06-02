@@ -295,10 +295,12 @@ class MyTableWidget(QWidget):
 		self.tabs = QTabWidget()
 		self.tab1 = addGrammarTab(["S"], [["&"]], "G1")
 		self.tab2 = addAutomatonTab()
+		self.tab3 = GrammarOperationsTab()
 		self.tabs.resize(300,200)
 
-		self.tabs.addTab(self.tab1,"Add Grammar")
+		self.tabs.addTab(self.tab1,"Add GR")
 		self.tabs.addTab(self.tab2,"Add AF")
+		self.tabs.addTab(self.tab3,"GR Operations")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -535,7 +537,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setRowCount(1)
 		self.transition_table_ui.setColumnCount(0)
 		self.transition_table_ui.setAcceptDrops(True)
-		self.transition_table_ui.setItem(0,0, StateTableItem("Q0"))
+		self.transition_table_ui.setItem(0,0, StateTableItem("q0"))
 
 		#self.transition_table_ui.move(0,0)
 
@@ -587,7 +589,7 @@ class addAutomatonTab(QWidget):
 		self.list_states.setDragEnabled(True)
 		self.list_states.itemChanged.connect(self.itemChanged)
 		self.list_symbol.itemChanged.connect(self.symbol_changed)
-		item = StateItem("Q0")
+		item = StateItem("q0")
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
 		#self.list_states.setCurrentItem(item)
@@ -607,7 +609,7 @@ class addAutomatonTab(QWidget):
 		self.set_edits_events()
 		self.i = 0
 		self.last_selected = None
-		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("Q0"))
+		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("q0"))
 		self.set_placeholders()
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
@@ -660,13 +662,13 @@ class addAutomatonTab(QWidget):
 
 	def create_state(self):
 		self.i += 1
-		item = StateItem("Q" + str(self.i))
+		item = StateItem("q" + str(self.i))
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
 		count = self.transition_table_ui.rowCount()
 		column_count = len(self.alphabet)
 		self.transition_table_ui.setRowCount(count+1)
-		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("Q" + str(self.i)))
+		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("q" + str(self.i)))
 		for i in range(0, len(self.alphabet)):
 			self.transition_table_ui.setItem(count,i,QTableWidgetItem("-"))
 
@@ -719,7 +721,7 @@ class addAutomatonTab(QWidget):
 			approval_change = True
 			items = [self.list_symbol.item(i) for i in range(self.list_symbol.count())]
 			items = list(set(items) - {self.list_symbol.selectedItems()[0]})
-			
+
 			for i in items:
 				if item.text() == i.text():
 					print("IGUAL")
@@ -876,6 +878,137 @@ class addAutomatonTab(QWidget):
 		Globals.automata = auts
 		Globals.selected = newA
 		self.saveAF.emit(Globals.selected)
+
+class GrammarOperationsTab(QWidget):
+  def __init__(self):
+    super(QWidget, self).__init__()
+
+    self.line = 0
+    self.layout = QGridLayout()
+    self.layout.setRowStretch(0,1)
+    self.layout.setRowStretch(1,1)
+    self.layout.setRowStretch(2,1)
+    self.top = QWidget()
+    self.top.setStyleSheet("background-color:pink;")
+    self.top_layout = QGridLayout()
+    self.top_layout.setRowStretch(0,1)
+    self.top_layout.setRowStretch(1,1)
+    self.top_layout.setRowStretch(2,1)
+    self.top_layout.setRowStretch(3,1)
+    self.top_op1 = QWidget()
+    self.top_op1.setStyleSheet("background-color:purple;")
+    self.top_op1_layout = QGridLayout()
+    self.top_op1_layout.setColumnStretch(0,1)
+    self.top_op1_layout.setColumnStretch(1,1)
+    self.top_op1label = QLabel()
+    self.top_op1label.setText("GR 1:")
+    self.top_op1edit = QLineEdit()
+    self.top_op1_layout.addWidget(self.top_op1label,0,0)
+    self.top_op1_layout.addWidget(self.top_op1edit,0,1)
+    self.top_op1.setLayout(self.top_op1_layout)
+    self.top_op2 = QWidget()
+    self.top_op2.setStyleSheet("background-color:purple;")
+    self.top_op2_layout = QGridLayout()
+    self.top_op2_layout.setColumnStretch(0,1)
+    self.top_op2_layout.setColumnStretch(1,1)
+    self.top_op2label = QLabel()
+    self.top_op2label.setText("GR 2:")
+    self.top_op2edit = QLineEdit()
+    self.top_op2_layout.addWidget(self.top_op2label,0,0)
+    self.top_op2_layout.addWidget(self.top_op2edit,0,1)
+    self.top_op2.setLayout(self.top_op2_layout)
+    self.top_operation = QLabel()
+    self.top_operation.setAlignment(Qt.AlignCenter)
+    self.top_operation.setText("concatenada com")
+    self.top_operation.setStyleSheet("background-color:orange;")
+    self.top_done = QPushButton("Pronto")
+    self.top_done.clicked.connect(self.add_concatenation)
+    self.top_layout.addWidget(self.top_op1,0,0)
+    self.top_layout.addWidget(self.top_op2,2,0)
+    self.top_layout.addWidget(self.top_operation,1,0)
+    self.top_layout.addWidget(self.top_done,3,0)
+    self.top.setLayout(self.top_layout)
+
+    self.mid = QWidget()
+    self.mid.setStyleSheet("background-color:pink;")
+    self.mid_layout = QGridLayout()
+    self.mid_layout.setRowStretch(0,1)
+    self.mid_layout.setRowStretch(1,1)
+    self.mid_layout.setRowStretch(2,1)
+    self.mid_layout.setRowStretch(3,1)
+    self.mid_op1 = QWidget()
+    self.mid_op1.setStyleSheet("background-color:purple;")
+    self.mid_op1_layout = QGridLayout()
+    self.mid_op1_layout.setColumnStretch(0,1)
+    self.mid_op1_layout.setColumnStretch(1,1)
+    self.mid_op1label = QLabel()
+    self.mid_op1label.setText("GR 1:")
+    self.mid_op1edit = QLineEdit()
+    self.mid_op1_layout.addWidget(self.mid_op1label,0,0)
+    self.mid_op1_layout.addWidget(self.mid_op1edit,0,1)
+    self.mid_op1.setLayout(self.mid_op1_layout)
+    self.mid_op2 = QWidget()
+    self.mid_op2.setStyleSheet("background-color:purple;")
+    self.mid_op2_layout = QGridLayout()
+    self.mid_op2_layout.setColumnStretch(0,1)
+    self.mid_op2_layout.setColumnStretch(1,1)
+    self.mid_op2label = QLabel()
+    self.mid_op2label.setText("GR 2:")
+    self.mid_op2edit = QLineEdit()
+    self.mid_op2_layout.addWidget(self.mid_op2label,0,0)
+    self.mid_op2_layout.addWidget(self.mid_op2edit,0,1)
+    self.mid_op2.setLayout(self.mid_op2_layout)
+    self.mid_operation = QLabel()
+    self.mid_operation.setAlignment(Qt.AlignCenter)
+    self.mid_operation.setText("unida com")
+    self.mid_operation.setStyleSheet("background-color:orange;")
+    self.mid_done = QPushButton("Pronto")
+    self.mid_done.clicked.connect(self.add_union)
+    self.mid_layout.addWidget(self.mid_op1,0,0)
+    self.mid_layout.addWidget(self.mid_op2,2,0)
+    self.mid_layout.addWidget(self.mid_operation,1,0)
+    self.mid_layout.addWidget(self.mid_done,3,0)
+    self.mid.setLayout(self.mid_layout)
+
+    self.bot = QWidget()
+    self.bot.setStyleSheet("background-color:pink;")
+    self.bot_layout = QGridLayout()
+    self.bot_layout.setRowStretch(0,1)
+    self.bot_layout.setRowStretch(1,1)
+    self.bot_layout.setRowStretch(2,1)
+    self.bot_op1 = QWidget()
+    self.bot_op1.setStyleSheet("background-color:purple;")
+    self.bot_op1_layout = QGridLayout()
+    self.bot_op1_layout.setColumnStretch(0,1)
+    self.bot_op1_layout.setColumnStretch(1,1)
+    self.bot_op1label = QLabel()
+    self.bot_op1label.setText("GR:")
+    self.bot_op1edit = QLineEdit()
+    self.bot_op1_layout.addWidget(self.bot_op1label,0,0)
+    self.bot_op1_layout.addWidget(self.bot_op1edit,0,1)
+    self.bot_op1.setLayout(self.bot_op1_layout)
+    self.bot_operation = QLabel()
+    self.bot_operation.setAlignment(Qt.AlignCenter)
+    self.bot_operation.setText("fechada")
+    self.bot_operation.setStyleSheet("background-color:orange;")
+    self.bot_done = QPushButton("Pronto")
+    self.bot_done.clicked.connect(self.add_kleene)
+    self.bot_layout.addWidget(self.bot_op1,0,0)
+    self.bot_layout.addWidget(self.bot_operation,1,0)
+    self.bot_layout.addWidget(self.bot_done,2,0)
+    self.bot.setLayout(self.bot_layout)
+
+    self.layout.addWidget(self.top,0,0)
+    self.layout.addWidget(self.mid,1,0)
+    self.layout.addWidget(self.bot,2,0)
+
+    self.setLayout(self.layout)
+  def add_concatenation(self):
+    print("aaaaaaaaa")
+  def add_union(self):
+    print("bbbbbbbbb")
+  def add_kleene(self):
+    print("ccccccccc")
 
 
 class StateList(QListWidget):
