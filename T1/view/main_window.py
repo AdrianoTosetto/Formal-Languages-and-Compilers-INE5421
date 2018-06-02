@@ -669,14 +669,19 @@ class addAutomatonTab(QWidget):
 		column_count = len(self.alphabet)
 		self.transition_table_ui.setRowCount(count+1)
 		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("q" + str(self.i)))
-		for i in range(0, len(self.alphabet)):
+		alphabet =  [str(self.list_symbol.item(i).text()) for i in range(self.list_symbol.count())]
+		for i in range(0, len(alphabet)):
 			self.transition_table_ui.setItem(count,i,QTableWidgetItem("-"))
 
 		rb = QRadioButton()
 		cb = QCheckBox()
 		self.initial_state_radio_group.addButton(rb)
-		self.transition_table_ui.setCellWidget(count,column_count,rb)
-		self.transition_table_ui.setCellWidget(count,column_count+1,cb)
+		if len(alphabet) == 0:
+			self.transition_table_ui.setCellWidget(count,0,rb)
+			self.transition_table_ui.setCellWidget(count,1,cb)
+		else:
+			self.transition_table_ui.setCellWidget(count,column_count,rb)
+			self.transition_table_ui.setCellWidget(count,column_count+1,cb)
 
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
