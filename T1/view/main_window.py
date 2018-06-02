@@ -225,6 +225,7 @@ class MainWindow(QWidget):
 		self.showER.setLayout(self.erLayout)
 
 		self.grList = QListWidget(self)
+		self.grList.setDragEnabled(True)
 		self.afList = QListWidget(self)
 		self.erList = QListWidget(self)
 		self.listLayout = QVBoxLayout()
@@ -255,10 +256,12 @@ class MyTableWidget(QWidget):
 		self.tabs = QTabWidget()
 		self.tab1 = addGrammarTab(["S"], [["&"]])
 		self.tab2 = addAutomatonTab()
+		self.tab3 = AutomataOperationsTab()
 		self.tabs.resize(300,200)
 
 		self.tabs.addTab(self.tab1,"Add Grammar")
 		self.tabs.addTab(self.tab2,"Add AF")
+		self.tabs.addTab(self.tab3, "AF Operations")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -661,7 +664,7 @@ class AutomataOperationsTab(QWidget):
 		super(QWidget, self).__init__(parent)
 		self.layout = QVBoxLayout(self)
 		self.tabs = QTabWidget()
-		self.tab1 = QWidget()
+		self.tab1 = AutomataOperationsTab()
 		self.tab2 = QWidget()
 		self.tabs.resize(300,200) 
  
@@ -681,16 +684,48 @@ class AutomataOperationsTab(QWidget):
 		for currentQTableWidgetItem in self.tableWidget.selectedItems():
 			print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
-class UnionTab(QWidget):
+
+
+
+class TwoAutomataOperation(QWidget):
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.top_panel = QWidget()
 		self.bottom_panel = QWidget()
-		self.button_af1 = QPushButton()
-		self.button_af2 = QPushButton()
+		self.button_af1 = QLineEdit("Automato 1")
+		self.button_af2 = QLineEdit("Automato 2")
+		self.action_button = QPushButton()
+		self.action_button.clicked.connect(self.operation_button_action)
 		self.top_layout = QGridLayout()
 		self.bottom_layout = QGridLayout()
 		self.set_top_panel()
+		self.set_bottom_panel()
+		self.set_layout()
+	def action_button_label(self, label):
+		self.action_button.setText(label)
 	def set_top_panel(self):
 		self.top_layout.addWidget(self.button_af1, 0, 0)
 		self.top_layout.addWidget(self.button_af2, 1, 0)
+		self.top_panel.setLayout(self.top_layout)
+	def set_bottom_panel(self):
+		return
+	def set_layout(self):
+		self.layout = QGridLayout()
+		self.layout.addWidget(self.top_panel, 0,0)
+		self.layout.addWidget(self.bottom_panel, 1,0)
+		self.setLayout(self.layout)
+	def operation_button_action(self):
+		return
+
+class UnionTab(TwoAutomataOperation):
+	def __init__(self):
+		super(TwoAutomataOperation,self).__init__()
+
+	def operation_button_action(self):
+		print('union')
+class ConcatenationTab(TwoAutomataOperation):
+	def __init__(self):
+		super(TwoAutomataOperation,self).__init__()
+
+	def operation_button_action(self):
+		print('concatenation')
