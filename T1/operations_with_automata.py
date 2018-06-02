@@ -24,9 +24,12 @@ def make_nondeterministic(fa):
 
     return NDAutomaton(newStates, newFinalStates, newInitial, fa.Σ)
 
-def automata_union(fa1, fa2):
+def automata_union(fa1, fa2, name = None, add = False):
     nfa1 = make_nondeterministic(fa1)
     nfa2 = make_nondeterministic(fa2)
+
+    if name == None:
+        name = str(fa1.name) + " ∪ " + str(fa2.name)
 
     result_Σ = list(set(fa1.Σ) | set(fa2.Σ))
     result_states = set()
@@ -85,13 +88,16 @@ def automata_union(fa1, fa2):
     return NDAutomaton(result_states, result_final_states, newInitial, result_Σ)
 
 
-def automata_complement(af1):
+def automata_complement(af1, name = None, add = False):
     waf = None
     if type(af1) is type(NDAutomaton(set(), set(), NDState(''))):
         waf = af1.determinize()
     else:
         waf = af1
     waf.complete()
+
+    if name == None:
+        name = str(waf.name) + "'"
 
     new_states = copy.deepcopy(waf.states)
     #print(new_states)
@@ -112,15 +118,17 @@ def automata_complement(af1):
     for s in new_states:
         s.isAcceptance = s in nfs
 
-    return Automaton(new_states, nfs, new_initial_state, af1.Σ)
+    return Automaton(new_states, nfs, new_initial_state, af1.Σ, name, add)
 
-def automata_intersec(af1, af2):
+def automata_intersec(af1, af2, name = None, add = False):
     neg_fa1 = automata_complement(af1)
     neg_fa2 = automata_complement(af2)
 
+    if name == None:
+        name = str(af1.name) + " ∩ " + str(af2.name)
+
     union = automata_union(neg_fa1, neg_fa2)
-    deterunion = union.determinize()
-    intersec = automata_complement(deterunion)
+    intersec = automata_complement(union, name, add)
 
     '''print(union.process_input('aaaa'))
     print(union.process_input('aaab'))
@@ -140,10 +148,13 @@ def automata_intersec(af1, af2):
 
     return intersec
 
-def automata_difference(af1, af2):
+def automata_difference(af1, af2, name = None, add = False):
     neg_af2 = automata_complement(af2)
 
-    diff = automata_intersec(af1, neg_af2)
+    if name == None:
+        name = str(af1.name) + " - " + str(af2.name)
+
+    diff = automata_intersec(af1, neg_af2, name, add)
 
     #union = diff
 
@@ -178,7 +189,7 @@ def isContained(af1, af2):
 def areEqual(af1, af2):
     return isContained(af1, af2) and isContained(af2, af1)
 
-def getReverse(af):
+def getReverse(af, add = False):
     if type(af) is type(NDAutomaton(set(), set(), NDState(''))):
         newAF = af.determinize()
     else:
@@ -204,7 +215,7 @@ def getReverse(af):
                                 ns.remove_transition(nt)
                         ns.add_transition(Transition(t.symbol, os))
 
-    newAF = make_nondeterministic(Automaton(newStates, {newFinal}, newFinal, af.Σ))
+    newAF = make_nondeterministic(Automaton(newStates, {newFinal}, newFinal, af.Σ, add))
 
     i = 0
     changed = True

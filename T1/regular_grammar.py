@@ -6,16 +6,17 @@ from globals import *
 '''
 
 class Grammar:
-	def __init__(self, productions, name = None):
+	def __init__(self, productions, name = None, add = False):
 		if len(productions) is 0:
 			return None
 		self.productions = self.validate_productions(productions)
 		if name is None:
 			self.name = 'G' + str(Globals.grammar_count)
-			Globals.grammar_count += 1
+			if add:
+				Globals.grammar_count += 1
 		else:
 			self.name = name
-		if self not in Globals.grammars:
+		if self not in Globals.grammars and add:
 			Globals.grammars.append(self)
 
 	def validate_productions(self, productions):
