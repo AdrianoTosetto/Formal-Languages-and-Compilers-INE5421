@@ -560,6 +560,7 @@ class addAutomatonTab(QWidget):
 		self.edit_alphabet = QLineEdit()
 		self.list_symbol  = QListWidget()
 		self.remove_symbol_button = QPushButton("Remover símbolo")
+		self.remove_symbol_button.clicked.connect(self.remove_symbol)
 		self.add_symbol_button = QPushButton("Adicionar símbolo")
 		self.add_symbol_button.clicked.connect(self.add_new_symbol)
 		self.add_remove_symbol_panel = QWidget()
@@ -616,7 +617,29 @@ class addAutomatonTab(QWidget):
 		for s in symbols:
 			if (c_ord < ord(s)):
 				c_ord = ord(s)
-		print("novo symbolo = " + chr(c_ord+1) )
+
+		new_symbol = chr(c_ord+1)
+		item = QListWidgetItem(new_symbol)
+		item.setFlags(item.flags() | Qt.ItemIsEditable)
+		self.list_symbol.addItem(item)
+		column = self.transition_table_ui.columnCount() - 2
+		self.transition_table_ui.insertColumn(column)
+		self.transition_table_ui.setHorizontalHeaderItem(column, QTableWidgetItem(new_symbol))
+
+		rowCount = self.transition_table_ui.rowCount()
+
+		for i in range(0, rowCount):
+			self.transition_table_ui.setItem(i, column , QTableWidgetItem("-"))
+	def remove_symbol(self):
+		item = self.list_symbol.selectedItems()[0]
+		print(item.text())
+		column_count = self.transition_table_ui.columnCount()
+
+		for i in range(0, column_count):
+			if self.transition_table_ui.horizontalHeaderItem(i).text() == item.text():
+				self.transition_table_ui.removeColumn(i)
+				break
+		self.list_symbol.takeItem(self.list_symbol.currentRow())
 	def setPolicyEdits(self):
 		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.edit_alphabet.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -755,6 +778,7 @@ class addAutomatonTab(QWidget):
 
 	def showAutomaton(self, af):
 		self.list_states.clear()
+		self.list_symbol.clear()
 		self.edit_alphabet.setText(','.join(map(str, af.Σ)) )
 		self.alphabet = af.Σ
 		self.transition_table_ui.setRowCount(len(af.states))
