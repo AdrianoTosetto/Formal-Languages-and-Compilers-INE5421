@@ -634,9 +634,19 @@ class addAutomatonTab(QWidget):
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
 		row_count = self.transition_table_ui.rowCount()
+		column_count = self.transition_table_ui.columnCount()
+
+		for i in range(0, row_count):
+			for j in range(0, column_count - 2):
+				try:
+					if self.transition_table_ui.item(i, j).text() == item.text():
+						self.transition_table_ui.item(i, j).setText("-")
+				except:
+					print("Problema com " + str((i,j)))
 		for i in range(0, row_count):
 			if self.transition_table_ui.verticalHeaderItem(i).text() == item.text():
-				self.transition_table_ui.removeRow(i)
+					self.transition_table_ui.removeRow(i)
+					return
 	def itemChanged(self, item):
 		print(item.oldName + " mudou para " + item.text())
 		row_count = self.transition_table_ui.rowCount()
@@ -738,8 +748,6 @@ class addAutomatonTab(QWidget):
 			for t in s.transitions:
 				self.set_transition_cell(s.name, t.target_state.name, t.symbol)
 
-		self.set_transition_cell('q0_0', 'q0', 'b')
-
 	def set_transition_cell(self, state, target, symbol):
 		row = -1
 		column = -1
@@ -751,6 +759,7 @@ class addAutomatonTab(QWidget):
 			if self.transition_table_ui.verticalHeaderItem(i).text() == state:
 				print("linha = " + str(i))
 				row = i
+		print((row,column))
 		self.transition_table_ui.setItem(row, column, QTableWidgetItem(target))
 
 
