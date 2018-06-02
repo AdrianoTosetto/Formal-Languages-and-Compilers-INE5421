@@ -586,6 +586,7 @@ class addAutomatonTab(QWidget):
 		self.list_states = StateList()
 		self.list_states.setDragEnabled(True)
 		self.list_states.itemChanged.connect(self.itemChanged)
+		self.list_symbol.itemChanged.connect(self.symbol_changed)
 		item = StateItem("Q0")
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
@@ -619,7 +620,7 @@ class addAutomatonTab(QWidget):
 				c_ord = ord(s)
 
 		new_symbol = chr(c_ord+1)
-		item = QListWidgetItem(new_symbol)
+		item = SymbolItem(new_symbol)
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_symbol.addItem(item)
 		column = self.transition_table_ui.columnCount() - 2
@@ -714,6 +715,25 @@ class addAutomatonTab(QWidget):
 
 		item.oldName = item.text()
 		MainWindow.jesus = item.text()
+	def symbol_changed(self, item):
+			approval_change = True
+			items = [self.list_symbol.item(i) for i in range(self.list_symbol.count())]
+			items = list(set(items) - {self.list_symbol.selectedItems()[0]})
+			
+			for i in items:
+				if item.text() == i.text():
+					print("IGUAL")
+					approval_change = False
+					break
+			if approval_change:
+				column_count = self.transition_table_ui.columnCount()
+				for i in range(0, column_count):
+					if self.transition_table_ui.horizontalHeaderItem(i).text() == item.oldName:
+						self.transition_table_ui.horizontalHeaderItem(i).setText(item.text())
+						print("OFUND")
+				item.oldName = item.text()
+			else:
+				item.setText(item.oldName)
 	def selectChanged(self):
 		'''
 			no momento, este método não tem uso algum
@@ -787,7 +807,8 @@ class addAutomatonTab(QWidget):
 		states_list = list(af.states)
 		self.initial_state_radio_group = QButtonGroup()
 		for i in range(0, len(af.Σ)):
-			item = QListWidgetItem(af.Σ[i])
+			item = SymbolItem(af.Σ[i])
+			item.setFlags(item.flags() | Qt.ItemIsEditable)
 			self.list_symbol.addItem(item)
 		for i in range(0, len(states_list)):
 			s = states_list[i]
@@ -864,6 +885,12 @@ class StateItem(QListWidgetItem):
 	def __init__(self, text):
 		super().__init__(text)
 		self.oldName = text
+class SymbolItem(QListWidgetItem):
+	def __init__(self, text):
+		super().__init__(text)
+		self.oldName = text
+	def __hash__(self):
+		return id(self)
 
 class StateTableItem(QTableWidgetItem):
 	def __init__(self, text):
