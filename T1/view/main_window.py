@@ -39,6 +39,7 @@ class MainWindow(QWidget):
 		self.MyTableWidget = MyTableWidget(self.rightSide)
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
 		self.updateAF.connect(self.MyTableWidget.tab2.showAutomaton)
+		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
@@ -524,6 +525,7 @@ class GrammarOperationsTab(QWidget):
 
 
 class addAutomatonTab(QWidget):
+	saveAF = QtCore.pyqtSignal(Automaton)
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -541,6 +543,7 @@ class addAutomatonTab(QWidget):
 		self.add_automaton_button = QPushButton("Adicionar")
 		self.create_transition_table_button = \
 			QPushButton("Criar tabela") # botao para criar a tabela com o alfabeto inserido
+		self.add_automaton_button.clicked.connect(self.save_automaton)
 		self.bottom_layout = QGridLayout()
 		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
 		self.create_transition_table_button.clicked.connect(self.create_transition_table)
@@ -761,6 +764,38 @@ class addAutomatonTab(QWidget):
 				row = i
 		print((row,column))
 		self.transition_table_ui.setItem(row, column, QTableWidgetItem(target))
+	def save_automaton(self):
+		states = set()
+		finalStates = set()
+		initialState = None
+		newΣ = []
+		for i in range(0, self.transition_table_ui.rowCount()):
+			newS = State(self.transition_table_ui.verticalHeaderItem(i).text(), self.transition_table_ui.cellWidget(i, self.transition_table_ui.columnCount() - 1).checkState() == 2)
+			states.add(newS)
+			if newS.isAcceptance:
+				finalStates.add(newS)
+			if self.transition_table_ui.cellWidget(i, len(Globals.selected.Σ) + 1).isChecked():
+				initialState = newS
+		for i in range(0, self.transition_table_ui.rowCount()):
+			for s in states:
+				if self.transition_table_ui.verticalHeaderItem(i).text() == s.name:
+					for j in range(0, self.transition_table_ui.columnCount() - 2):
+						for ns in states:
+							if ns.name == self.transition_table_ui.item(i,j).text():
+								s.add_transition(Transition(self.transition_table_ui.horizontalHeaderItem(j).text(), ns))
+		for j in range(0, self.transition_table_ui.columnCount() - 2):
+			newΣ.append(self.transition_table_ui.horizontalHeaderItem(j).text())
+
+		auts = []
+		newA = Automaton(states, finalStates, initialState, newΣ, Globals.selected.name)
+		for a in Globals.automata:
+			if a.name != Globals.selected.name:
+				auts.append(a)
+			else:
+				auts.append(newA)
+		Globals.automata = auts
+		Globals.selected = newA
+		self.saveAF.emit(Globals.selected)
 
 
 class StateList(QListWidget):
