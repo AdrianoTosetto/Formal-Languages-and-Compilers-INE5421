@@ -621,12 +621,12 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("Q" + str(self.i)))
 		for i in range(0, len(self.alphabet)):
 			self.transition_table_ui.setItem(count,i,QTableWidgetItem("-"))
-		for i in range(0, count+1):
-			r = QRadioButton()
-			c = QCheckBox()
-			self.initial_state_radio_group.addButton(r)
-			self.transition_table_ui.setCellWidget(i,column_count,QRadioButton())
-			self.transition_table_ui.setCellWidget(i,column_count+1,c)
+
+		rb = QRadioButton()
+		cb = QCheckBox()
+		self.initial_state_radio_group.addButton(rb)
+		self.transition_table_ui.setCellWidget(count,column_count,rb)
+		self.transition_table_ui.setCellWidget(count,column_count+1,cb)
 
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
@@ -705,6 +705,9 @@ class addAutomatonTab(QWidget):
 		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
 		self.edit_alphabet.setText(new_text)
 	def showAutomaton(self, af):
+		self.list_states.clear()
+
+		self.alphabet = af.Σ
 		self.transition_table_ui.setRowCount(len(af.states))
 		self.transition_table_ui.setColumnCount(len(af.Σ) + 2)
 		self.setColsLabels(af.Σ)
@@ -712,6 +715,9 @@ class addAutomatonTab(QWidget):
 		self.initial_state_radio_group = QButtonGroup()
 		for i in range(0, len(states_list)):
 			s = states_list[i]
+			item = StateItem(s.name)
+			item.setFlags(item.flags() | Qt.ItemIsEditable)
+			self.list_states.addItem(item)
 			self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(s.name))
 			cb = QCheckBox()
 			rb = QRadioButton()
