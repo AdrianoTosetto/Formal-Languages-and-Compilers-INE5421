@@ -592,7 +592,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setVerticalHeaderItem(0, StateTableItem("Q0"))
 		self.set_placeholders()
 		self.alphabet = []
-
+		self.showAutomaton(Globals.automata[0])
 	def setPolicyEdits(self):
 		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.edit_alphabet.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -704,6 +704,44 @@ class addAutomatonTab(QWidget):
 			return
 		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
 		self.edit_alphabet.setText(new_text)
+	def showAutomaton(self, af):
+		self.transition_table_ui.setRowCount(len(af.states))
+		self.transition_table_ui.setColumnCount(len(af.Σ) + 2)
+		self.setColsLabels(af.Σ)
+		states_list = list(af.states)
+		self.initial_state_radio_group = QButtonGroup()
+		for i in range(0, len(states_list)):
+			s = states_list[i]
+			self.transition_table_ui.setVerticalHeaderItem(i, StateTableItem(s.name))
+			cb = QCheckBox()
+			rb = QRadioButton()
+			self.initial_state_radio_group.addButton(rb)
+			if s.isAcceptance:
+				cb.setChecked(True)
+			if s == af.initialState:
+				rb.setChecked(True)
+			self.transition_table_ui.setCellWidget(i, len(af.Σ)+1, cb)
+			self.transition_table_ui.setCellWidget(i, len(af.Σ), rb)
+
+		for i in range(0, len(states_list)):
+			s = states_list[i]
+			for t in s.transitions:
+				self.set_transition_cell(s.name, t.target_state.name, t.symbol)
+
+		self.set_transition_cell('q0_0', 'q0', 'b')
+
+	def set_transition_cell(self, state, target, symbol):
+		row = -1
+		column = -1
+		for i in range(0, self.transition_table_ui.columnCount()):
+			if self.transition_table_ui.horizontalHeaderItem(i).text() == symbol:
+				print("coluna = " + str(i))
+				column = i
+		for i in range(0, self.transition_table_ui.rowCount()):
+			if self.transition_table_ui.verticalHeaderItem(i).text() == state:
+				print("linha = " + str(i))
+				row = i
+		self.transition_table_ui.setItem(row, column, QTableWidgetItem(target))
 
 
 class StateList(QListWidget):
