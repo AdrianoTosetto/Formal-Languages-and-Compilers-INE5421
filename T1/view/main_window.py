@@ -81,19 +81,27 @@ class MainWindow(QWidget):
 		self.update_gr()
 		self.center.setText(str(gram))
 		Globals.selected = copy.deepcopy(gram)
-		print(gram.get_productions_from('A'))
 		nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
 			prods.append(gram.get_productions_from(nt))
 		self.MyTableWidget.update(nts, prods)
+	def select_automaton(self, aut):
+		self.update_af()
+		self.center.setText(str(aut))
+		Globals.selected = copy.deepcopy(aut)
+		'''nts = gram.get_non_terminals()
+		prods = []
+		for nt in nts:
+			prods.append(gram.get_productions_from(nt))
+		self.MyTableWidget.update(nts, prods)'''
 	def addStuff(self):
 		if Globals.displayed == 1:
 			self.add_gr()
 		elif Globals.displayed == 2:
 			print("Adicionadas ERs")
 		elif Globals.displayed == 3:
-			print("Adicionados AFs")
+			self.add_af()
 		else:
 			print("Erro")
 	def update_stuff(self):
@@ -102,7 +110,7 @@ class MainWindow(QWidget):
 		elif Globals.displayed == 2:
 			print("Atualizadas ERs")
 		elif Globals.displayed == 3:
-			print("Atualizadas AFs")
+			self.update_af()
 		else:
 			print("Erro")
 	def deleteStuff(self):
@@ -114,11 +122,18 @@ class MainWindow(QWidget):
 						grams.append(g)
 				Globals.grammars = grams
 				self.update_gr()
+			if type(Globals.selected) == type(Automaton([],[], State(""))):
+				auts = []
+				for a in Globals.automata:
+					if a.name != Globals.selected.name:
+						auts.append(a)
+				Globals.automata = auts
+				self.update_af()
 		self.center.setText('')
 		Globals.selected = None
 
 	def add_gr(self):
-		newG = Grammar([Production('S', '&')])
+		newG = Grammar([Production('S', '&')], add = True)
 		Globals.selected = newG
 		self.update_gr()
 
@@ -130,6 +145,21 @@ class MainWindow(QWidget):
 			item_widget.clicked.connect(functools.partial(self.select_grammar, g))
 			self.grList.setItemWidget(item, item_widget)
 			self.grList.addItem(item)
+
+	def add_af(self):
+		q0 = State("q0", True)
+		newM = Automaton([q0], [q0], q0, add = True)
+		Globals.selected = newM
+		self.update_af()
+
+	def update_af(self):
+		self.afList.clear()
+		for a in Globals.automata:
+			item = QListWidgetItem(self.afList)
+			item_widget = AutomatonButton(a.name, a)
+			item_widget.clicked.connect(functools.partial(self.select_automaton, a))
+			self.afList.setItemWidget(item, item_widget)
+			self.afList.addItem(item)
 
 	def generateRightSide(self):
 		self.optionsAF = QWidget()
@@ -225,7 +255,6 @@ class MainWindow(QWidget):
 		self.showER.setLayout(self.erLayout)
 
 		self.grList = QListWidget(self)
-		self.grList.setDragEnabled(True)
 		self.afList = QListWidget(self)
 		self.erList = QListWidget(self)
 		self.listLayout = QVBoxLayout()
@@ -233,6 +262,7 @@ class MainWindow(QWidget):
 		self.listLayout.addWidget(self.erList)
 		self.listLayout.addWidget(self.afList)
 		self.update_gr()
+		self.update_af()
 		self.grList.setHidden(True)
 		self.afList.setHidden(True)
 		self.erList.setHidden(True)
@@ -248,6 +278,11 @@ class GrammarButton(QPushButton):
 		self.grammar = grammar
 		super().__init__(QString)
 
+class AutomatonButton(QPushButton):
+	def __init__(self, QString, automaton):
+		self.automaton = automaton
+		super().__init__(QString)
+
 
 class MyTableWidget(QWidget):
 	def __init__(self, parent):
@@ -256,12 +291,10 @@ class MyTableWidget(QWidget):
 		self.tabs = QTabWidget()
 		self.tab1 = addGrammarTab(["S"], [["&"]])
 		self.tab2 = addAutomatonTab()
-		self.tab3 = AutomataOperationsTab()
 		self.tabs.resize(300,200)
 
 		self.tabs.addTab(self.tab1,"Add Grammar")
 		self.tabs.addTab(self.tab2,"Add AF")
-		self.tabs.addTab(self.tab3, "AF Operations")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -378,6 +411,8 @@ class addGrammarTab(QWidget):
 				if c is '|':
 					prodByNT.append(prod)
 					prod = ''
+					continue
+				elif c is ' ':
 					continue
 				prod = prod + c
 			prodByNT.append(prod)
@@ -659,23 +694,23 @@ class TransitionTable:
 	def __init__(self):
 		print('something')
 
-class AutomataOperationsTab(QWidget): 
-	def __init__(self, parent=None):   
+class AutomataOperationsTab(QWidget):
+	def __init__(self, parent=None):
 		super(QWidget, self).__init__(parent)
 		self.layout = QVBoxLayout(self)
 		self.tabs = QTabWidget()
-		self.tab1 = AutomataOperationsTab()
+		self.tab1 = QWidget()
 		self.tab2 = QWidget()
-		self.tabs.resize(300,200) 
- 
+		self.tabs.resize(300,200)
+
 		self.tabs.addTab(self.tab1,"Union")
 		self.tabs.addTab(self.tab2,"Concatenation")
- 
+
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
         #self.tab1.layout.addWidget(self.pushButton1)
         #self.tab1.setLayout(self.tab1.layout)
-       
+
 		self.layout.addWidget(self.tabs)
 		self.setLayout(self.layout)
 	@pyqtSlot()
@@ -684,48 +719,16 @@ class AutomataOperationsTab(QWidget):
 		for currentQTableWidgetItem in self.tableWidget.selectedItems():
 			print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
-
-
-
-class TwoAutomataOperation(QWidget):
+class UnionTab(QWidget):
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.top_panel = QWidget()
 		self.bottom_panel = QWidget()
-		self.button_af1 = QLineEdit("Automato 1")
-		self.button_af2 = QLineEdit("Automato 2")
-		self.action_button = QPushButton()
-		self.action_button.clicked.connect(self.operation_button_action)
+		self.button_af1 = QPushButton()
+		self.button_af2 = QPushButton()
 		self.top_layout = QGridLayout()
 		self.bottom_layout = QGridLayout()
 		self.set_top_panel()
-		self.set_bottom_panel()
-		self.set_layout()
-	def action_button_label(self, label):
-		self.action_button.setText(label)
 	def set_top_panel(self):
 		self.top_layout.addWidget(self.button_af1, 0, 0)
 		self.top_layout.addWidget(self.button_af2, 1, 0)
-		self.top_panel.setLayout(self.top_layout)
-	def set_bottom_panel(self):
-		return
-	def set_layout(self):
-		self.layout = QGridLayout()
-		self.layout.addWidget(self.top_panel, 0,0)
-		self.layout.addWidget(self.bottom_panel, 1,0)
-		self.setLayout(self.layout)
-	def operation_button_action(self):
-		return
-
-class UnionTab(TwoAutomataOperation):
-	def __init__(self):
-		super(TwoAutomataOperation,self).__init__()
-
-	def operation_button_action(self):
-		print('union')
-class ConcatenationTab(TwoAutomataOperation):
-	def __init__(self):
-		super(TwoAutomataOperation,self).__init__()
-
-	def operation_button_action(self):
-		print('concatenation')

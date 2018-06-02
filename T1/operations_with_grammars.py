@@ -7,12 +7,16 @@ import copy
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
             'O', 'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-def grammar_union(gr1, gr2):
+def grammar_union(gr1, gr2, add):
     hasEpsilon = False
     oldProds1 = copy.deepcopy(gr1.productions)
     initial1 = copy.deepcopy(gr1.productions[0].leftSide)
     oldNonTerminals1 = set()
     oldProds2 = copy.deepcopy(gr2.productions)
+
+    if newG not in Globals.grammars:
+        Globals.grammars.append(newG)
+        Globals.grammar_count += 1
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
     count = 0
@@ -88,15 +92,11 @@ def grammar_union(gr1, gr2):
 
     newProds = newProds + oldProds1 + oldProds2
 
-    newG = Grammar(newProds, gr1.name + " ∪ " + gr2.name)
-
-    if newG not in Globals.grammars:
-        Globals.grammars.append(newG)
-        Globals.grammar_count += 1
+    newG = Grammar(newProds, gr1.name + " ∪ " + gr2.name, add)
 
     return newG
 
-def grammar_concatenation(gr1, gr2):
+def grammar_concatenation(gr1, gr2, add):
     hasEpsilon = False
     oldProds1 = copy.deepcopy(gr1.productions)
     initial1 = copy.deepcopy(gr1.productions[0].leftSide)
@@ -167,15 +167,11 @@ def grammar_concatenation(gr1, gr2):
 
     newProds = oldProds1 + oldProds2
 
-    newG = Grammar(newProds, gr1.name + "." + gr2.name)
-
-    if newG not in Globals.grammars:
-        Globals.grammars.append(newG)
-        Globals.grammar_count += 1
+    newG = Grammar(newProds, gr1.name + "." + gr2.name, add)
 
     return newG
 
-def grammar_kleene_star(gr):
+def grammar_kleene_star(gr, add = False):
     oldProds = copy.deepcopy(gr.productions)
     initial = copy.deepcopy(gr.productions[0].leftSide)
     oldNonTerminals = set()
@@ -227,10 +223,6 @@ def grammar_kleene_star(gr):
 
     newProds = newProds + oldProds
 
-    newG = Grammar(newProds, gr.name + "*")
-
-    if newG not in Globals.grammars:
-        Globals.grammars.append(newG)
-        Globals.grammar_count += 1
+    newG = Grammar(newProds, gr.name + "*", add)
 
     return newG
