@@ -669,19 +669,14 @@ class addAutomatonTab(QWidget):
 		column_count = len(self.alphabet)
 		self.transition_table_ui.setRowCount(count+1)
 		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("q" + str(self.i)))
-		alphabet =  [str(self.list_symbol.item(i).text()) for i in range(self.list_symbol.count())]
-		for i in range(0, len(alphabet)):
+		for i in range(0, len(self.alphabet)):
 			self.transition_table_ui.setItem(count,i,QTableWidgetItem("-"))
 
 		rb = QRadioButton()
 		cb = QCheckBox()
 		self.initial_state_radio_group.addButton(rb)
-		if len(alphabet) == 0:
-			self.transition_table_ui.setCellWidget(count,0,rb)
-			self.transition_table_ui.setCellWidget(count,1,cb)
-		else:
-			self.transition_table_ui.setCellWidget(count,column_count,rb)
-			self.transition_table_ui.setCellWidget(count,column_count+1,cb)
+		self.transition_table_ui.setCellWidget(count,column_count,rb)
+		self.transition_table_ui.setCellWidget(count,column_count+1,cb)
 
 	def remove_state(self):
 		item = self.list_states.takeItem(self.list_states.row(self.list_states.selectedItems()[0]))
@@ -856,12 +851,14 @@ class addAutomatonTab(QWidget):
 		finalStates = set()
 		initialState = None
 		newΣ = []
+		for j in range(0, self.transition_table_ui.columnCount() - 2):
+			newΣ.append(self.transition_table_ui.horizontalHeaderItem(j).text())
 		for i in range(0, self.transition_table_ui.rowCount()):
 			newS = State(self.transition_table_ui.verticalHeaderItem(i).text(), self.transition_table_ui.cellWidget(i, self.transition_table_ui.columnCount() - 1).checkState() == 2)
 			states.add(newS)
 			if newS.isAcceptance:
 				finalStates.add(newS)
-			if self.transition_table_ui.cellWidget(i, len(Globals.selected.Σ) + 1).isChecked():
+			if self.transition_table_ui.cellWidget(i, len(newΣ) + 1).isChecked():
 				initialState = newS
 		for i in range(0, self.transition_table_ui.rowCount()):
 			for s in states:
@@ -870,8 +867,6 @@ class addAutomatonTab(QWidget):
 						for ns in states:
 							if ns.name == self.transition_table_ui.item(i,j).text():
 								s.add_transition(Transition(self.transition_table_ui.horizontalHeaderItem(j).text(), ns))
-		for j in range(0, self.transition_table_ui.columnCount() - 2):
-			newΣ.append(self.transition_table_ui.horizontalHeaderItem(j).text())
 
 		auts = []
 		newA = Automaton(states, finalStates, initialState, newΣ, Globals.selected.name)
