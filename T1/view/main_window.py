@@ -558,13 +558,23 @@ class addAutomatonTab(QWidget):
 		self.edit_name = QLineEdit()
 		self.edit_name.setDragEnabled(True)
 		self.edit_alphabet = QLineEdit()
+		self.list_symbol  = QListWidget()
+		self.remove_symbol_button = QPushButton("Remover símbolo")
+		self.add_symbol_button = QPushButton("Adicionar símbolo")
+		self.add_symbol_button.clicked.connect(self.add_new_symbol)
+		self.add_remove_symbol_panel = QWidget()
+		self.add_remove_symbol_layout = QGridLayout()
+		self.add_remove_symbol_layout.addWidget(self.add_symbol_button, 0,0)
+		self.add_remove_symbol_layout.addWidget(self.remove_symbol_button, 1, 0)
+		self.add_remove_symbol_panel.setLayout(self.add_remove_symbol_layout)
+
 		self.add_new_state = QPushButton("Adicionar estado")
 		self.remove_state_button = QPushButton("Remover estado selecionado")
 		self.add_remove_state_layout.addWidget(self.add_new_state, 0,0)
 		self.add_remove_state_layout.addWidget(self.remove_state_button, 1, 0)
 		self.add_remove_panel.setLayout(self.add_remove_state_layout)
-		self.top_layout.addWidget(self.edit_name, 0, 0)
-		self.top_layout.addWidget(self.edit_alphabet, 0, 1)
+		self.top_layout.addWidget(self.add_remove_symbol_panel, 0, 0)
+		self.top_layout.addWidget(self.list_symbol, 0, 1)
 		self.top_layout.addWidget(self.add_remove_panel, 1,0)
 		self.setPolicyEdits()
 		self.setPolicyButtons()
@@ -599,6 +609,14 @@ class addAutomatonTab(QWidget):
 		self.set_placeholders()
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
+
+	def add_new_symbol(self):
+		symbols = [str(self.list_symbol.item(i).text()) for i in range(self.list_symbol.count())]
+		c_ord = -1
+		for s in symbols:
+			if (c_ord < ord(s)):
+				c_ord = ord(s)
+		print("novo symbolo = " + chr(c_ord+1) )
 	def setPolicyEdits(self):
 		self.edit_name.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.edit_alphabet.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -715,21 +733,38 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setHorizontalHeaderItem(i, StateTableItem("Inicial"))
 		self.transition_table_ui.setHorizontalHeaderItem(i+1, StateTableItem("Final"))
 	def alphabet_changed(self):
+		print(self.alphabet)
 		text = self.edit_alphabet.text()
+
+		self.transition_table_ui.insertColumn(1)
+		return
 		if len(text) == 1:
 			return
-		new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
+		if text[len(text)-1] == ",":
+			new_text = text[0:len(text)-1]
+			old_column_count = self.transition_table_ui.columnCount()
+			self.transition_table_ui.setColumnCount(old_column_count - 3)
+		else:
+			new_text = text[0:len(text) - 1] + "," + text[len(text) - 1]
+			old_column_count = self.transition_table_ui.columnCount()
+			self.transition_table_ui.setColumnCount(old_column_count - 2)
+			self.transition_table_ui.setColumnCount(old_column_count + 1)
+			self.setColsLabels(new_text.split(","))
 		self.edit_alphabet.setText(new_text)
+		#self.showAutomaton(Globals.selected)
 
 	def showAutomaton(self, af):
 		self.list_states.clear()
-
+		self.edit_alphabet.setText(','.join(map(str, af.Σ)) )
 		self.alphabet = af.Σ
 		self.transition_table_ui.setRowCount(len(af.states))
 		self.transition_table_ui.setColumnCount(len(af.Σ) + 2)
 		self.setColsLabels(af.Σ)
 		states_list = list(af.states)
 		self.initial_state_radio_group = QButtonGroup()
+		for i in range(0, len(af.Σ)):
+			item = QListWidgetItem(af.Σ[i])
+			self.list_symbol.addItem(item)
 		for i in range(0, len(states_list)):
 			s = states_list[i]
 			item = StateItem(s.name)
@@ -867,3 +902,15 @@ class UnionTab(QWidget):
 	def set_top_panel(self):
 		self.top_layout.addWidget(self.button_af1, 0, 0)
 		self.top_layout.addWidget(self.button_af2, 1, 0)
+
+
+class Edit(QLineEdit):
+	def __init__(self, parent=None):
+		QLineEdit.__init__(self, parent)
+
+	def keyPressEvent(self, event):
+		if type(event) == QtGui.QKeyEvent:
+			#self.setText (chr(event.key()).lower())
+			event.accept()
+		else:
+			event.ignore()
