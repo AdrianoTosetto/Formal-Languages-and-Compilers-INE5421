@@ -46,6 +46,7 @@ class MainWindow(QWidget):
 		self.updateAFD.connect(self.MyTableWidget.tab2.showAutomaton)
 		self.updateAFND.connect(self.MyTableWidget.tab4.showAutomaton)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
+		self.MyTableWidget.tab2.saveAFND.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
@@ -501,7 +502,8 @@ class RemoveProdButton(QPushButton):
 
 
 class addAutomatonTab(QWidget):
-	saveAF = QtCore.pyqtSignal(NDAutomaton)
+	saveAFND = QtCore.pyqtSignal(NDAutomaton)
+	saveAF = QtCore.pyqtSignal(Automaton)
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -724,7 +726,7 @@ class addAutomatonTab(QWidget):
 		newAF.name = Globals.selected.name + " (nondeterministic)"
 		Globals.automata.append(newAF)
 		Globals.selected = newAF
-		self.saveAF.emit(Globals.selected)
+		self.saveAFND.emit(Globals.selected)
 
 	def setColsLabels(self, labels):
 		i = 0

@@ -315,8 +315,11 @@ class addNDAutomatonTab(QWidget):
 
 		for i in range(0, len(states_list)):
 			s = states_list[i]
-			for t in s.transitions:
-				self.set_transition_cell(s.name, t.target_state.name, t.symbol)
+			for t in s.ndtransitions:
+				str_states_names = ""
+				for ts in t.target_states:
+					str_states_names += ts.name
+				self.set_transition_cell(s.name, str_states_names, t.symbol)
 
 	def set_transition_cell(self, state, target, symbol):
 		row = -1
