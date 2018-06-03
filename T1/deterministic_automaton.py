@@ -1,5 +1,6 @@
 from globals import *
 import copy
+from regular_grammar import *
 
 
 class Automaton:
@@ -402,6 +403,70 @@ class Automaton:
 					#print(tt.target_state)
 
 		return Automaton(set(newStates), set(newFinalStates), newInitialState, self.Σ)
+
+	def rename_states_alphabet(self):
+		alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+		            'O', 'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+		newInitialState = self.initialState
+		newFinalStates = set()
+		oldStates = []
+		newStates = copy.deepcopy(self.states)
+
+		i = 0
+
+		for s in newStates:
+			if s == newInitialState:
+				newInitialState.name = str(alphabet[i])
+			oldStates.append(s)
+			s.name = str(alphabet[i])
+			i += 1
+			if s.isAcceptance:
+				newFinalStates.add(s)
+		for s in newStates:
+			trans = []
+			for t in s.transitions:
+				it = 0
+				for os in oldStates:
+					if t.target_state == os:
+						for ns in newStates:
+							if ns == State(str(alphabet[it])):
+								trans.append(Transition(t.symbol, ns))
+					it += 1
+			s.transitions = []
+			for t in trans:
+				s.add_transition(t)
+			if s == newInitialState:
+				newInitialState = s
+				#for tt in t.target_state.transitions:
+					#print(tt.target_state)
+
+		return Automaton(set(newStates), set(newFinalStates), newInitialState, self.Σ)
+
+	def to_grammar(self):
+		newAuto = self.rename_states_alphabet()
+		prods = []
+		if newAuto.initialState.isAcceptance:
+			for t in newAuto.initialState.transitions:
+				prods.append(Production('S', t.symbol + t.target_state.name))
+				if t.target_state.isAcceptance:
+					prods.append(Production('S', t.symbol))
+			prods.append(Production('S', '&'))
+		for p in newAuto.initialState.transitions:
+			if newAuto.initialState.isAcceptance:
+				prods.append(Production(newAuto.initialState.name, p.symbol + p.target_state.name))
+				if p.target_state.isAcceptance:
+					prods.append(Production(newAuto.initialState.name, p.symbol))
+			else:
+				prods.append(Production('S', p.symbol + p.target_state.name))
+				if p.target_state.isAcceptance:
+					prods.append(Production('S', p.symbol))
+		for s in newAuto.states:
+			if s != newAuto.initialState:
+				for p in s.transitions:
+					prods.append(Production(s.name, p.symbol + p.target_state.name))
+					if p.target_state.isAcceptance:
+						prods.append(Production(s.name, p.symbol))
+		return Grammar(prods)
 
 
 class Transition:
