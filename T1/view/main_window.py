@@ -521,7 +521,7 @@ class addAutomatonTab(QWidget):
 		#self.transition_table_ui.move(0,0)
 
 
-		self.add_automaton_button = QPushButton("Adicionar")
+		self.add_automaton_button = QPushButton("Salvar")
 		self.make_non_deterministic_button = \
 			QPushButton("Gerar NAF") # botao para criar a tabela com o alfabeto inserido
 		self.add_automaton_button.clicked.connect(self.save_automaton)
