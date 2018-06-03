@@ -109,15 +109,6 @@ class Tree:
 	def costura(self):
 		self.root.costura()
 
-
-class Pendency:
-	def __init__(self, node, action):
-		self.node = node
-		self.action = action
-
-	def get_pendency(self):
-		return (self.node, self.action)
-
 class Node:
 
 	def __init__(self, symbol, left=None, right=None):
@@ -582,8 +573,49 @@ class Node:
 
 		return node_composition
 
+def normalize(regex):
+    last = ' '
+    new = ''
+    for s in regex:
+        if s == ' ' and last == ' ':
+            continue
+        elif s == ' ' and last != ' ':
+            new += s
+            last = s
+            continue
+        elif s != ' ' and last != ' ':
+            new += ' ' + s
+            last = s
+            continue
+        else:
+            new += s
+            last = s
+    print(new)
+    last = ' '
+    new2 = ''
+    for n in new:
+        if n == ' ':
+            new2 += n
+            continue
+        isdigit = n.lower() in "abcdefghijklmnopqrstuvwxyz" or n in "0123456789" or n == "("
+        islastdigit = last.lower() in "abcdefghijklmnopqrstuvwxyz" or last in "0123456789" or last == ")"
+        if isdigit and islastdigit:
+            new2 += '. ' + n
+        else:
+            new2 += n
+        if n not in "?*+":
+            last = n
+    print(new2)
+    for n2 in new2:
+        if n2 in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            n2 = n2.lower()
+    return new2
+
+
+
 class RegExp:
 	def __init__(self, regex):
+		regex = normalize(regex)
 		self.regex = regex
 	def get_compositions_from(self, compositions, symbol):
 		for c in compositions:
