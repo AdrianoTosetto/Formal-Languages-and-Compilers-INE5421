@@ -1049,6 +1049,8 @@ class AutomatonTable(QTableWidget):
 	def dragEnterEvent(self, event):
 		print('ender')
 		event.accept()
+	def keyPressEvent(self, event):
+		print("deletado")
 class TransitionTable:
 	def __init__(self):
 		print('something')
