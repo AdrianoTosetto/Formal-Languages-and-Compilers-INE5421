@@ -11,6 +11,7 @@ from operations_with_grammars import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 from nd_add_automaton_tab import *
+from operations_with_automata import *
 hey = "haha"
 
 class MainWindow(QWidget):
@@ -496,7 +497,7 @@ class RemoveProdButton(QPushButton):
 
 
 class addAutomatonTab(QWidget):
-	saveAF = QtCore.pyqtSignal(Automaton)
+	saveAF = QtCore.pyqtSignal(NDAutomaton)
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -512,12 +513,12 @@ class addAutomatonTab(QWidget):
 
 
 		self.add_automaton_button = QPushButton("Adicionar")
-		self.create_transition_table_button = \
-			QPushButton("Criar tabela") # botao para criar a tabela com o alfabeto inserido
+		self.make_non_deterministic_button = \
+			QPushButton("Gerar NAF") # botao para criar a tabela com o alfabeto inserido
 		self.add_automaton_button.clicked.connect(self.save_automaton)
 		self.bottom_layout = QGridLayout()
-		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
-		self.create_transition_table_button.clicked.connect(self.create_transition_table)
+		self.bottom_layout.addWidget(self.make_non_deterministic_button,0,0)
+		self.make_non_deterministic_button.clicked.connect(self.make_non_deterministic)
 		self.bottom_layout.addWidget(self.add_automaton_button, 0,1)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
@@ -714,28 +715,12 @@ class addAutomatonTab(QWidget):
 		MainWindow.jesus = self.list_states.selectedItems()[0].text()
 		print(MainWindow.jesus)
 
-	def create_transition_table(self):
-		raw_text = self.edit_alphabet.text()
-		alphabet = raw_text.split(",")
-		alphabet = sorted(list(set(alphabet)), key=str.lower)
-		self.transition_table_ui.setColumnCount(len(alphabet) + 2)
-		self.setColsLabels(alphabet)
-		self.alphabet = alphabet
-		header = self.transition_table_ui.horizontalHeader()
-		for i in range(0, self.transition_table_ui.columnCount()):
-			header.setSectionResizeMode(i, QHeaderView.Stretch)
-		row_count = self.transition_table_ui.rowCount()
-		column_count = self.transition_table_ui.columnCount() - 2
-		for i in range(0, row_count):
-			for j in range(0, column_count):
-				self.transition_table_ui.setItem(i,j,QTableWidgetItem("(" + str(i) + "," + str(j) + ")"))
-		initial_state_radio_group = QButtonGroup()
-		for i in range(0, row_count):
-			r = QRadioButton()
-			c = QCheckBox()
-			self.initial_state_radio_group.addButton(r)
-			self.transition_table_ui.setCellWidget(i,column_count,QRadioButton())
-			self.transition_table_ui.setCellWidget(i,column_count+1,c)
+	def make_non_deterministic(self):
+		newAF = make_nondeterministic(Globals.selected)
+		newAF.name = Globals.selected.name + " (nondeterministic)"
+		Globals.automata.append(newAF)
+		Globals.selected = newAF
+		self.saveAF.emit(Globals.selected)
 
 	def setColsLabels(self, labels):
 		i = 0
