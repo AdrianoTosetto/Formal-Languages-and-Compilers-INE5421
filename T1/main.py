@@ -63,6 +63,8 @@ if __name__ == "__main__":
 
 	print(areEqual(nbs, getReverse(nas)))
 
+	print(nas.to_grammar())
+
 
 	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
 	t = Tree()
