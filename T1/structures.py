@@ -187,15 +187,17 @@ class Node:
 		if not self.is_leaf():
 			return set()
 		node_composition = set()
+		visited_down = set()
+		visited_up = set()
 		if self.costura_node.symbol == ".":
-			node_composition |= (self.handle_concatenation(self.costura_node, UP))
+			node_composition |= (self.handle_concatenation(self.costura_node, UP, visited_down, visited_up))
 		if self.costura_node.symbol == "?":
-			node_composition |= (self.handle_optional(self.costura_node, UP))
+			node_composition |= (self.handle_optional(self.costura_node, UP, visited_down, visited_up))
 		if self.costura_node.symbol == "*":
-			node_composition |= self.handle_star(self.costura_node, DOWN)
-			node_composition |= (self.handle_star(self.costura_node, UP))
+			node_composition |= self.handle_star(self.costura_node, DOWN, visited_down, visited_up)
+			node_composition |= (self.handle_star(self.costura_node, UP, visited_down, visited_up))
 		if self.costura_node.symbol == "|":
-			node_composition = self.handle_union(self.costura_node, UP)
+			node_composition = self.handle_union(self.costura_node, UP, visited_down, visited_up)
 
 		return node_composition
 
@@ -291,7 +293,8 @@ class Node:
 				node_composition |=  node.handle_optional(node.left, DOWN)
 				node_composition |=  node.handle_optional(node.left, UP)
 				#pendencies.push(Pendency(node.left), UP)
-
+		################################3
+		################################3
 		while not pendencies.isEmpty():
 			p = pendencies.pop()
 
@@ -334,12 +337,14 @@ class Node:
 			elif node.left.symbol == "*":
 				node_composition |= node.handle_star(node.left, DOWN, visited_down, visited_up)
 				node_composition |= node.handle_star(node.left, UP,  visited_down, visited_up)
+			elif node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN,  visited_down, visited_up)
 		if action == UP:
 			visited_up.add(node)
 			if node.costura_node.symbol == 'λ':
 				node_composition |= {node.costura_node}
 			if node.costura_node.symbol == ".":
-				node_composition |= node.handle_concatenation(node.costura_node, UP)
+				node_composition |= node.handle_concatenation(node.costura_node, UP, visited_down, visited_up)
 			elif node.costura_node.symbol == "?":
 				node_composition |= node.handle_optional(node.costura_node, UP,  visited_down, visited_up)
 				#pendencies.push(node.left, UP)
@@ -361,10 +366,10 @@ class Node:
 			right_most = node.right_most_node()
 			print("right most "+str(right_most))
 			if right_most.costura_node.symbol == "*":
-				node_composition |= right_most.handle_star(right_most.costura_node, DOWN)
-				node_composition |= right_most.handle_star(right_most.costura_node, UP)
+				node_composition |= right_most.handle_star(right_most.costura_node, DOWN, visited_down, visited_up)
+				node_composition |= right_most.handle_star(right_most.costura_node, UP, visited_down, visited_up)
 			elif right_most.costura_node.symbol == ".":
-				node_composition |= right_most.handle_concatenation(right_most.costura_node, UP)
+				node_composition |= right_most.handle_concatenation(right_most.costura_node, UP,visited_down, visited_up)
 			elif right_most.costura_node.symbol == "?":
 				#node_composition |= right_most.handle_optional(right_most.costura_node, DOWN)
 				node_composition |= right_most.handle_optional(right_most.costura_node, UP,visited_down,\
@@ -377,6 +382,27 @@ class Node:
 				node_composition |= {node.left}
 			if node.right.is_leaf():
 				node_composition |= {node.right}
+			if node.left.symbol == ".":
+				node_composition |= node.handle_concatenation(node.left, DOWN, visited_down, visited_up)
+			if node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN, visited_down, visited_up)
+			if node.left.symbol == "*":
+				node_composition |= node.handle_star(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_star(node.left, UP, visited_down, visited_up)
+			if node.left.symbol == "?":
+				node_composition |= node.handle_optional(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_optional(node.left, UP, visited_down, visited_up)
+
+			if node.right.symbol == ".":
+				node_composition |= node.handle_concatenation(node.right, DOWN, visited_down, visited_up)
+			if node.right.symbol == "|":
+				node_composition |= node.handle_union(node.right, DOWN, visited_down, visited_up)
+			if node.right.symbol == "*":
+				node_composition |= node.handle_star(node.right, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_star(node.right, UP, visited_down, visited_up)
+			if node.right.symbol == "?":
+				node_composition |= node.handle_optional(node.right, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_optional(node.right, UP, visited_down, visited_up)
 		return node_composition
 	def post_order(self):
 
@@ -426,8 +452,7 @@ class Node:
 				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
 			if self.right.symbol == "|":
-				node_composition |= self.handle_star(self.right, DOWN, visited_down, visited_up)
-				node_composition |= self.handle_star(self.right, UP, visited_down ,visited_up)
+				node_composition |= self.handle_union(self.right, DOWN, visited_down, visited_up)
 			if self.right.symbol == "?":
 				node_composition |= self.handle_optional(self.right,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.right,UP, visited_down,visited_up)
@@ -440,8 +465,7 @@ class Node:
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
 			if self.left.symbol == "|":
-				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
-				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+				node_composition |= self.handle_union(self.left, DOWN, visited_down, visited_up)
 			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
@@ -454,8 +478,7 @@ class Node:
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
 			if self.left.symbol == "|":
-				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
-				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+				node_composition |= self.handle_union(self.left, DOWN, visited_down, visited_up)
 			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
@@ -469,8 +492,7 @@ class Node:
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
 			if self.left.symbol == "|":
-				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
-				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+				node_composition |= self.handle_union(self.left, DOWN, visited_down, visited_up)
 			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
@@ -487,8 +509,7 @@ class Node:
 				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
 				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
 			if self.left.symbol == "|":
-				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
-				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+				node_composition |= self.handle_union(self.left, DOWN, visited_down, visited_up)
 			if self.left.symbol == "?":
 				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
@@ -545,6 +566,7 @@ class RegExp:
 		q0_composition = ret[1]
 		Σ = ret[2]
 
+		print("COMPS: " + str(compositions))
 		unvisited = [q0_composition]
 		visited = []
 		trans = []
@@ -561,7 +583,36 @@ class RegExp:
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
         
-		print(q0_composition)
+		print("visitados = " + str(visited))
+		states = []
+		finalStates = []
+		for v in visited:
+			accpt = False
+			for c in v:
+				if c.label == -1:
+					accpt = True
+			state = State(str(v), accpt)
+			states.append(state)
+			if state.isAcceptance:
+				finalStates.append(state)
+			if state.name == str(q0_composition):
+				initialState = state
+		for s in states:
+			for s1 in states:
+				for t in trans:
+					if s.name == str(t[0]) and s1.name == str(t[2]):
+						s.add_transition(Transition(t[1], s1))
+
+		result_automaton = Automaton(states, finalStates, initialState, Σ).rename_states()
+		r = result_automaton.minimize()
+		g = r.to_grammar()
+		sent = g.produce(4)
+
+		for s in sent:
+			print(s)
+			print(r.process_input(s))
+
+		#print(result_automaton)
 class StateComposition:
 
 	def __init__(self, state_composition, Σ):

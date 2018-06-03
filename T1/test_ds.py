@@ -15,7 +15,8 @@ if __name__ == "__main__":
 	#expr = ' ( ( C . D * ) * ) ? . B'
 	#expr = '( ( C * | ( A . D ) ? ) . ( A . B ) * ) ?'
 	#expr = '( A * ) *'
-	expr = '( A . B . C ) * | ( C . B . A ) *'
+	#expr = '( A . B . C ) * | ( C . B . A ) *'
+	expr = '( 0 | 1 . ( 0 . 1 * . 0 ) * . 1 ) . ( 0 | 1 . ( 0 . 1 * . 0 ) * . 1 ) *'
 	re = RegExp(expr)
 	re.to_automaton()
 	'''q0 = State('q0')
