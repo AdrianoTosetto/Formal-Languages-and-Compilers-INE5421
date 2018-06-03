@@ -7,7 +7,7 @@ from operations_with_automata import *
 from functools import *
 def find_key(value, dictionary):
     return reduce(lambda x, y: x if x is not None else y,
-                  map(lambda x: x[0] if x[1] == value else None, 
+                  map(lambda x: x[0] if x[1] == value else None,
                       dictionary.items()))
 
 if __name__ == "__main__":
@@ -16,9 +16,9 @@ if __name__ == "__main__":
 	#expr = '( ( C * | ( A . D ) ? ) . ( A . B ) * ) ?'
 	#expr = '( A * ) *'
 	#expr = '( A . B . C ) * | ( C . B . A ) *'
-	expr = '( 0 | 1 . ( 0 . 1 * . 0 ) * . 1 ) . ( 0 | 1 . ( 0 . 1 * . 0 ) * . 1 ) *'
+	expr = '( 0 | 1 . ( 0 . 1 * . 0 ) * . 1 ) +'
 	re = RegExp(expr)
-	re.to_automaton()
+	print(re.to_automaton())
 	'''q0 = State('q0')
 	q1 = State('q1', True)
 
