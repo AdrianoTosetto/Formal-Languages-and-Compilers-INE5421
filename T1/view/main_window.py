@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 from nd_add_automaton_tab import *
 from operations_with_automata import *
+from simone_tab import *
 hey = "haha"
 
 class MainWindow(QWidget):
@@ -307,12 +308,14 @@ class MyTableWidget(QWidget):
 		self.tab2 = addAutomatonTab()
 		self.tab3 = GrammarOperationsTab()
 		self.tab4 = addNDAutomatonTab()
+		self.tab5 = SimoneTab()
 		self.tabs.resize(300,200)
 
 		self.tabs.addTab(self.tab1,"Add GR")
 		self.tabs.addTab(self.tab2,"Add AF")
 		self.tabs.addTab(self.tab3,"GR Operations")
 		self.tabs.addTab(self.tab4,"Add NAF")
+		self.tabs.addTab(self.tab5, "Simone")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
