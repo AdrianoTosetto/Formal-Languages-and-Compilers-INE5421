@@ -10,11 +10,12 @@ from regular_grammar import *
 from operations_with_grammars import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
-
+from nd_add_automaton_tab import *
 hey = "haha"
 
 class MainWindow(QWidget):
 	jesus = "-"
+	jesus1 = "-"
 	updateAF = QtCore.pyqtSignal(Automaton)
 	def __init__(self):
 		self.app = QApplication(sys.argv)
@@ -41,6 +42,7 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
 		self.MyTableWidget.tab3.updateGR.connect(self.select_grammar)
 		self.updateAF.connect(self.MyTableWidget.tab2.showAutomaton)
+		self.updateAF.connect(self.MyTableWidget.tab4.showAutomaton)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
@@ -298,11 +300,13 @@ class MyTableWidget(QWidget):
 		self.tab1 = addGrammarTab(["S"], [["&"]], "G1")
 		self.tab2 = addAutomatonTab()
 		self.tab3 = GrammarOperationsTab()
+		self.tab4 = addNDAutomatonTab()
 		self.tabs.resize(300,200)
 
 		self.tabs.addTab(self.tab1,"Add GR")
 		self.tabs.addTab(self.tab2,"Add AF")
 		self.tabs.addTab(self.tab3,"GR Operations")
+		self.tabs.addTab(self.tab4,"Add NAF")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -844,6 +848,7 @@ class addAutomatonTab(QWidget):
 		Globals.selected = newA
 		self.saveAF.emit(Globals.selected)
 
+
 class GrammarOperationsTab(QWidget):
 	updateGR = QtCore.pyqtSignal(Grammar)
 	def __init__(self):
@@ -1054,6 +1059,7 @@ class AutomatonTable(QTableWidget):
 class TransitionTable:
 	def __init__(self):
 		print('something')
+
 
 class AutomataOperationsTab(QWidget):
 	def __init__(self, parent=None):
