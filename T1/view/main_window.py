@@ -16,7 +16,8 @@ hey = "haha"
 class MainWindow(QWidget):
 	jesus = "-"
 	jesus1 = "-"
-	updateAF = QtCore.pyqtSignal(Automaton)
+	updateAFD = QtCore.pyqtSignal(Automaton)
+	updateAFND = QtCore.pyqtSignal(NDAutomaton)
 	def __init__(self):
 		self.app = QApplication(sys.argv)
 		super().__init__()
@@ -41,8 +42,8 @@ class MainWindow(QWidget):
 		self.MyTableWidget = MyTableWidget(self.rightSide)
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
 		self.MyTableWidget.tab3.updateGR.connect(self.select_grammar)
-		self.updateAF.connect(self.MyTableWidget.tab2.showAutomaton)
-		self.updateAF.connect(self.MyTableWidget.tab4.showAutomaton)
+		self.updateAFD.connect(self.MyTableWidget.tab2.showAutomaton)
+		self.updateAFND.connect(self.MyTableWidget.tab4.showAutomaton)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
@@ -97,7 +98,10 @@ class MainWindow(QWidget):
 		self.update_af()
 		self.center.setText(str(aut))
 		Globals.selected = copy.deepcopy(aut)
-		self.updateAF.emit(Globals.selected)
+		if type(Globals.selected) == type(Automaton({}, {}, State(''))):
+			self.updateAFD.emit(Globals.selected)
+		else:
+			self.updateAFND.emit(Globals.selected)
 		'''nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
