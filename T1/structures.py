@@ -180,6 +180,8 @@ class Node:
 		node_composition = set()
 		visited_down = set()
 		visited_up = set()
+		if self.costura_node.symbol == 'λ':
+			node_composition |= {self.costura_node}
 		if self.costura_node.symbol == ".":
 			node_composition |= (self.handle_concatenation(self.costura_node, UP, visited_down, visited_up))
 		if self.costura_node.symbol == "?":
@@ -471,6 +473,8 @@ class Node:
 		visited_up = set()
 		visited_down = set()
 		node_composition = set()
+		if self.is_leaf():
+			node_composition |= {self.costura_node}
 		if self.symbol == '|':
 			if self.right.is_leaf():
 				node_composition |= {self.left}
@@ -605,10 +609,12 @@ def normalize(regex):
             new2 += n
         if n not in "?*+":
             last = n
-    print(new2)
+    print("new2 = " +new2)
     for n2 in new2:
         if n2 in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
             n2 = n2.lower()
+    if len(new2) == 1:
+    	new2 = new2 + " | " + new2
     return new2
 
 
@@ -657,7 +663,7 @@ class RegExp:
 		ret = self.parse()
 		compositions = ret[0]
 		q0_composition = ret[1]
-		Σ = ret[2]
+		Σ = list(ret[2])
 
 		print("COMPS: " + str(compositions))
 		unvisited = [q0_composition]

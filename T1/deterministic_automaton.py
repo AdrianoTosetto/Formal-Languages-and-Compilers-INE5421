@@ -9,8 +9,11 @@ class Automaton:
 		if len(states) < 1:
 			return None
 		if name is None:
-			self.name = 'M' + str(Globals.automaton_count)
-			Globals.automaton_count += 1
+			i = 1
+			while Automaton({},{},State(''), name = 'M' + str(i)) in Globals.automata:
+				i+=1
+			self.name = 'M' + str(i)
+			#Globals.automaton_count += 1
 		else:
 			self.name = name
 		self.states = (states)
