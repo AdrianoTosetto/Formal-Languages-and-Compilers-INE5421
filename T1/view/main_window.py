@@ -20,6 +20,7 @@ class MainWindow(QWidget):
 	jesus1 = "-"
 	updateAFD = QtCore.pyqtSignal(Automaton)
 	updateAFND = QtCore.pyqtSignal(NDAutomaton)
+	updateER = QtCore.pyqtSignal(str)
 	def __init__(self):
 		self.app = QApplication(sys.argv)
 		super().__init__()
@@ -46,6 +47,9 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab3.updateGR.connect(self.select_grammar)
 		self.updateAFD.connect(self.MyTableWidget.tab2.showAutomaton)
 		self.updateAFND.connect(self.MyTableWidget.tab4.showAutomaton)
+		self.updateER.connect(self.MyTableWidget.tab5.set_edit_er)
+		self.MyTableWidget.tab5.saveER.connect(self.select_expression)
+		self.MyTableWidget.tab5.saveDS.connect(self.update_af)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.MyTableWidget.tab2.saveAFND.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
@@ -90,7 +94,7 @@ class MainWindow(QWidget):
 		Globals.displayed = 2
 	def select_grammar(self, gram):
 		self.update_gr()
-		self.center.setText(str(gram))
+		self.center.setText(gram.name + ":\n" + str(gram))
 		Globals.selected = copy.deepcopy(gram)
 		nts = gram.get_non_terminals()
 		prods = []
@@ -99,12 +103,17 @@ class MainWindow(QWidget):
 		self.MyTableWidget.update(nts, prods, gram.name)
 	def select_automaton(self, aut):
 		self.update_af()
-		self.center.setText(str(aut))
+		self.center.setText(aut.name + ":\n" + str(aut))
 		Globals.selected = copy.deepcopy(aut)
 		if type(Globals.selected) == type(Automaton({}, {}, State(''))):
 			self.updateAFD.emit(Globals.selected)
 		else:
 			self.updateAFND.emit(Globals.selected)
+	def select_expression(self, exp):
+		self.update_er()
+		self.center.setText(exp)
+		Globals.selcted = copy.deepcopy(exp)
+		self.updateER.emit(Globals.selected)
 		'''nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
@@ -114,7 +123,7 @@ class MainWindow(QWidget):
 		if Globals.displayed == 1:
 			self.add_gr()
 		elif Globals.displayed == 2:
-			print("Adicionadas ERs")
+			self.add_er()
 		elif Globals.displayed == 3:
 			self.add_af()
 		else:
@@ -123,7 +132,7 @@ class MainWindow(QWidget):
 		if Globals.displayed == 1:
 			self.update_gr()
 		elif Globals.displayed == 2:
-			print("Atualizadas ERs")
+			self.update_er()
 		elif Globals.displayed == 3:
 			self.update_af()
 		else:
@@ -144,9 +153,28 @@ class MainWindow(QWidget):
 						auts.append(a)
 				Globals.automata = auts
 				self.update_af()
+			if type(Globals.selected) == type('') or type(Globals.selected) == type(""):
+				exps = []
+				for e in Globals.expressions:
+					if e != Globals.selected:
+						exps.append(e)
+				Globals.expressions = exps
+				self.update_er()
 		self.center.setText('')
 		Globals.selected = None
-
+	def add_er(self):
+		newER = "a"
+		Globals.expressions.append(newER)
+		Globals.selected = newER
+		self.update_er()
+	def update_er(self):
+		self.erList.clear()
+		for e in Globals.expressions:
+			item = QListWidgetItem(self.erList)
+			item_widget = QPushButton(e)
+			item_widget.clicked.connect(functools.partial(self.select_expression, e))
+			self.erList.setItemWidget(item, item_widget)
+			self.erList.addItem(item)
 	def add_gr(self):
 		newG = Grammar([Production('S', '&')], add = True)
 		Globals.selected = newG

@@ -8,10 +8,9 @@ class Automaton:
 	def __init__(self, states, finalStates, initialState, Σ=['0','1'], name = None, add = False):
 		if len(states) < 1:
 			return None
-		if name is None and add:
+		if name is None:
 			self.name = 'M' + str(Globals.automaton_count)
-			if add:
-				Globals.automaton_count += 1
+			Globals.automaton_count += 1
 		else:
 			self.name = name
 		self.states = (states)
