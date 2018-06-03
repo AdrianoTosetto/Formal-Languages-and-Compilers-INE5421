@@ -634,13 +634,16 @@ class addAutomatonTab(QWidget):
 		self.list_symbol.addItem(item)
 		column = self.transition_table_ui.columnCount() - 2
 		self.transition_table_ui.insertColumn(column)
-		self.transition_table_ui.setHorizontalHeaderItem(column, QTableWidgetItem(new_symbol))
+		column = self.transition_table_ui.columnCount() - 2
+		self.transition_table_ui.setHorizontalHeaderItem(column-1, QTableWidgetItem(new_symbol))
 
 		rowCount = self.transition_table_ui.rowCount()
 
 		for i in range(0, rowCount):
-			self.transition_table_ui.setItem(i, column , QTableWidgetItem("-"))
+			self.transition_table_ui.setItem(i, column -1, QTableWidgetItem("-"))
 	def remove_symbol(self):
+		if self.list_symbol.count() == 1:
+			return
 		item = self.list_symbol.selectedItems()[0]
 		print(item.text())
 		column_count = self.transition_table_ui.columnCount()
@@ -673,7 +676,7 @@ class addAutomatonTab(QWidget):
 		item.setFlags(item.flags() | Qt.ItemIsEditable)
 		self.list_states.addItem(item)
 		count = self.transition_table_ui.rowCount()
-		column_count = len(self.alphabet)
+		column_count = self.transition_table_ui.columnCount() - 2
 		self.transition_table_ui.setRowCount(count+1)
 		self.transition_table_ui.setVerticalHeaderItem(count, StateTableItem("q" + str(self.i)))
 		for i in range(0, len(self.alphabet)):
@@ -849,8 +852,9 @@ class addAutomatonTab(QWidget):
 			states.add(newS)
 			if newS.isAcceptance:
 				finalStates.add(newS)
-			if self.transition_table_ui.cellWidget(i, len(newΣ) + 1).isChecked():
+			if self.transition_table_ui.cellWidget(i, len(newΣ)).isChecked():
 				initialState = newS
+				print("novo inicial = " + str(newS))
 		for i in range(0, self.transition_table_ui.rowCount()):
 			for s in states:
 				if self.transition_table_ui.verticalHeaderItem(i).text() == s.name:
