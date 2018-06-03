@@ -7,6 +7,7 @@ import sys
 sys.path.append('../')
 from globals import *
 from regular_grammar import *
+from operations_with_grammars import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 
@@ -38,6 +39,7 @@ class MainWindow(QWidget):
 		self.rightLayout.setColumnStretch(1,3)
 		self.MyTableWidget = MyTableWidget(self.rightSide)
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
+		self.MyTableWidget.tab3.updateGR.connect(self.select_grammar)
 		self.updateAF.connect(self.MyTableWidget.tab2.showAutomaton)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
@@ -488,43 +490,6 @@ class RemoveProdButton(QPushButton):
 		super().__init__(text)
 		self.line = line
 
-class GrammarOperationsTab(QWidget):
-	def __init__(self):
-		super(QWidget, self).__init__()
-
-		self.line = 0
-		self.layout = QGridLayout()
-		self.top_layout = QGridLayout()
-		self.top_layout.setColumnStretch(0,1)
-		self.top_layout.setColumnStretch(1,1)
-		self.top_layout.setColumnStretch(2,6)
-		self.top_layout.setColumnStretch(3,1)
-		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit, self.new_gr_name)
-		self.top = QWidget()
-		self.top.setLayout(self.top_layout)
-		self.sarea = QScrollArea()
-		self.sarea.setWidget(self.top)
-		self.sarea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-		self.sarea.setWidgetResizable(True)
-		self.bottom_layout = QGridLayout()
-		self.add_grammar = QPushButton("Save grammar")
-		self.add_prod    = QPushButton("Add prod")
-		self.add_prod.clicked.connect(self.add_production)
-		self.add_grammar.clicked.connect(self.save_grammar)
-		self.setPolicyButtons()
-		self.bottom_layout.addWidget(self.add_grammar, 0, 0)
-		self.bottom_layout.addWidget(self.add_prod, 0, 1)
-		self.bottom = QWidget()
-		self.bottom.setLayout(self.bottom_layout)
-		self.bottom.setStyleSheet("background-color:white;")
-
-		self.layout.addWidget(self.sarea,0,0)
-		self.layout.addWidget(self.bottom,1,0)
-
-		self.layout.setRowStretch(0,9)
-		self.layout.setRowStretch(1,1)
-		self.setLayout(self.layout)
-
 
 class addAutomatonTab(QWidget):
 	saveAF = QtCore.pyqtSignal(Automaton)
@@ -880,135 +845,175 @@ class addAutomatonTab(QWidget):
 		self.saveAF.emit(Globals.selected)
 
 class GrammarOperationsTab(QWidget):
-  def __init__(self):
-    super(QWidget, self).__init__()
+	updateGR = QtCore.pyqtSignal(Grammar)
+	def __init__(self):
+		super(QWidget, self).__init__()
 
-    self.line = 0
-    self.layout = QGridLayout()
-    self.layout.setRowStretch(0,1)
-    self.layout.setRowStretch(1,1)
-    self.layout.setRowStretch(2,1)
-    self.top = QWidget()
-    self.top.setStyleSheet("background-color:pink;")
-    self.top_layout = QGridLayout()
-    self.top_layout.setRowStretch(0,1)
-    self.top_layout.setRowStretch(1,1)
-    self.top_layout.setRowStretch(2,1)
-    self.top_layout.setRowStretch(3,1)
-    self.top_op1 = QWidget()
-    self.top_op1.setStyleSheet("background-color:purple;")
-    self.top_op1_layout = QGridLayout()
-    self.top_op1_layout.setColumnStretch(0,1)
-    self.top_op1_layout.setColumnStretch(1,1)
-    self.top_op1label = QLabel()
-    self.top_op1label.setText("GR 1:")
-    self.top_op1edit = QLineEdit()
-    self.top_op1_layout.addWidget(self.top_op1label,0,0)
-    self.top_op1_layout.addWidget(self.top_op1edit,0,1)
-    self.top_op1.setLayout(self.top_op1_layout)
-    self.top_op2 = QWidget()
-    self.top_op2.setStyleSheet("background-color:purple;")
-    self.top_op2_layout = QGridLayout()
-    self.top_op2_layout.setColumnStretch(0,1)
-    self.top_op2_layout.setColumnStretch(1,1)
-    self.top_op2label = QLabel()
-    self.top_op2label.setText("GR 2:")
-    self.top_op2edit = QLineEdit()
-    self.top_op2_layout.addWidget(self.top_op2label,0,0)
-    self.top_op2_layout.addWidget(self.top_op2edit,0,1)
-    self.top_op2.setLayout(self.top_op2_layout)
-    self.top_operation = QLabel()
-    self.top_operation.setAlignment(Qt.AlignCenter)
-    self.top_operation.setText("concatenada com")
-    self.top_operation.setStyleSheet("background-color:orange;")
-    self.top_done = QPushButton("Pronto")
-    self.top_done.clicked.connect(self.add_concatenation)
-    self.top_layout.addWidget(self.top_op1,0,0)
-    self.top_layout.addWidget(self.top_op2,2,0)
-    self.top_layout.addWidget(self.top_operation,1,0)
-    self.top_layout.addWidget(self.top_done,3,0)
-    self.top.setLayout(self.top_layout)
+		self.line = 0
+		self.layout = QGridLayout()
+		self.layout.setRowStretch(0,1)
+		self.layout.setRowStretch(1,1)
+		self.layout.setRowStretch(2,1)
+		self.top = QWidget()
+		self.top.setStyleSheet("background-color:pink;")
+		self.top_layout = QGridLayout()
+		self.top_layout.setRowStretch(0,1)
+		self.top_layout.setRowStretch(1,1)
+		self.top_layout.setRowStretch(2,1)
+		self.top_layout.setRowStretch(3,1)
+		self.top_op1 = QWidget()
+		self.top_op1.setStyleSheet("background-color:purple;")
+		self.top_op1_layout = QGridLayout()
+		self.top_op1_layout.setColumnStretch(0,1)
+		self.top_op1_layout.setColumnStretch(1,1)
+		self.top_op1label = QLabel()
+		self.top_op1label.setText("GR 1:")
+		self.top_op1edit = QLineEdit()
+		self.top_op1_layout.addWidget(self.top_op1label,0,0)
+		self.top_op1_layout.addWidget(self.top_op1edit,0,1)
+		self.top_op1.setLayout(self.top_op1_layout)
+		self.top_op2 = QWidget()
+		self.top_op2.setStyleSheet("background-color:purple;")
+		self.top_op2_layout = QGridLayout()
+		self.top_op2_layout.setColumnStretch(0,1)
+		self.top_op2_layout.setColumnStretch(1,1)
+		self.top_op2label = QLabel()
+		self.top_op2label.setText("GR 2:")
+		self.top_op2edit = QLineEdit()
+		self.top_op2_layout.addWidget(self.top_op2label,0,0)
+		self.top_op2_layout.addWidget(self.top_op2edit,0,1)
+		self.top_op2.setLayout(self.top_op2_layout)
+		self.top_operation = QLabel()
+		self.top_operation.setAlignment(Qt.AlignCenter)
+		self.top_operation.setText("concatenada com")
+		self.top_operation.setStyleSheet("background-color:orange;")
+		self.top_done = QPushButton("Pronto")
+		self.top_done.clicked.connect(self.add_concatenation)
+		self.top_layout.addWidget(self.top_op1,0,0)
+		self.top_layout.addWidget(self.top_op2,2,0)
+		self.top_layout.addWidget(self.top_operation,1,0)
+		self.top_layout.addWidget(self.top_done,3,0)
+		self.top.setLayout(self.top_layout)
 
-    self.mid = QWidget()
-    self.mid.setStyleSheet("background-color:pink;")
-    self.mid_layout = QGridLayout()
-    self.mid_layout.setRowStretch(0,1)
-    self.mid_layout.setRowStretch(1,1)
-    self.mid_layout.setRowStretch(2,1)
-    self.mid_layout.setRowStretch(3,1)
-    self.mid_op1 = QWidget()
-    self.mid_op1.setStyleSheet("background-color:purple;")
-    self.mid_op1_layout = QGridLayout()
-    self.mid_op1_layout.setColumnStretch(0,1)
-    self.mid_op1_layout.setColumnStretch(1,1)
-    self.mid_op1label = QLabel()
-    self.mid_op1label.setText("GR 1:")
-    self.mid_op1edit = QLineEdit()
-    self.mid_op1_layout.addWidget(self.mid_op1label,0,0)
-    self.mid_op1_layout.addWidget(self.mid_op1edit,0,1)
-    self.mid_op1.setLayout(self.mid_op1_layout)
-    self.mid_op2 = QWidget()
-    self.mid_op2.setStyleSheet("background-color:purple;")
-    self.mid_op2_layout = QGridLayout()
-    self.mid_op2_layout.setColumnStretch(0,1)
-    self.mid_op2_layout.setColumnStretch(1,1)
-    self.mid_op2label = QLabel()
-    self.mid_op2label.setText("GR 2:")
-    self.mid_op2edit = QLineEdit()
-    self.mid_op2_layout.addWidget(self.mid_op2label,0,0)
-    self.mid_op2_layout.addWidget(self.mid_op2edit,0,1)
-    self.mid_op2.setLayout(self.mid_op2_layout)
-    self.mid_operation = QLabel()
-    self.mid_operation.setAlignment(Qt.AlignCenter)
-    self.mid_operation.setText("unida com")
-    self.mid_operation.setStyleSheet("background-color:orange;")
-    self.mid_done = QPushButton("Pronto")
-    self.mid_done.clicked.connect(self.add_union)
-    self.mid_layout.addWidget(self.mid_op1,0,0)
-    self.mid_layout.addWidget(self.mid_op2,2,0)
-    self.mid_layout.addWidget(self.mid_operation,1,0)
-    self.mid_layout.addWidget(self.mid_done,3,0)
-    self.mid.setLayout(self.mid_layout)
+		self.mid = QWidget()
+		self.mid.setStyleSheet("background-color:pink;")
+		self.mid_layout = QGridLayout()
+		self.mid_layout.setRowStretch(0,1)
+		self.mid_layout.setRowStretch(1,1)
+		self.mid_layout.setRowStretch(2,1)
+		self.mid_layout.setRowStretch(3,1)
+		self.mid_op1 = QWidget()
+		self.mid_op1.setStyleSheet("background-color:purple;")
+		self.mid_op1_layout = QGridLayout()
+		self.mid_op1_layout.setColumnStretch(0,1)
+		self.mid_op1_layout.setColumnStretch(1,1)
+		self.mid_op1label = QLabel()
+		self.mid_op1label.setText("GR 1:")
+		self.mid_op1edit = QLineEdit()
+		self.mid_op1_layout.addWidget(self.mid_op1label,0,0)
+		self.mid_op1_layout.addWidget(self.mid_op1edit,0,1)
+		self.mid_op1.setLayout(self.mid_op1_layout)
+		self.mid_op2 = QWidget()
+		self.mid_op2.setStyleSheet("background-color:purple;")
+		self.mid_op2_layout = QGridLayout()
+		self.mid_op2_layout.setColumnStretch(0,1)
+		self.mid_op2_layout.setColumnStretch(1,1)
+		self.mid_op2label = QLabel()
+		self.mid_op2label.setText("GR 2:")
+		self.mid_op2edit = QLineEdit()
+		self.mid_op2_layout.addWidget(self.mid_op2label,0,0)
+		self.mid_op2_layout.addWidget(self.mid_op2edit,0,1)
+		self.mid_op2.setLayout(self.mid_op2_layout)
+		self.mid_operation = QLabel()
+		self.mid_operation.setAlignment(Qt.AlignCenter)
+		self.mid_operation.setText("unida com")
+		self.mid_operation.setStyleSheet("background-color:orange;")
+		self.mid_done = QPushButton("Pronto")
+		self.mid_done.clicked.connect(self.add_union)
+		self.mid_layout.addWidget(self.mid_op1,0,0)
+		self.mid_layout.addWidget(self.mid_op2,2,0)
+		self.mid_layout.addWidget(self.mid_operation,1,0)
+		self.mid_layout.addWidget(self.mid_done,3,0)
+		self.mid.setLayout(self.mid_layout)
 
-    self.bot = QWidget()
-    self.bot.setStyleSheet("background-color:pink;")
-    self.bot_layout = QGridLayout()
-    self.bot_layout.setRowStretch(0,1)
-    self.bot_layout.setRowStretch(1,1)
-    self.bot_layout.setRowStretch(2,1)
-    self.bot_op1 = QWidget()
-    self.bot_op1.setStyleSheet("background-color:purple;")
-    self.bot_op1_layout = QGridLayout()
-    self.bot_op1_layout.setColumnStretch(0,1)
-    self.bot_op1_layout.setColumnStretch(1,1)
-    self.bot_op1label = QLabel()
-    self.bot_op1label.setText("GR:")
-    self.bot_op1edit = QLineEdit()
-    self.bot_op1_layout.addWidget(self.bot_op1label,0,0)
-    self.bot_op1_layout.addWidget(self.bot_op1edit,0,1)
-    self.bot_op1.setLayout(self.bot_op1_layout)
-    self.bot_operation = QLabel()
-    self.bot_operation.setAlignment(Qt.AlignCenter)
-    self.bot_operation.setText("fechada")
-    self.bot_operation.setStyleSheet("background-color:orange;")
-    self.bot_done = QPushButton("Pronto")
-    self.bot_done.clicked.connect(self.add_kleene)
-    self.bot_layout.addWidget(self.bot_op1,0,0)
-    self.bot_layout.addWidget(self.bot_operation,1,0)
-    self.bot_layout.addWidget(self.bot_done,2,0)
-    self.bot.setLayout(self.bot_layout)
+		self.bot = QWidget()
+		self.bot.setStyleSheet("background-color:pink;")
+		self.bot_layout = QGridLayout()
+		self.bot_layout.setRowStretch(0,1)
+		self.bot_layout.setRowStretch(1,1)
+		self.bot_layout.setRowStretch(2,1)
+		self.bot_op1 = QWidget()
+		self.bot_op1.setStyleSheet("background-color:purple;")
+		self.bot_op1_layout = QGridLayout()
+		self.bot_op1_layout.setColumnStretch(0,1)
+		self.bot_op1_layout.setColumnStretch(1,1)
+		self.bot_op1label = QLabel()
+		self.bot_op1label.setText("GR:")
+		self.bot_op1edit = QLineEdit()
+		self.bot_op1_layout.addWidget(self.bot_op1label,0,0)
+		self.bot_op1_layout.addWidget(self.bot_op1edit,0,1)
+		self.bot_op1.setLayout(self.bot_op1_layout)
+		self.bot_operation = QLabel()
+		self.bot_operation.setAlignment(Qt.AlignCenter)
+		self.bot_operation.setText("fechada")
+		self.bot_operation.setStyleSheet("background-color:orange;")
+		self.bot_done = QPushButton("Pronto")
+		self.bot_done.clicked.connect(self.add_kleene)
+		self.bot_layout.addWidget(self.bot_op1,0,0)
+		self.bot_layout.addWidget(self.bot_operation,1,0)
+		self.bot_layout.addWidget(self.bot_done,2,0)
+		self.bot.setLayout(self.bot_layout)
 
-    self.layout.addWidget(self.top,0,0)
-    self.layout.addWidget(self.mid,1,0)
-    self.layout.addWidget(self.bot,2,0)
+		self.layout.addWidget(self.top,0,0)
+		self.layout.addWidget(self.mid,1,0)
+		self.layout.addWidget(self.bot,2,0)
 
-    self.setLayout(self.layout)
-  def add_concatenation(self):
-    print("aaaaaaaaa")
-  def add_union(self):
-    print("bbbbbbbbb")
-  def add_kleene(self):
-    print("ccccccccc")
+		self.setLayout(self.layout)
+	def add_concatenation(self):
+		g_1 = None
+		g_2 = None
+		for g1 in Globals.grammars:
+			if g1.name == self.top_op1edit.text():
+				g_1 = g1
+		for g2 in Globals.grammars:
+			if g2.name == self.top_op2edit.text():
+				g_2 = g2
+		if g_1 != None and g_2 != None:
+			newG = grammar_concatenation(g_1, g_2)
+			if newG in Globals.grammars:
+				newG.name = newG.name + "'"
+			Globals.grammars.append(newG)
+			Globals.selected = newG
+			self.updateGR.emit(Globals.selected)
+
+	def add_union(self):
+		g_1 = None
+		g_2 = None
+		for g1 in Globals.grammars:
+			if g1.name == self.mid_op1edit.text():
+				g_1 = g1
+		for g2 in Globals.grammars:
+			if g2.name == self.mid_op2edit.text():
+				g_2 = g2
+		if g_1 != None and g_2 != None:
+			newG = grammar_union(g_1, g_2)
+			if newG in Globals.grammars:
+				newG.name = newG.name + "'"
+			Globals.grammars.append(newG)
+			Globals.selected = newG
+			self.updateGR.emit(Globals.selected)
+	def add_kleene(self):
+		g_1 = None
+		for g1 in Globals.grammars:
+			if g1.name == self.bot_op1edit.text():
+				g_1 = g1
+		if g_1 != None:
+			newG = grammar_kleene_star(g_1)
+			if newG in Globals.grammars:
+				newG.name = newG.name + "'"
+			Globals.grammars.append(newG)
+			Globals.selected = newG
+			self.updateGR.emit(Globals.selected)
 
 
 class StateList(QListWidget):

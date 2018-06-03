@@ -7,7 +7,7 @@ import copy
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
             'O', 'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-def grammar_union(gr1, gr2, add):
+def grammar_union(gr1, gr2, add = False):
     hasEpsilon = False
     oldProds1 = copy.deepcopy(gr1.productions)
     initial1 = copy.deepcopy(gr1.productions[0].leftSide)
@@ -96,7 +96,7 @@ def grammar_union(gr1, gr2, add):
 
     return newG
 
-def grammar_concatenation(gr1, gr2, add):
+def grammar_concatenation(gr1, gr2, add = False):
     hasEpsilon = False
     oldProds1 = copy.deepcopy(gr1.productions)
     initial1 = copy.deepcopy(gr1.productions[0].leftSide)
@@ -178,7 +178,10 @@ def grammar_kleene_star(gr, add = False):
     count = 0
     for p in oldProds:
         if p.rightSide is '&':
-            oldProds1 = oldProds - p
+            oldProds1 = []
+            for p1 in oldProds:
+                if p1 != p:
+                    oldProds1.append(p1)
             break
         oldProds1 = oldProds
     oldProds = oldProds1
