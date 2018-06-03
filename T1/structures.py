@@ -523,8 +523,22 @@ class RegExp:
 		q0_composition = nodo.handle_root()
 
 		return (compositions, q0_composition, Σ)
-	def handle_composition(self, compositions, c):
-		print("batata")
+	def handle_composition(self, composition, compositions, s):
+		'''composição pelo símbolo s'''
+		ret = set()
+		if not composition:
+			return 
+		for c in composition:
+			''' label = -1 é o caso do lambda'''
+			if c.label == -1:
+				continue
+			if c.symbol == s:
+				ret = ret | compositions[c]
+		''' ret is empty? if so, return None '''
+		if not ret:
+			return None
+		return ret
+
 	def to_automaton(self):
 		ret = self.parse()
 		compositions = ret[0]
@@ -534,15 +548,16 @@ class RegExp:
 		unvisited = [q0_composition]
 		visited = []
 		trans = []
-
 		while len(unvisited) != 0:
 			comp = unvisited.pop(0)
-			print(comp)
 			if comp not in visited:
 				visited.append(comp)
 			for s in Σ:
-				nextc = self.handle_composition(comp, s)
+				nextc = self.handle_composition(comp, compositions, s)
+				if nextc is None:
+					continue
 				trans.append([comp, s, nextc])
+				print(str(comp) + " vai para " + str(nextc) + " por " + s)
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
         
