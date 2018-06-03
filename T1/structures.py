@@ -37,14 +37,14 @@ def polish_notation(infixexpr):
     prec["?"] = 4
     prec["*"] = 4
     prec["+"] = 4
-    prec["^"] = 5
+    #prec["^"] = 5
     opStack = Stack()
     postfixList = []
     tokenList = infixexpr.split()
 
     for token in tokenList:
-        if token in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or token in "0123456789":
-            postfixList.append(token)
+        if token.lower() in "abcdefghijklmnopqrstuvwxyz" or token in "0123456789":
+            postfixList.append(token.lower())
         elif token == '(':
             opStack.push(token)
         elif token == ')':
@@ -71,11 +71,11 @@ class Tree:
 		self.symbol = 'a'
 
 	def is_operand(self, char):
-		return char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or char in "0123456789"
+		return char.lower() in "abcdefghijklmnopqrstuvwxyz" or char in "0123456789"
 	def is_operator(self, char):
-		return char == '*' or char == '|' or char == "." or char == "?"
+		return char == '*' or char == '|' or char == "." or char == "?" or char == "+"
 	def one_operand_operator(self, char):
-		return char == '*' or char == "?"
+		return char == '*' or char == "?" or char == "+"
 	def build(self, expr):
 		stack = Stack()
 		for symbol in expr:
@@ -198,6 +198,9 @@ class Node:
 			node_composition |= (self.handle_star(self.costura_node, UP, visited_down, visited_up))
 		if self.costura_node.symbol == "|":
 			node_composition = self.handle_union(self.costura_node, UP, visited_down, visited_up)
+		if self.costura_node.symbol == "+":
+			node_composition |= self.handle_plus(self.costura_node, DOWN, visited_down, visited_up)
+			node_composition |= (self.handle_plus(self.costura_node, UP, visited_down, visited_up))
 
 		return node_composition
 
@@ -214,48 +217,35 @@ class Node:
 			if node.left.is_leaf():
 				node_composition |= {node.left}
 			if node.left.symbol == ".":
-				node_composition |= node.handle_concatenation(node.left, DOWN)
+				node_composition |= node.handle_concatenation(node.left, DOWN, visited_down, visited_up)
 			if node.left.symbol == "*":
-				node_composition |= node.handle_star(node.left, DOWN)
-				node_composition |= node.handle_star(node.left, UP)
+				node_composition |= node.handle_star(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_star(node.left, UP, visited_down, visited_up)
 			if node.left.symbol == "?":
-				node_composition |= node.handle_optional(node.left, DOWN)
-				node_composition |= node.handle_optional(node.left, UP)
+				node_composition |= node.handle_optional(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_optional(node.left, UP, visited_down, visited_up)
 			if node.left.symbol == "|":
-				node_composition |= node.handle_union(node.left, DOWN)
+				node_composition |= node.handle_union(node.left, DOWN, visited_down, visited_up)
+			if node.left.symbol == "+":
+				node_composition |= node.handle_plus(node.left, DOWN, visited_down, visited_up)
 		if action == UP:
 			visited_up.add(node)
 			if node.costura_node.symbol == 'λ':
 				node_composition |= {node.costura_node}
 				print("deveria parar aqui")
 			if node.costura_node.symbol == "*":
-				node_composition |= node.handle_star(node.costura_node, DOWN, visited)
-				node_composition |= node.handle_star(node.costura_node, UP, visited)
+				node_composition |= node.handle_star(node.costura_node, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_star(node.costura_node, UP, visited_down, visited_up)
 				#pendencies.push(Pendency(node.costura_node, UP))
 			if node.costura_node.symbol == ".":
 				node_composition |= node.handle_concatenation(node.costura_node, UP, visited_down, visited_up)
 			if node.costura_node.symbol == "?":
-				node_composition |= node.handle_optional(node.costura_node, UP, visited)
+				node_composition |= node.handle_optional(node.costura_node, UP, visited_down, visited_up)
 			if node.costura_node.symbol == "|":
-				node_composition |= node.handle_union(node.left, DOWN)
-		while not pendencies.isEmpty():
-			p = pendencies.pop()
-			print("kek")
-			if p.action == UP:
-				if p.node.costura_node.symbol == ".":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited)
-					print("dps: " + str(node_composition))
-				if p.node.costura_node.symbol == "*":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_star(p.node.costura_node, UP, visited)
-					print("dps: " + str(node_composition))
-			if p.action == DOWN:
-				if p.node.right.symbol == "*":
-					node_composition |= p.node.handle_star(p.node.left, DOWN, visited)
-					node_composition |= p.node.handle_star(p.node.left, UP, visited)
-				if p.node.symbol == ".":
-					node_composition |= p.node.handle_concatenation(p.node.left, DOWN, visited)
+				node_composition |= node.handle_union(node.left, DOWN, visited_down, visited_up)
+			if node.costura_node.symbol == "+":
+				node_composition |= node.handle_plus(node.costura_node, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_plus(node.costura_node, UP, visited_down, visited_up)
 
 		return node_composition
 	def handle_concatenation(self, node, action, visited_down=set(), visited_up=set()):
@@ -271,14 +261,16 @@ class Node:
 				node_composition.add(node.right)
 			elif node.right.symbol == "*":
 				node_composition |= node.handle_star(node.right, DOWN, visited_down, visited_up)
-				print("pendencia com " + str(node.right) + " por cima")
 				node_composition |= node.handle_star(node.right, UP,  visited_down, visited_up)
 			elif node.right.symbol == ".":
-				node_composition |= node.handle_star(node.right, DOWN,  visited_down, visited_up)
+				node_composition |= node.handle_concatenation(node.right, DOWN,  visited_down, visited_up)
 			elif node.right.symbol == "?":
 				node_composition |= node.handle_optional(node.right, DOWN,  visited_down, visited_up)
 				node_composition |= node.handle_optional(node.right, UP,  visited_down, visited_up)
-				#pendencies.push(Pendency(node.right, UP))
+			elif node.right.symbol == "|":
+				node_composition |= node.handle_union(node.right, DOWN,  visited_down, visited_up)
+			elif node.right.symbol == "+":
+				node_composition |= node.handle_plus(node.right, DOWN,  visited_down, visited_up)
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
@@ -290,29 +282,15 @@ class Node:
 				node_composition |=  node.handle_star(node.left, UP, visited_down, visited_up)
 				#pendencies.push(Pendency(node.left), UP)
 			elif node.left.symbol == "?":
-				node_composition |=  node.handle_optional(node.left, DOWN)
-				node_composition |=  node.handle_optional(node.left, UP)
+				node_composition |=  node.handle_optional(node.left, DOWN, visited_down, visited_up)
+				node_composition |=  node.handle_optional(node.left, UP, visited_down, visited_up)
 				#pendencies.push(Pendency(node.left), UP)
+			elif node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN, visited_down,visited_up)
+			elif node.left.symbol == "+":
+				node_composition |= node.handle_plus(node.left, DOWN, visited_down,visited_up)
 		################################3
 		################################3
-		while not pendencies.isEmpty():
-			p = pendencies.pop()
-
-			if p.action == UP:
-				if p.node.costura_node.symbol == ".":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP,  visited_down, visited_up)
-					print("dps: " + str(node_composition))
-				if p.node.costura_node.symbol == "*":
-					print("antes: " + str(node_composition))
-					node_composition |= p.node.handle_star(p.node.costura_node, UP,  visited_down, visited_up)
-					node_composition |= p.node.handle_star(p.node.costura_node, DOWN,  visited_down, visited_up)
-					print("dps: " + str(node_composition))
-				if p.node.costura_node.symbol == "?":
-					node_composition |= p.node.handle_optional(p.node.costura_node, UP,  visited_down, visited_up)
-			if p.action == DOWN:
-				if p.node.symbol == ".":
-					node_composition |= p.node.handle_concatenation(p.node.costura_node, UP, visited_down, visited_up)
 				#if p.node.symbol ==
 
 
@@ -339,6 +317,8 @@ class Node:
 				node_composition |= node.handle_star(node.left, UP,  visited_down, visited_up)
 			elif node.left.symbol == "|":
 				node_composition |= node.handle_union(node.left, DOWN,  visited_down, visited_up)
+			elif node.left.symbol == "+":
+				node_composition |= node.handle_plus(node.left, DOWN,  visited_down, visited_up)
 		if action == UP:
 			visited_up.add(node)
 			if node.costura_node.symbol == 'λ':
@@ -353,6 +333,9 @@ class Node:
 				node_composition |= node.handle_star(node.costura_node, UP,  visited_down, visited_up)
 			elif node.costura_node.symbol == "|":
 				node_composition |= node.handle_union(node.costura_node, UP, visited_down, visited_up)
+			elif node.costura_node.symbol == "+":
+				node_composition |= node.handle_plus(node.costura_node, DOWN,visited_down, visited_up)
+				node_composition |= node.handle_plus(node.costura_node, UP,  visited_down, visited_up)
 		return node_composition
 	def handle_union(self, node, action, visited_down=set(), visited_up=set()):
 
@@ -376,6 +359,11 @@ class Node:
 				 visited_up)
 			elif right_most.costura_node.symbol == "λ":
 				node_composition |= {right_most.costura_node}
+			elif right_most.costura_node.symbol == "|":
+				node_composition |= right_most.handle_union(right_most.costura_node, UP,visited_down, visited_up)
+			elif right_most.costura_node.symbol == "+":
+				node_composition |= right_most.handle_plus(right_most.costura_node, DOWN, visited_down, visited_up)
+				node_composition |= right_most.handle_plus(right_most.costura_node, UP, visited_down, visited_up)
 		if action == DOWN:
 			visited_down.add(node)
 			if node.left.is_leaf():
@@ -392,6 +380,8 @@ class Node:
 			if node.left.symbol == "?":
 				node_composition |= node.handle_optional(node.left, DOWN, visited_down, visited_up)
 				node_composition |= node.handle_optional(node.left, UP, visited_down, visited_up)
+			if node.left.symbol == "+":
+				node_composition |= node.handle_plus(node.left, DOWN, visited_down, visited_up)
 
 			if node.right.symbol == ".":
 				node_composition |= node.handle_concatenation(node.right, DOWN, visited_down, visited_up)
@@ -403,6 +393,51 @@ class Node:
 			if node.right.symbol == "?":
 				node_composition |= node.handle_optional(node.right, DOWN, visited_down, visited_up)
 				node_composition |= node.handle_optional(node.right, UP, visited_down, visited_up)
+			if node.right.symbol == "+":
+				node_composition |= node.handle_plus(node.right, DOWN, visited_down, visited_up)
+		return node_composition
+
+	def handle_plus(self, node, action, visited_down=set(), visited_up=set()):
+		if node in visited_down and action == DOWN:
+			return set()
+		if node in visited_up and action == UP:
+			return set()
+		pendencies = Stack()
+		node_composition = set()
+		if action == DOWN:
+			visited_down.add(node)
+			if node.left.is_leaf():
+				node_composition.add(node.left)
+			elif node.left.symbol == ".":
+				node_composition |= node.handle_concatenation(node.left, DOWN,  visited_down, visited_up)
+			elif node.left.symbol == "?":
+				node_composition |= node.handle_optional(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_optional(node.left, UP,visited_down, visited_up)
+				#pendencies.push(node.left, UP)
+			elif node.left.symbol == "*":
+				node_composition |= node.handle_star(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_star(node.left, UP,  visited_down, visited_up)
+			elif node.left.symbol == "|":
+				node_composition |= node.handle_union(node.left, DOWN,  visited_down, visited_up)
+			elif node.left.symbol == "+":
+				node_composition |= node.handle_plus(node.left, DOWN,  visited_down, visited_up)
+		if action == UP:
+			visited_up.add(node)
+			if node.costura_node.symbol == 'λ':
+				node_composition |= {node.costura_node}
+			if node.costura_node.symbol == ".":
+				node_composition |= node.handle_concatenation(node.costura_node, UP, visited_down, visited_up)
+			elif node.costura_node.symbol == "?":
+				node_composition |= node.handle_optional(node.costura_node, UP,  visited_down, visited_up)
+				#pendencies.push(node.left, UP)
+			elif node.costura_node.symbol == "*":
+				node_composition |= node.handle_star(node.costura_node, DOWN,visited_down, visited_up)
+				node_composition |= node.handle_star(node.costura_node, UP,  visited_down, visited_up)
+			elif node.costura_node.symbol == "|":
+				node_composition |= node.handle_union(node.costura_node, UP, visited_down, visited_up)
+			elif node.costura_node.symbol == "+":
+				node_composition |= node.handle_plus(node.costura_node, DOWN,visited_down, visited_up)
+				node_composition |= node.handle_plus(node.costura_node, UP,  visited_down, visited_up)
 		return node_composition
 	def post_order(self):
 
@@ -458,6 +493,8 @@ class Node:
 				node_composition |= self.handle_optional(self.right,UP, visited_down,visited_up)
 			if self.right.symbol == ".":
 				node_composition |= self.handle_concatenation(self.right,DOWN, visited_down ,visited_up)
+			if self.right.symbol == "+":
+				node_composition |= self.handle_plus(self.right,DOWN, visited_down ,visited_up)
 
 			if self.left.is_leaf():
 				node_composition |= {self.left}
@@ -471,6 +508,8 @@ class Node:
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+			if self.left.symbol == "+":
+				node_composition |= self.handle_plus(self.left,DOWN, visited_down ,visited_up)
 		if self.symbol == ".":
 			if self.left.is_leaf():
 				node_composition |= {self.left}
@@ -484,6 +523,8 @@ class Node:
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+			if self.left.symbol == "+":
+				node_composition |= self.handle_plus(self.left,DOWN, visited_down ,visited_up)
 
 		if self.symbol == "*":
 			if self.left.is_leaf():
@@ -498,6 +539,8 @@ class Node:
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+			if self.left.symbol == "+":
+				node_composition |= self.handle_plus(self.left,DOWN, visited_down ,visited_up)
 
 			if self.costura_node is not None:
 				node_composition |= {self.costura_node}
@@ -515,9 +558,27 @@ class Node:
 				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
 			if self.left.symbol == ".":
 				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+			if self.left.symbol == "+":
+				node_composition |= self.handle_plus(self.left,DOWN, visited_down ,visited_up)
 
 			if self.costura_node is not None:
 				node_composition |= {self.costura_node}
+
+		if self.symbol == "+":
+			if self.left.is_leaf():
+				node_composition |= {self.left}
+			if self.left.symbol == '*':
+				node_composition |= self.handle_star(self.left, DOWN, visited_down, visited_up)
+				node_composition |= self.handle_star(self.left, UP, visited_down ,visited_up)
+			if self.left.symbol == "|":
+				node_composition |= self.handle_union(self.left, DOWN, visited_down, visited_up)
+			if self.left.symbol == "?":
+				node_composition |= self.handle_optional(self.left,DOWN,visited_down, visited_up)
+				node_composition |= self.handle_optional(self.left,UP, visited_down,visited_up)
+			if self.left.symbol == ".":
+				node_composition |= self.handle_concatenation(self.left,DOWN, visited_down ,visited_up)
+			if self.left.symbol == "+":
+				node_composition |= self.handle_plus(self.left,DOWN, visited_down ,visited_up)
 
 		return node_composition
 
@@ -548,7 +609,7 @@ class RegExp:
 		'''composição pelo símbolo s'''
 		ret = set()
 		if not composition:
-			return 
+			return
 		for c in composition:
 			''' label = -1 é o caso do lambda'''
 			if c.label == -1:
@@ -582,7 +643,7 @@ class RegExp:
 				print(str(comp) + " vai para " + str(nextc) + " por " + s)
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
-        
+
 		print("visitados = " + str(visited))
 		states = []
 		finalStates = []
@@ -604,15 +665,8 @@ class RegExp:
 						s.add_transition(Transition(t[1], s1))
 
 		result_automaton = Automaton(states, finalStates, initialState, Σ).rename_states()
-		r = result_automaton.minimize()
-		g = r.to_grammar()
-		sent = g.produce(4)
 
-		for s in sent:
-			print(s)
-			print(r.process_input(s))
-
-		#print(result_automaton)
+		return result_automaton
 class StateComposition:
 
 	def __init__(self, state_composition, Σ):
