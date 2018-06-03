@@ -37,6 +37,19 @@ class Automaton:
 		self.currentState = self.initialState
 		return output
 
+
+	def n_first_sentences_accepted(self, n):
+		from itertools import product
+		a = self.Σ
+		ni_sentences = []
+		ni_sentences_accepted = []
+		for i in range(0,n+1):
+			for t in list(product(a, repeat=i)):
+				s = "".join(t)
+				if self.process_input(s):
+					ni_sentences_accepted.append(s)
+			#ni_sentences.append(list(product(a, repeat=i)))
+		return ni_sentences_accepted
 	def next_state(self, symbol):
 		self.currentState = self.currentState.next_state(symbol)
 		return self.currentState
