@@ -4,18 +4,21 @@ from non_deterministic_automaton import *
 from deterministic_automaton import *
 from globals import *
 from operations_with_automata import *
+from functools import *
+def find_key(value, dictionary):
+    return reduce(lambda x, y: x if x is not None else y,
+                  map(lambda x: x[0] if x[1] == value else None, 
+                      dictionary.items()))
 
 if __name__ == "__main__":
 	#expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
 	#expr = ' ( ( C . D * ) * ) ? . B'
 	#expr = '( ( C * | ( A . D ) ? ) . ( A . B ) * ) ?'
 	#expr = '( A * ) *'
-	#expr = '( A . B . C ) * | ( C . B . A ) *'
-	#re = RegExp(expr)
-	#re.to_automaton()
-
-
-	q0 = State('q0')
+	expr = '( A . B . C ) * | ( C . B . A ) *'
+	re = RegExp(expr)
+	re.to_automaton()
+	'''q0 = State('q0')
 	q1 = State('q1', True)
 
 	t0 = Transition('a', q1)
@@ -31,4 +34,4 @@ if __name__ == "__main__":
 	q1.add_transition(t3)
 
 	a = Automaton(set([q0,q1]),set([q0]),q0,['a','b'], add = True)
-	print(a.n_first_sentences_accepted(5))
+	print(a.n_first_sentences_accepted(5))'''

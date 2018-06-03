@@ -506,7 +506,7 @@ class RegExp:
 	def get_compositions_from(self, compositions, symbol):
 		for c in compositions:
 			print()
-	def parse_to_automaton(self):
+	def parse(self):
 		t = Tree()
 		Σ = set()
 		nodo = t.build(polish_notation(self.regex))
@@ -523,12 +523,28 @@ class RegExp:
 		q0_composition = nodo.handle_root()
 
 		return (compositions, q0_composition, Σ)
-
+	def handle_composition(self, compositions, c):
+		print("batata")
 	def to_automaton(self):
-		ret = self.parse_to_automaton()
+		ret = self.parse()
 		compositions = ret[0]
 		q0_composition = ret[1]
 		Σ = ret[2]
+
+		unvisited = [q0_composition]
+		visited = []
+		trans = []
+
+		while len(unvisited) != 0:
+			comp = unvisited.pop(0)
+			print(comp)
+			if comp not in visited:
+				visited.append(comp)
+			for s in Σ:
+				nextc = self.handle_composition(comp, s)
+				trans.append([comp, s, nextc])
+				if nextc not in unvisited and nextc not in visited:
+					unvisited.append(nextc)
         
 		print(q0_composition)
 class StateComposition:
@@ -548,6 +564,8 @@ class StateComposition:
 				ret.append(tc)
 
 		return ret
+	def __hash__(self):
+		return 1
 
 def display(root, level):
 	if root is None:
