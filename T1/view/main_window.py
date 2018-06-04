@@ -18,6 +18,7 @@ hey = "haha"
 class MainWindow(QWidget):
 	jesus = "-"
 	jesus1 = "-"
+	logtxt = ""
 	updateAFD = QtCore.pyqtSignal(Automaton)
 	updateAFND = QtCore.pyqtSignal(NDAutomaton)
 	updateER = QtCore.pyqtSignal(str)
@@ -53,18 +54,32 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
 		self.MyTableWidget.tab2.minimize.connect(self.select_automaton)
 		self.MyTableWidget.tab2.saveAFND.connect(self.select_automaton)
+		self.MyTableWidget.tab2.printS.connect(self.log_sentences)
 		self.MyTableWidget.tab4.saveAFND.connect(self.select_automaton)
+		self.MyTableWidget.tab4.printS.connect(self.log_update)
 		self.MyTableWidget.tab6.updateAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
 		self.generateLeftSide()
 
-		self.center = QLabel()
-		self.center.setText(str(Globals.grammars[0]))
-		self.center.setStyleSheet("background-color:white;")
-		self.centerLayout = QVBoxLayout()
-		self.centerLayout.addWidget(self.center)
+		self.center = QWidget()
+		self.centerLayout = QGridLayout()
+		self.centerLayout.addWidget(self.center, 0, 0)
+		self.centerLayout.setRowStretch(0,5)
+		self.centerLayout.setRowStretch(1,3)
+		self.display = QLabel()
+		self.display.setText('Selecione uma GR/ER/AF')
+		self.display.setStyleSheet("background-color:white;")
+		self.displayLayout = QVBoxLayout()
+		self.displayLayout.addWidget(self.display)
+		self.log = QLabel()
+		self.log.setText('')
+		self.log.setStyleSheet("background-color:white;")
+		self.logLayout = QVBoxLayout()
+		self.logLayout.addWidget(self.log)
+		self.centerLayout.addWidget(self.display,0,0)
+		self.centerLayout.addWidget(self.log,1,0)
 		self.displayScreen.setLayout(self.centerLayout)
 
 		self.mainLayout = QGridLayout()
@@ -78,6 +93,10 @@ class MainWindow(QWidget):
 		sys.exit(self.app.exec_())
 
 	@pyqtSlot()
+	def log_update(self):
+		self.log.setText(self.MyTableWidget.tab4.jesus)
+	def log_sentences(self):
+		self.log.setText(MainWindow.logtxt)
 	def on_click(self):
 		print('PyQt5 button click')
 	def showAFs(self):
@@ -97,7 +116,7 @@ class MainWindow(QWidget):
 		Globals.displayed = 2
 	def select_grammar(self, gram):
 		self.update_gr()
-		self.center.setText(gram.name + ":\n" + str(gram))
+		self.display.setText(gram.name + ":\n" + str(gram))
 		Globals.selected = copy.deepcopy(gram)
 		nts = gram.get_non_terminals()
 		prods = []
@@ -106,7 +125,7 @@ class MainWindow(QWidget):
 		self.MyTableWidget.update(nts, prods, gram.name)
 	def select_automaton(self, aut):
 		self.update_af()
-		self.center.setText(aut.name + ":\n" + str(aut))
+		self.display.setText(aut.name + ":\n" + str(aut))
 		Globals.selected = copy.deepcopy(aut)
 		if type(Globals.selected) == type(Automaton({}, {}, State(''))):
 			self.updateAFD.emit(Globals.selected)
@@ -114,7 +133,7 @@ class MainWindow(QWidget):
 			self.updateAFND.emit(Globals.selected)
 	def select_expression(self, exp):
 		self.update_er()
-		self.center.setText(exp)
+		self.display.setText(exp)
 		Globals.selcted = copy.deepcopy(exp)
 		self.updateER.emit(Globals.selected)
 		'''nts = gram.get_non_terminals()
@@ -163,7 +182,7 @@ class MainWindow(QWidget):
 						exps.append(e)
 				Globals.expressions = exps
 				self.update_er()
-		self.center.setText('')
+		self.display.setText('')
 		Globals.selected = None
 	def add_er(self):
 		newER = "a"
@@ -530,6 +549,7 @@ class addAutomatonTab(QWidget):
 	saveAFND = QtCore.pyqtSignal(NDAutomaton)
 	saveAF = QtCore.pyqtSignal(Automaton)
 	minimize = QtCore.pyqtSignal(Automaton)
+	printS = QtCore.pyqtSignal()
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -629,7 +649,9 @@ class addAutomatonTab(QWidget):
 		if type(Globals.selected) != Automaton:
 			self.error("Escolha um automato")
 		n = self.n_sentences.value()
-		print(Globals.selected.n_first_sentences_accepted(n))
+		lista = Globals.selected.n_size_sentences_accepted(n)
+		MainWindow.logtxt = "Sentenças reconhecidas: \n" + str(lista)
+		self.printS.emit()
 	def error(self, msg):
 		error_dialog = QtWidgets.QErrorMessage()
 		error_dialog.showMessage(msg)

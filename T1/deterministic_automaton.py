@@ -47,8 +47,21 @@ class Automaton:
 			for t in list(product(a, repeat=i)):
 				s = "".join(t)
 				if self.process_input(s):
+					if s == "":
+						s = '&'
 					ni_sentences_accepted.append(s)
-			#ni_sentences.append(list(product(a, repeat=i)))
+		return ni_sentences_accepted
+	def n_size_sentences_accepted(self, n):
+		from itertools import product
+		a = self.Σ
+		ni_sentences = []
+		ni_sentences_accepted = []
+		for t in list(product(a, repeat=n)):
+			s = "".join(t)
+			if self.process_input(s):
+				if s == "":
+					s = '&'
+				ni_sentences_accepted.append(s)
 		return ni_sentences_accepted
 	def next_state(self, symbol):
 		self.currentState = self.currentState.next_state(symbol)

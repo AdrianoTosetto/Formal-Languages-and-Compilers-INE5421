@@ -127,6 +127,31 @@ class NDAutomaton:
 				output = True
 		self.currentStates = {self.initialState} | self.initialState.next_states('&')
 		return output
+	def n_first_sentences_accepted(self, n):
+		from itertools import product
+		a = self.Σ
+		ni_sentences = []
+		ni_sentences_accepted = []
+		for i in range(0,n+1):
+			for t in list(product(a, repeat=i)):
+				s = "".join(t)
+				if self.process_input(s):
+					if s == "":
+						s = '&'
+					ni_sentences_accepted.append(s)
+		return ni_sentences_accepted
+	def n_size_sentences_accepted(self, n):
+		from itertools import product
+		a = self.Σ
+		ni_sentences = []
+		ni_sentences_accepted = []
+		for t in list(product(a, repeat=n)):
+			s = "".join(t)
+			if self.process_input(s):
+				if s == "":
+					s = '&'
+				ni_sentences_accepted.append(s)
+		return ni_sentences_accepted
 	def next_states(self, symbol, go_ahead=True):
 		temp = []
 		for state in self.currentStates:

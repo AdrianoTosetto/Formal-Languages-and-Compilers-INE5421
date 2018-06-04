@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from main_window import *
 import functools
 import sys
 sys.path.append('../')
@@ -13,6 +14,8 @@ from PyQt5 import *
 
 class addNDAutomatonTab(QWidget):
 	saveAFND = QtCore.pyqtSignal(NDAutomaton)
+	printS = QtCore.pyqtSignal()
+	jesus = ""
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -30,11 +33,16 @@ class addNDAutomatonTab(QWidget):
 		self.add_automaton_button = QPushButton("Salvar")
 		self.create_transition_table_button = \
 			QPushButton("Determinizar") # botao para criar a tabela com o alfabeto inserido
+		self.rec_button = QPushButton("Reconhecer sentenças")
+		self.rec_button.clicked.connect(self.rec_sentences)
+		self.n_sentences = QSpinBox()
 		self.add_automaton_button.clicked.connect(self.save_automaton)
 		self.bottom_layout = QGridLayout()
 		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
 		self.create_transition_table_button.clicked.connect(self.create_transition_table)
 		self.bottom_layout.addWidget(self.add_automaton_button, 0,1)
+		self.bottom_layout.addWidget(self.rec_button, 0,2)
+		self.bottom_layout.addWidget(self.n_sentences, 0,3)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
 
@@ -99,6 +107,15 @@ class addNDAutomatonTab(QWidget):
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
 
+
+	def rec_sentences(self):
+		if type(Globals.selected) != NDAutomaton:
+			self.error("Escolha um automato")
+		n = self.n_sentences.value()
+		lista = Globals.selected.n_size_sentences_accepted(n)
+		logtxt = "Sentenças reconhecidas: \n" + str(lista)
+		addNDAutomatonTab.jesus = logtxt
+		self.printS.emit()
 	def add_new_symbol(self):
 		symbols = [str(self.list_symbol.item(i).text()) for i in range(self.list_symbol.count())]
 		c_ord = -1
