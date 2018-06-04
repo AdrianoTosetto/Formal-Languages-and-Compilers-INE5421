@@ -374,10 +374,13 @@ class Automaton:
 		newStates = copy.deepcopy(self.states)
 
 		i = 0
-
+		s2 = set()
 		for s in newStates:
 			if s.name == 'φ':
 				continue
+			s2.add(s)
+		newStates = s2
+		for s in newStates:
 			if s == newInitialState:
 				newInitialState.name = 'q' + str(i)
 			oldStates.append(s)
@@ -395,9 +398,7 @@ class Automaton:
 							if ns == State('q' + str(it)):
 								trans.append(Transition(t.symbol, ns))
 					it += 1
-			s.transitions = []
-			for t in trans:
-				s.add_transition(t)
+			s.transitions = trans
 			if s == newInitialState:
 				newInitialState = s
 				#for tt in t.target_state.transitions:
@@ -414,10 +415,13 @@ class Automaton:
 		newStates = copy.deepcopy(self.states)
 
 		i = 0
-
+		s2 = set()
 		for s in newStates:
 			if s.name == 'φ':
 				continue
+			s2.add(s)
+		newStates = s2
+		for s in newStates:
 			if s == newInitialState:
 				newInitialState.name = str(alphabet[i])
 			oldStates.append(s)

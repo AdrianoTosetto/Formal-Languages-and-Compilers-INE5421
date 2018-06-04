@@ -85,7 +85,7 @@ def automata_union(fa1, fa2, name = None, add = False):
     if newInitial.isAcceptance:
         result_final_states.add(newInitial)
 
-    return NDAutomaton(result_states, result_final_states, newInitial, result_Σ)
+    return NDAutomaton(result_states, result_final_states, newInitial, result_Σ, name)
 
 
 def automata_complement(af1, name = None, add = False):

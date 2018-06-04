@@ -542,6 +542,9 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setItem(0,0, StateTableItem("q0"))
 		self.minimize_button = QPushButton("Minimizar")
 		self.rename_button = QPushButton("Renomear estados")
+		self.rec_button = QPushButton("Reconhecer sentenças")
+		self.rec_button.clicked.connect(self.rec_sentences)
+		self.n_sentences = QSpinBox()
 		self.rename_button.clicked.connect(self.rename_states)
 		#self.transition_table_ui.move(0,0)
 
@@ -555,7 +558,8 @@ class addAutomatonTab(QWidget):
 		self.make_non_deterministic_button.clicked.connect(self.make_non_deterministic)
 		self.bottom_layout.addWidget(self.add_automaton_button, 0,2)
 		self.bottom_layout.addWidget(self.minimize_button, 0, 1)
-		self.bottom_layout.addWidget(self.rename_button, 0, 3)
+		self.bottom_layout.addWidget(self.rec_button, 0, 3)
+		self.bottom_layout.addWidget(self.n_sentences, 0, 4)
 		self.minimize_button.clicked.connect(self.do_minimize)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
@@ -621,7 +625,15 @@ class addAutomatonTab(QWidget):
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
 
-
+	def rec_sentences(self):
+		if type(Globals.selected) != Automaton:
+			self.error("Escolha um automato")
+		n = self.n_sentences.value()
+		print(Globals.selected.n_first_sentences_accepted(n))
+	def error(self, msg):
+		error_dialog = QtWidgets.QErrorMessage()
+		error_dialog.showMessage(msg)
+		error_dialog.exec_()
 	def do_minimize(self):
 		af = Globals.selected
 		if type(af) != Automaton:
