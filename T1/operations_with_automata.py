@@ -97,7 +97,7 @@ def automata_complement(af1, name = None, add = False):
     waf.complete()
 
     if name == None:
-        name = str(waf.name) + "'"
+        name = "¬" + str(waf.name)
 
     new_states = copy.deepcopy(waf.states)
     #print(new_states)
@@ -127,8 +127,8 @@ def automata_intersec(af1, af2, name = None, add = False):
     if name == None:
         name = str(af1.name) + " ∩ " + str(af2.name)
 
-    union = automata_union(neg_fa1, neg_fa2)
-    intersec = automata_complement(union, name, add)
+    union = automata_union(neg_fa1, neg_fa2, add = True)
+    intersec = automata_complement(union, name, add = add)
 
     '''print(union.process_input('aaaa'))
     print(union.process_input('aaab'))
@@ -149,7 +149,7 @@ def automata_intersec(af1, af2, name = None, add = False):
     return intersec
 
 def automata_difference(af1, af2, name = None, add = False):
-    neg_af2 = automata_complement(af2)
+    neg_af2 = automata_complement(af2, add = True)
 
     if name == None:
         name = str(af1.name) + " - " + str(af2.name)
@@ -238,4 +238,4 @@ def getReverse(af, add = False):
     if acceptEpsilon:
         newAF.finalStates |= {newInitial}
 
-    return newAF
+    return newAF.determinize()

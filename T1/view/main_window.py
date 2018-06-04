@@ -51,7 +51,10 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab5.saveER.connect(self.select_expression)
 		self.MyTableWidget.tab5.saveDS.connect(self.update_af)
 		self.MyTableWidget.tab2.saveAF.connect(self.select_automaton)
+		self.MyTableWidget.tab2.minimize.connect(self.select_automaton)
 		self.MyTableWidget.tab2.saveAFND.connect(self.select_automaton)
+		self.MyTableWidget.tab4.saveAFND.connect(self.select_automaton)
+		self.MyTableWidget.tab6.updateAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 
@@ -226,18 +229,14 @@ class MainWindow(QWidget):
 		self.leftLayout.addWidget(self.listofentities,2,0)
 
 		self.optionAdd = QWidget()
-		self.optionEdit = QWidget()
 		self.optionDelete = QWidget()
 		self.optionAdd.setStyleSheet("background-color:indigo;")
-		self.optionEdit.setStyleSheet("background-color:cyan;")
 		self.optionDelete.setStyleSheet("background-color:fuchsia;")
 		self.optionsLayout = QGridLayout()
 		self.optionsLayout.setColumnStretch(0,1)
 		self.optionsLayout.setColumnStretch(1,1)
-		self.optionsLayout.setColumnStretch(2,1)
 		self.optionsLayout.addWidget(self.optionAdd,0,0)
-		self.optionsLayout.addWidget(self.optionEdit,0,1)
-		self.optionsLayout.addWidget(self.optionDelete,0,2)
+		self.optionsLayout.addWidget(self.optionDelete,0,1)
 		self.options.setLayout(self.optionsLayout)
 
 		self.addButton = QPushButton('Adicionar', self)
@@ -246,13 +245,6 @@ class MainWindow(QWidget):
 		self.addLayout = QVBoxLayout()
 		self.addLayout.addWidget(self.addButton)
 		self.optionAdd.setLayout(self.addLayout)
-
-		self.editButton = QPushButton('Editar', self)
-		self.editButton.setToolTip('Editar GR/ER/AF')
-		self.editButton.clicked.connect(self.on_click)
-		self.editLayout = QVBoxLayout()
-		self.editLayout.addWidget(self.editButton)
-		self.optionEdit.setLayout(self.editLayout)
 
 		self.deleteButton = QPushButton('Deletar', self)
 		self.deleteButton.setToolTip('Deletar GR/ER/AF')
@@ -337,13 +329,15 @@ class MyTableWidget(QWidget):
 		self.tab3 = GrammarOperationsTab()
 		self.tab4 = addNDAutomatonTab()
 		self.tab5 = SimoneTab()
+		self.tab6 = AFOperationsTab()
 		self.tabs.resize(300,200)
 
-		self.tabs.addTab(self.tab1,"Add GR")
-		self.tabs.addTab(self.tab2,"Add AF")
+		self.tabs.addTab(self.tab1,"Edit GR")
+		self.tabs.addTab(self.tab2,"Edit AF")
 		self.tabs.addTab(self.tab3,"GR Operations")
-		self.tabs.addTab(self.tab4,"Add NAF")
-		self.tabs.addTab(self.tab5, "Simone")
+		self.tabs.addTab(self.tab4,"Edit NAF")
+		self.tabs.addTab(self.tab5, "Edit ER")
+		self.tabs.addTab(self.tab6, "AF Operations")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -535,6 +529,7 @@ class RemoveProdButton(QPushButton):
 class addAutomatonTab(QWidget):
 	saveAFND = QtCore.pyqtSignal(NDAutomaton)
 	saveAF = QtCore.pyqtSignal(Automaton)
+	minimize = QtCore.pyqtSignal(Automaton)
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -545,7 +540,9 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setColumnCount(0)
 		self.transition_table_ui.setAcceptDrops(True)
 		self.transition_table_ui.setItem(0,0, StateTableItem("q0"))
-
+		self.minimize_button = QPushButton("Minimizar")
+		self.rename_button = QPushButton("Renomear estados")
+		self.rename_button.clicked.connect(self.rename_states)
 		#self.transition_table_ui.move(0,0)
 
 
@@ -556,7 +553,10 @@ class addAutomatonTab(QWidget):
 		self.bottom_layout = QGridLayout()
 		self.bottom_layout.addWidget(self.make_non_deterministic_button,0,0)
 		self.make_non_deterministic_button.clicked.connect(self.make_non_deterministic)
-		self.bottom_layout.addWidget(self.add_automaton_button, 0,1)
+		self.bottom_layout.addWidget(self.add_automaton_button, 0,2)
+		self.bottom_layout.addWidget(self.minimize_button, 0, 1)
+		self.bottom_layout.addWidget(self.rename_button, 0, 3)
+		self.minimize_button.clicked.connect(self.do_minimize)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
 
@@ -621,6 +621,27 @@ class addAutomatonTab(QWidget):
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
 
+
+	def do_minimize(self):
+		af = Globals.selected
+		if type(af) != Automaton:
+			print("Não pode")
+			return
+		min_af = af.minimize()
+		min_af.name = "minimized_" + af.name
+		Globals.automata.append(min_af)
+		Globals.selected = min_af
+		self.minimize.emit(Globals.selected)
+	def rename_states(self):
+		af = Globals.selected
+		if type(af) != Automaton:
+			print("Não pode")
+			return
+		raf = af.rename_states()
+		raf.name = "renamed_" + af.name
+		Globals.automata.append(raf)
+		Globals.selected = raf
+		self.minimize.emit(Globals.selected)
 	def add_new_symbol(self):
 		symbols = [str(self.list_symbol.item(i).text()) for i in range(self.list_symbol.count())]
 		c_ord = -1
@@ -916,7 +937,7 @@ class GrammarOperationsTab(QWidget):
 		self.top_op2.setLayout(self.top_op2_layout)
 		self.top_operation = QLabel()
 		self.top_operation.setAlignment(Qt.AlignCenter)
-		self.top_operation.setText("concatenada com")
+		self.top_operation.setText(".")
 		self.top_operation.setStyleSheet("background-color:orange;")
 		self.top_done = QPushButton("Pronto")
 		self.top_done.clicked.connect(self.add_concatenation)
@@ -957,7 +978,7 @@ class GrammarOperationsTab(QWidget):
 		self.mid_op2.setLayout(self.mid_op2_layout)
 		self.mid_operation = QLabel()
 		self.mid_operation.setAlignment(Qt.AlignCenter)
-		self.mid_operation.setText("unida com")
+		self.mid_operation.setText("∪")
 		self.mid_operation.setStyleSheet("background-color:orange;")
 		self.mid_done = QPushButton("Pronto")
 		self.mid_done.clicked.connect(self.add_union)
@@ -986,7 +1007,7 @@ class GrammarOperationsTab(QWidget):
 		self.bot_op1.setLayout(self.bot_op1_layout)
 		self.bot_operation = QLabel()
 		self.bot_operation.setAlignment(Qt.AlignCenter)
-		self.bot_operation.setText("fechada")
+		self.bot_operation.setText("*")
 		self.bot_operation.setStyleSheet("background-color:orange;")
 		self.bot_done = QPushButton("Pronto")
 		self.bot_done.clicked.connect(self.add_kleene)
@@ -1011,7 +1032,7 @@ class GrammarOperationsTab(QWidget):
 				g_2 = g2
 		if g_1 != None and g_2 != None:
 			newG = grammar_concatenation(g_1, g_2)
-			if newG in Globals.grammars:
+			while newG in Globals.grammars:
 				newG.name = newG.name + "'"
 			Globals.grammars.append(newG)
 			Globals.selected = newG
@@ -1028,7 +1049,7 @@ class GrammarOperationsTab(QWidget):
 				g_2 = g2
 		if g_1 != None and g_2 != None:
 			newG = grammar_union(g_1, g_2)
-			if newG in Globals.grammars:
+			while newG in Globals.grammars:
 				newG.name = newG.name + "'"
 			Globals.grammars.append(newG)
 			Globals.selected = newG
@@ -1040,7 +1061,7 @@ class GrammarOperationsTab(QWidget):
 				g_1 = g1
 		if g_1 != None:
 			newG = grammar_kleene_star(g_1)
-			if newG in Globals.grammars:
+			while newG in Globals.grammars:
 				newG.name = newG.name + "'"
 			Globals.grammars.append(newG)
 			Globals.selected = newG
@@ -1137,3 +1158,175 @@ class Edit(QLineEdit):
 			event.accept()
 		else:
 			event.ignore()
+
+
+class AFOperationsTab(QWidget):
+	updateAF = QtCore.pyqtSignal(Automaton)
+	def __init__(self):
+		super(QWidget, self).__init__()
+
+		self.line = 0
+		self.layout = QGridLayout()
+		self.layout.setRowStretch(0,1)
+		self.layout.setRowStretch(1,1)
+		self.layout.setRowStretch(2,1)
+		self.top = QWidget()
+		self.top.setStyleSheet("background-color:pink;")
+		self.top_layout = QGridLayout()
+		self.top_layout.setRowStretch(0,1)
+		self.top_layout.setRowStretch(1,1)
+		self.top_layout.setRowStretch(2,1)
+		self.top_layout.setRowStretch(3,1)
+		self.top_op1 = QWidget()
+		self.top_op1.setStyleSheet("background-color:purple;")
+		self.top_op1_layout = QGridLayout()
+		self.top_op1_layout.setColumnStretch(0,1)
+		self.top_op1_layout.setColumnStretch(1,1)
+		self.top_op1label = QLabel()
+		self.top_op1label.setText("AF 1:")
+		self.top_op1edit = QLineEdit()
+		self.top_op1_layout.addWidget(self.top_op1label,0,0)
+		self.top_op1_layout.addWidget(self.top_op1edit,0,1)
+		self.top_op1.setLayout(self.top_op1_layout)
+		self.top_op2 = QWidget()
+		self.top_op2.setStyleSheet("background-color:purple;")
+		self.top_op2_layout = QGridLayout()
+		self.top_op2_layout.setColumnStretch(0,1)
+		self.top_op2_layout.setColumnStretch(1,1)
+		self.top_op2label = QLabel()
+		self.top_op2label.setText("AF 2:")
+		self.top_op2edit = QLineEdit()
+		self.top_op2_layout.addWidget(self.top_op2label,0,0)
+		self.top_op2_layout.addWidget(self.top_op2edit,0,1)
+		self.top_op2.setLayout(self.top_op2_layout)
+		self.top_operation = QLabel()
+		self.top_operation.setAlignment(Qt.AlignCenter)
+		self.top_operation.setText("∩")
+		self.top_operation.setStyleSheet("background-color:orange;")
+		self.top_done = QPushButton("Pronto")
+		self.top_done.clicked.connect(self.add_intersection)
+		self.top_layout.addWidget(self.top_op1,0,0)
+		self.top_layout.addWidget(self.top_op2,2,0)
+		self.top_layout.addWidget(self.top_operation,1,0)
+		self.top_layout.addWidget(self.top_done,3,0)
+		self.top.setLayout(self.top_layout)
+
+		self.mid = QWidget()
+		self.mid.setStyleSheet("background-color:pink;")
+		self.mid_layout = QGridLayout()
+		self.mid_layout.setRowStretch(0,1)
+		self.mid_layout.setRowStretch(1,1)
+		self.mid_layout.setRowStretch(2,1)
+		self.mid_layout.setRowStretch(3,1)
+		self.mid_op1 = QWidget()
+		self.mid_op1.setStyleSheet("background-color:purple;")
+		self.mid_op1_layout = QGridLayout()
+		self.mid_op1_layout.setColumnStretch(0,1)
+		self.mid_op1_layout.setColumnStretch(1,1)
+		self.mid_op1label = QLabel()
+		self.mid_op1label.setText("AF 1:")
+		self.mid_op1edit = QLineEdit()
+		self.mid_op1_layout.addWidget(self.mid_op1label,0,0)
+		self.mid_op1_layout.addWidget(self.mid_op1edit,0,1)
+		self.mid_op1.setLayout(self.mid_op1_layout)
+		self.mid_op2 = QWidget()
+		self.mid_op2.setStyleSheet("background-color:purple;")
+		self.mid_op2_layout = QGridLayout()
+		self.mid_op2_layout.setColumnStretch(0,1)
+		self.mid_op2_layout.setColumnStretch(1,1)
+		self.mid_op2label = QLabel()
+		self.mid_op2label.setText("AF 2:")
+		self.mid_op2edit = QLineEdit()
+		self.mid_op2_layout.addWidget(self.mid_op2label,0,0)
+		self.mid_op2_layout.addWidget(self.mid_op2edit,0,1)
+		self.mid_op2.setLayout(self.mid_op2_layout)
+		self.mid_operation = QLabel()
+		self.mid_operation.setAlignment(Qt.AlignCenter)
+		self.mid_operation.setText("-")
+		self.mid_operation.setStyleSheet("background-color:orange;")
+		self.mid_done = QPushButton("Pronto")
+		self.mid_done.clicked.connect(self.add_difference)
+		self.mid_layout.addWidget(self.mid_op1,0,0)
+		self.mid_layout.addWidget(self.mid_op2,2,0)
+		self.mid_layout.addWidget(self.mid_operation,1,0)
+		self.mid_layout.addWidget(self.mid_done,3,0)
+		self.mid.setLayout(self.mid_layout)
+
+		self.bot = QWidget()
+		self.bot.setStyleSheet("background-color:pink;")
+		self.bot_layout = QGridLayout()
+		self.bot_layout.setRowStretch(0,1)
+		self.bot_layout.setRowStretch(1,1)
+		self.bot_layout.setRowStretch(2,1)
+		self.bot_op1 = QWidget()
+		self.bot_op1.setStyleSheet("background-color:purple;")
+		self.bot_op1_layout = QGridLayout()
+		self.bot_op1_layout.setColumnStretch(0,1)
+		self.bot_op1_layout.setColumnStretch(1,1)
+		self.bot_op1label = QLabel()
+		self.bot_op1label.setText("AF:")
+		self.bot_op1edit = QLineEdit()
+		self.bot_op1_layout.addWidget(self.bot_op1label,0,0)
+		self.bot_op1_layout.addWidget(self.bot_op1edit,0,1)
+		self.bot_op1.setLayout(self.bot_op1_layout)
+		self.bot_operation = QLabel()
+		self.bot_operation.setAlignment(Qt.AlignCenter)
+		self.bot_operation.setText("R")
+		self.bot_operation.setStyleSheet("background-color:orange;")
+		self.bot_done = QPushButton("Pronto")
+		self.bot_done.clicked.connect(self.add_reverse)
+		self.bot_layout.addWidget(self.bot_op1,0,0)
+		self.bot_layout.addWidget(self.bot_operation,1,0)
+		self.bot_layout.addWidget(self.bot_done,2,0)
+		self.bot.setLayout(self.bot_layout)
+
+		self.layout.addWidget(self.top,0,0)
+		self.layout.addWidget(self.mid,1,0)
+		self.layout.addWidget(self.bot,2,0)
+
+		self.setLayout(self.layout)
+	def add_intersection(self):
+		a_1 = None
+		a_2 = None
+		for a1 in Globals.automata:
+			if a1.name == self.top_op1edit.text():
+				a_1 = a1
+		for a2 in Globals.automata:
+			if a2.name == self.top_op2edit.text():
+				a_2 = a2
+		if a_1 != None and a_2 != None:
+			newA = automata_intersec(a_1, a_2)
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			Globals.automata.append(newA)
+			Globals.selected = newA
+			self.updateAF.emit(Globals.selected)
+
+	def add_difference(self):
+		a_1 = None
+		a_2 = None
+		for a1 in Globals.automata:
+			if a1.name == self.mid_op1edit.text():
+				a_1 = a1
+		for a2 in Globals.automata:
+			if a2.name == self.mid_op2edit.text():
+				a_2 = a2
+		if a_1 != None and a_2 != None:
+			newA = automata_difference(a_1, a_2)
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			Globals.automata.append(newA)
+			Globals.selected = newA
+			self.updateAF.emit(Globals.selected)
+	def add_reverse(self):
+		a_1 = None
+		for a1 in Globals.automata:
+			if a1.name == self.bot_op1edit.text():
+				a_1 = a1
+		if a_1 != None:
+			newA = getReverse(a_1)
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			Globals.automata.append(newA)
+			Globals.selected = newA
+			self.updateAF.emit(Globals.selected)

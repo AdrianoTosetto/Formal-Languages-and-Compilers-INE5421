@@ -100,8 +100,9 @@ class NDAutomaton:
 			return None
 		if name is None:
 			self.name = 'M' + str(Globals.automaton_count)
-			if add:
-				Globals.automaton_count += 1
+			Globals.automaton_count += 1
+		else:
+			self.name = name
 		self.states = (states)
 		self.finalStates = (finalStates)
 		self.initialState = initialState
@@ -146,7 +147,14 @@ class NDAutomaton:
 
 	def __str__(self):
 		stringerson = "   δ"
-		Σ = sorted(self.Σ) + ['&']
+		hasEpsilon = False
+		for s in self.states:
+			for t in s.ndtransitions:
+				if t.symbol == '&':
+					hasEpsilon = True
+		Σ = sorted(self.Σ)
+		if hasEpsilon and '&' not in Σ:
+			Σ += ['&']
 		for σ in Σ:
 			stringerson = stringerson + " |  " + σ + " "
 		stringerson = stringerson + "\n"

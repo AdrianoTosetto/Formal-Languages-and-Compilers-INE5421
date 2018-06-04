@@ -9,11 +9,8 @@ class Automaton:
 		if len(states) < 1:
 			return None
 		if name is None:
-			i = 1
-			while Automaton({},{},State(''), name = 'M' + str(i)) in Globals.automata:
-				i+=1
-			self.name = 'M' + str(i)
-			#Globals.automaton_count += 1
+			self.name = 'M' + str(Globals.automaton_count)
+			Globals.automaton_count += 1
 		else:
 			self.name = name
 		self.states = (states)
@@ -379,6 +376,8 @@ class Automaton:
 		i = 0
 
 		for s in newStates:
+			if s.name == 'φ':
+				continue
 			if s == newInitialState:
 				newInitialState.name = 'q' + str(i)
 			oldStates.append(s)
@@ -417,6 +416,8 @@ class Automaton:
 		i = 0
 
 		for s in newStates:
+			if s.name == 'φ':
+				continue
 			if s == newInitialState:
 				newInitialState.name = str(alphabet[i])
 			oldStates.append(s)

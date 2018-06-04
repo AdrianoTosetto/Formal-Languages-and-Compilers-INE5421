@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 
 class addNDAutomatonTab(QWidget):
-	saveAF = QtCore.pyqtSignal(Automaton)
+	saveAFND = QtCore.pyqtSignal(NDAutomaton)
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.initial_state_radio_group = QButtonGroup()
@@ -27,9 +27,9 @@ class addNDAutomatonTab(QWidget):
 		#self.transition_table_ui.move(0,0)
 
 
-		self.add_automaton_button = QPushButton("Adicionar")
+		self.add_automaton_button = QPushButton("Salvar")
 		self.create_transition_table_button = \
-			QPushButton("Criar tabela") # botao para criar a tabela com o alfabeto inserido
+			QPushButton("Determinizar") # botao para criar a tabela com o alfabeto inserido
 		self.add_automaton_button.clicked.connect(self.save_automaton)
 		self.bottom_layout = QGridLayout()
 		self.bottom_layout.addWidget(self.create_transition_table_button,0,0)
@@ -315,11 +315,18 @@ class addNDAutomatonTab(QWidget):
 
 		for i in range(0, len(states_list)):
 			s = states_list[i]
-			for t in s.ndtransitions:
+			for sig in af.Σ:
+				str_states_names = ""
+				for t in s.ndtransitions:
+					if t.symbol == sig:
+						for ts in t.target_states:
+							str_states_names += ts.name
+				self.set_transition_cell(s.name, str_states_names, sig)
+			'''for t in s.ndtransitions:
 				str_states_names = ""
 				for ts in t.target_states:
 					str_states_names += ts.name
-				self.set_transition_cell(s.name, str_states_names, t.symbol)
+				self.set_transition_cell(s.name, str_states_names, t.symbol)'''
 
 	def set_transition_cell(self, state, target, symbol):
 		row = -1
@@ -342,7 +349,7 @@ class addNDAutomatonTab(QWidget):
 		for j in range(0, self.transition_table_ui.columnCount() - 2):
 			newΣ.append(self.transition_table_ui.horizontalHeaderItem(j).text())
 		for i in range(0, self.transition_table_ui.rowCount()):
-			newS = State(self.transition_table_ui.verticalHeaderItem(i).text(), self.transition_table_ui.cellWidget(i, self.transition_table_ui.columnCount() - 1).checkState() == 2)
+			newS = NDState(self.transition_table_ui.verticalHeaderItem(i).text(), self.transition_table_ui.cellWidget(i, self.transition_table_ui.columnCount() - 1).checkState() == 2)
 			states.add(newS)
 			if newS.isAcceptance:
 				finalStates.add(newS)
@@ -353,11 +360,11 @@ class addNDAutomatonTab(QWidget):
 				if self.transition_table_ui.verticalHeaderItem(i).text() == s.name:
 					for j in range(0, self.transition_table_ui.columnCount() - 2):
 						for ns in states:
-							if ns.name == self.transition_table_ui.item(i,j).text():
-								s.add_transition(Transition(self.transition_table_ui.horizontalHeaderItem(j).text(), ns))
+							if ns.name in self.transition_table_ui.item(i,j).text():
+								s.add_transition(NDTransition(self.transition_table_ui.horizontalHeaderItem(j).text(), [ns]))
 
 		auts = []
-		newA = Automaton(states, finalStates, initialState, newΣ, Globals.selected.name)
+		newA = NDAutomaton(states, finalStates, initialState, newΣ, Globals.selected.name)
 		for a in Globals.automata:
 			if a.name != Globals.selected.name:
 				auts.append(a)
@@ -365,7 +372,7 @@ class addNDAutomatonTab(QWidget):
 				auts.append(newA)
 		Globals.automata = auts
 		Globals.selected = newA
-		self.saveAF.emit(Globals.selected)
+		self.saveAFND.emit(Globals.selected)
 
 
 class NDAutomatonTable(QTableWidget):
