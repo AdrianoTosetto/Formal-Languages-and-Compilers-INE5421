@@ -702,7 +702,7 @@ class RegExp:
 					if s.name == str(t[0]) and s1.name == str(t[2]):
 						s.add_transition(Transition(t[1], s1))
 
-		result_automaton = Automaton(states, finalStates, initialState, Σ).rename_states()
+		result_automaton = Automaton(states, finalStates, initialState, Σ)
 
 		return result_automaton
 class StateComposition:
