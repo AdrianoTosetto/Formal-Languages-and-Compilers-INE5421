@@ -171,7 +171,7 @@ class MainWindow(QWidget):
 						grams.append(g)
 				Globals.grammars = grams
 				self.update_gr()
-			if type(Globals.selected) == type(Automaton([],[], State(""))):
+			if type(Globals.selected) == type(Automaton([],[], State(""))) or type(Globals.selected) == type(NDAutomaton([],[], NDState(""))):
 				auts = []
 				for a in Globals.automata:
 					if a.name != Globals.selected.name:
