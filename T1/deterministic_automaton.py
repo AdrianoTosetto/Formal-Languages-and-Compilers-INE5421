@@ -376,7 +376,10 @@ class Automaton:
 		for s in self.states:
 			addPhi = addPhi or s.complete(self.Σ)
 		if addPhi:
-			self.states.add(φ(self.Σ))
+			if type(self.states) == set:
+				self.states.add(φ(self.Σ))
+			elif type(self.states) == list:
+				self.states.append(φ(self.Σ))
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
 	def set_(self):
 		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
