@@ -180,6 +180,7 @@ class Grammar:
 		states_str = {s for s in self.get_non_terminals()}
 		# state that accepts the input
 		λ = non_deterministic_automaton.NDState('λ')
+		λ.isAccptance = True
 		φ = non_deterministic_automaton.NDState('φ')
 		for s in alphabet:
 			λ.add_transition(non_deterministic_automaton.NDTransition(s, [φ]))
@@ -200,6 +201,7 @@ class Grammar:
 				states[s].add_transition(t)
 
 		states['λ'] = λ
+		states['φ'] = φ
 
 		for sstr in states_str:
 			for symbol in alphabet:
