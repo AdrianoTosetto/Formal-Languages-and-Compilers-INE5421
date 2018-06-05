@@ -184,6 +184,7 @@ class Grammar:
 		φ = non_deterministic_automaton.NDState('φ')
 		for s in alphabet:
 			λ.add_transition(non_deterministic_automaton.NDTransition(s, [φ]))
+			φ.add_transition(non_deterministic_automaton.NDTransition(s, [φ]))
 		for s in states:
 			prods = self._get_ord_productions_from(s.__str__())
 			for prod in prods:
