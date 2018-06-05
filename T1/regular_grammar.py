@@ -1,4 +1,4 @@
-from non_deterministic_automaton import *
+import non_deterministic_automaton
 from globals import *
 
 '''
@@ -176,9 +176,9 @@ class Grammar:
 
 	def convert_to_automaton(self):
 		alphabet = self.getAlphabet()
-		states = {s:NDState(s) for s in self.get_non_terminals()}
+		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
 		# state that accepts the input
-		λ = NDState('λ')
+		λ = non_deterministic_automaton.NDState('λ')
 		for s in states:
 			prods = self._get_ord_productions_from(s.__str__())
 			for prod in prods:
@@ -191,19 +191,18 @@ class Grammar:
 						nt = i[1]
 						next_state = states[nt]
 						sset.append(next_state)
-				t = NDTransition(symbol, sset)
-				#print(states[s].__str__() + " goes to " + str(sset) + " for " + symbol)
+				t = non_deterministic_automaton.NDTransition(symbol, sset)
 				sset = []
 				states[s].add_transition(t)
 
 		states['λ'] = λ
 
-		initialState = states['S']
+		initialState = states[self.productions[0].leftSide]
 		finalStates = [λ]
 		if self.has_empty_sentence():
 			finalStates.append(initialState)
 
-		return NDAutomaton(states.values(), finalStates, initialState, alphabet)
+		return non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet)
 
 	def add_production(self, prod):
 		self.productions.append(prod)

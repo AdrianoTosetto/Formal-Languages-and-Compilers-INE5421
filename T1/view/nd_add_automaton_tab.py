@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 
 class addNDAutomatonTab(QWidget):
+	saveAFD = QtCore.pyqtSignal(Automaton)
 	saveAFND = QtCore.pyqtSignal(NDAutomaton)
 	printS = QtCore.pyqtSignal()
 	jesus = ""
@@ -248,27 +249,11 @@ class addNDAutomatonTab(QWidget):
 		print("jesus = " + NDAutomatonTable.jesus1)
 
 	def create_transition_table(self):
-		raw_text = self.edit_alphabet.text()
-		alphabet = raw_text.split(",")
-		alphabet = sorted(list(set(alphabet)), key=str.lower)
-		self.transition_table_ui.setColumnCount(len(alphabet) + 2)
-		self.setColsLabels(alphabet)
-		self.alphabet = alphabet
-		header = self.transition_table_ui.horizontalHeader()
-		for i in range(0, self.transition_table_ui.columnCount()):
-			header.setSectionResizeMode(i, QHeaderView.Stretch)
-		row_count = self.transition_table_ui.rowCount()
-		column_count = self.transition_table_ui.columnCount() - 2
-		for i in range(0, row_count):
-			for j in range(0, column_count):
-				self.transition_table_ui.setItem(i,j,QTableWidgetItem("(" + str(i) + "," + str(j) + ")"))
-		initial_state_radio_group = QButtonGroup()
-		for i in range(0, row_count):
-			r = QRadioButton()
-			c = QCheckBox()
-			self.initial_state_radio_group.addButton(r)
-			self.transition_table_ui.setCellWidget(i,column_count,QRadioButton())
-			self.transition_table_ui.setCellWidget(i,column_count+1,c)
+		newAF = Globals.selected.determinize()
+		newAF.name = Globals.selected.name + " (determinized)"
+		Globals.automata.append(newAF)
+		Globals.selected = newAF
+		self.saveAFD.emit(Globals.selected)
 
 	def setColsLabels(self, labels):
 		i = 0

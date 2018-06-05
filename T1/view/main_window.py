@@ -55,8 +55,10 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab2.saveAFND.connect(self.select_automaton)
 		self.MyTableWidget.tab2.printS.connect(self.log_sentences)
 		self.MyTableWidget.tab4.saveAFND.connect(self.select_automaton)
+		self.MyTableWidget.tab4.saveAFD.connect(self.select_automaton)
 		self.MyTableWidget.tab4.printS.connect(self.log_update)
 		self.MyTableWidget.tab6.updateAF.connect(self.select_automaton)
+		self.MyTableWidget.tab7.updateAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 		self.rightLayout.setColumnStretch(0,5)
@@ -117,7 +119,7 @@ class MainWindow(QWidget):
 	def select_grammar(self, gram):
 		self.update_gr()
 		self.display.setText(gram.name + ":\n" + str(gram))
-		Globals.selected = copy.deepcopy(gram)
+		Globals.selected = gram
 		nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
@@ -126,7 +128,7 @@ class MainWindow(QWidget):
 	def select_automaton(self, aut):
 		self.update_af()
 		self.display.setText(aut.name + ":\n" + str(aut))
-		Globals.selected = copy.deepcopy(aut)
+		Globals.selected = aut
 		if type(Globals.selected) == type(Automaton({}, {}, State(''))):
 			self.updateAFD.emit(Globals.selected)
 		else:
@@ -134,7 +136,7 @@ class MainWindow(QWidget):
 	def select_expression(self, exp):
 		self.update_er()
 		self.display.setText(exp)
-		Globals.selcted = copy.deepcopy(exp)
+		Globals.selcted = copy.deepcopy(list(exp))
 		self.updateER.emit(Globals.selected)
 		'''nts = gram.get_non_terminals()
 		prods = []

@@ -1,4 +1,5 @@
-from deterministic_automaton import *
+import deterministic_automaton
+from deterministic_automaton import State, Transition, Automaton
 from globals import *
 import copy
 
@@ -25,7 +26,7 @@ class NDTransition:
 class NDState:
 	def __init__(self, name, isAcceptance = False):
 		self.name = name
-		self.ndtransitions = []
+		self.ndtransitions = list()
 		self.isAcceptance = isAcceptance
 
 	def get_symbols(self):
@@ -45,7 +46,6 @@ class NDState:
 		return None
 
 	def next_states(self, symbol, already_visited=set()):
-
 		next_states = set()
 		for t in self.ndtransitions:
 			if t.get_symbol() == symbol:
@@ -110,6 +110,22 @@ class NDAutomaton:
 		self.Σ = Σ
 		if self not in Globals.automata and add:
 			Globals.automata.append(self)
+
+	def __hash__(self):
+		hashable = self.name
+		if self.name == 'λ':
+			hashable ='lambda'
+		elif self.name == 'φ':
+			hashable = 'phi'
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
+
+	def __eq__(self, other):
+		return self.__hash__() == other.__hash__()
 
 	def process_input(self, input):
 		for symbol in input:
@@ -215,6 +231,8 @@ class NDAutomaton:
 			next_states_by_s = s.next_states('&')
 			for symbol in self.Σ:
 				trans = copy.deepcopy(news.ndtransitions)
+				if trans == None:
+					trans = []
 				#print("symbol = " + str(symbol))
 				target_states = list()
 				for ns in next_states_by_s:
@@ -247,8 +265,9 @@ class NDAutomaton:
 				return newState
 			determinizedStates.add(newState)
 			for t in oldState.ndtransitions:
-				newT = Transition(t.symbol, self.determinize_states(t.target_states, finalStates, newStates, determinizedStates))
-				newState.add_transition(newT)
+				if len(t.target_states) != 0:
+					newT = Transition(t.symbol, self.determinize_states(set(t.target_states), finalStates, newStates, determinizedStates))
+					newState.add_transition(newT)
 				#print(str(newState) + " + " + str(newT))
 			if newState in newStates:
 				newStates.remove(newState)
@@ -269,12 +288,14 @@ class NDAutomaton:
 				for t in s.ndtransitions:
 					if t.symbol == a:
 						nextStates = nextStates | set(t.target_states)
-			newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, newStates, determinizedStates)))
+			if len(nextStates) != 0:
+				newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, newStates, determinizedStates)))
 		if any(s in self.finalStates for s in states):
 			finalStates.add(newState)
 		if newState in newStates:
 			newStates.remove(newState)
-		newStates.add(newState)
+		if newState.name != "set()":
+			newStates.add(newState)
 		return newState
 
 	def determinize(self):
@@ -295,10 +316,12 @@ class NDAutomaton:
 			for t in s.ndtransitions:
 				#print(t.target_states)
 				#return " "
-				newState.add_transition(Transition(t.symbol, newA.determinize_states(t.target_states, finalStates, newStates, determinized)))
+				if len(t.target_states) != 0:
+					newState.add_transition(Transition(t.symbol, newA.determinize_states(set(t.target_states), finalStates, newStates, determinized)))
 			if newState in newStates:
 				newStates.remove(newState)
-			newStates.add(newState)
+			if newState.name != "set()":
+				newStates.add(newState)
 		for s in newStates:
 			if s == newInitialState:
 				newInitialState = s

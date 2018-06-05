@@ -2,9 +2,17 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5 import QtCore
 import functools
+sys.path.append('../')
+from globals import *
+import regular_grammar
+from non_deterministic_automaton import NDAutomaton
+from regular_grammar import Grammar
 
 class ConvertionTab(QWidget):
+	updateAF = QtCore.pyqtSignal(NDAutomaton)
+	updateGR = QtCore.pyqtSignal(Grammar)
 	def __init__(self):
 		super(QWidget, self).__init__(parent=None)
 		self.convert_gr_af_layout = QGridLayout()
@@ -19,7 +27,7 @@ class ConvertionTab(QWidget):
 		self.af_convert = QPushButton("Converter para GR")
 
 		self.main_layout = QGridLayout()
-		
+
 		self.set_click_events()
 
 		self.set_policy_buttons()
@@ -51,7 +59,20 @@ class ConvertionTab(QWidget):
 		self.af_convert.clicked.connect(self.convert_to_gr)
 
 	def convert_to_af(self):
-		print("converter gr para af")
+		a_1 = None
+		for a1 in Globals.grammars:
+			if a1.name == self.gr_name.text():
+				a_1 = a1
+		if a_1 != None:
+			newA = a_1.convert_to_automaton()
+			newA.name = "M"
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			newA.name = newA.name + " | T(" + newA.name + ") = L(" + a_1.name + ")"
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			Globals.automata.append(newA)
+			Globals.selected = newA
+			self.updateAF.emit(Globals.selected)
 	def convert_to_gr(self):
 		print("converter af para gr")
-
