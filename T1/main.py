@@ -18,6 +18,7 @@ if __name__ == "__main__":
 				   Production(leftSides[2], rightSides[6]), Production(leftSides[2], rightSides[7])]
 	#print(Globals.grammar_count)
 	myGrammar = Grammar(productions)
+	print(convert_to_automaton(myGrammar))
 	#Globals.grammars.append(myGrammar)
 
 	leftSides1 = ['S', 'A', 'B', 'C']

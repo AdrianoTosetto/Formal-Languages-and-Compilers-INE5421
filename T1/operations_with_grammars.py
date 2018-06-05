@@ -7,6 +7,39 @@ import copy
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
             'O', 'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
+
+def convert_to_automaton(gr):
+        alphabet = gr.getAlphabet()
+        states = {s:NDState(s) for s in gr.get_non_terminals()}
+        # state that accepts the input
+        λ = NDState('λ')
+        for s in states:
+            prods = gr._get_ord_productions_from(s.__str__())
+            for prod in prods:
+                sset = []
+                for i in prod:
+                    symbol = i[0] #terminal symbol
+                    if len(i) == 1:
+                        sset.append(λ)
+                    else:
+                        nt = i[1]
+                        next_state = states[nt]
+                        sset.append(next_state)
+                t = NDTransition(symbol, sset)
+                #print(states[s].__str__() + " goes to " + str(sset) + " for " + symbol)
+                sset = []
+                states[s].add_transition(t)
+
+        states['λ'] = λ
+
+        initialState = states['S']
+        finalStates = [λ]
+        if gr.has_empty_sentence():
+            finalStates.append(initialState)
+
+        return NDAutomaton(states.values(), finalStates, initialState, alphabet)
+
+
 def grammar_union(gr1, gr2, add = False):
     hasEpsilon = False
     oldProds1 = copy.deepcopy(gr1.productions)

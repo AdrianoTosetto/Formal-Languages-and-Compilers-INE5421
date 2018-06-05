@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from gr_af_convertions_tab import *
 import functools
 import sys
 sys.path.append('../')
@@ -41,8 +42,6 @@ class MainWindow(QWidget):
 		self.rightLayout = QGridLayout()
 		self.rightLayout.addWidget(self.displayScreen, 0, 0)
 		#self.rightLayout.addWidget(self.editPanel, 0, 1)
-		self.rightLayout.setColumnStretch(0,5)
-		self.rightLayout.setColumnStretch(1,3)
 		self.MyTableWidget = MyTableWidget(self.rightSide)
 		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
 		self.MyTableWidget.tab3.updateGR.connect(self.select_grammar)
@@ -60,7 +59,8 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab6.updateAF.connect(self.select_automaton)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
-
+		self.rightLayout.setColumnStretch(0,5)
+		self.rightLayout.setColumnStretch(1,2)
 		self.generateLeftSide()
 
 		self.center = QWidget()
@@ -349,6 +349,7 @@ class MyTableWidget(QWidget):
 		self.tab4 = addNDAutomatonTab()
 		self.tab5 = SimoneTab()
 		self.tab6 = AFOperationsTab()
+		self.tab7 = ConvertionTab()
 		self.tabs.resize(300,200)
 
 		self.tabs.addTab(self.tab1,"Edit GR")
@@ -357,6 +358,7 @@ class MyTableWidget(QWidget):
 		self.tabs.addTab(self.tab4,"Edit NAF")
 		self.tabs.addTab(self.tab5, "Edit ER")
 		self.tabs.addTab(self.tab6, "AF Operations")
+		self.tabs.addTab(self.tab7, "GR/AF Conversion")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
