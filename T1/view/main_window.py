@@ -59,6 +59,7 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab4.printS.connect(self.log_update)
 		self.MyTableWidget.tab6.updateAF.connect(self.select_automaton)
 		self.MyTableWidget.tab7.updateAF.connect(self.select_automaton)
+		self.MyTableWidget.tab7.updateGR.connect(self.select_grammar)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 		self.rightLayout.setColumnStretch(0,5)

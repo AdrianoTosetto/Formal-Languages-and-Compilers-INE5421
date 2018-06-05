@@ -9,6 +9,7 @@ from globals import *
 import regular_grammar
 from non_deterministic_automaton import NDAutomaton
 from regular_grammar import Grammar
+import deterministic_automaton
 
 class ConvertionTab(QWidget):
 	updateAF = QtCore.pyqtSignal(NDAutomaton)
@@ -75,4 +76,20 @@ class ConvertionTab(QWidget):
 			Globals.selected = newA
 			self.updateAF.emit(Globals.selected)
 	def convert_to_gr(self):
-		print("converter af para gr")
+		a_1 = None
+		for a1 in Globals.automata:
+			if a1.name == self.af_name.text():
+				a_1 = a1
+		if type(a_1) != type(deterministic_automaton.Automaton({},{},deterministic_automaton.State(""))):
+			return
+		if a_1 != None:
+			newA = a_1.to_grammar()
+			newA.name = "G"
+			while newA in Globals.grammars:
+				newA.name = newA.name + "'"
+			newA.name = newA.name + " | L(" + newA.name + ") = T(" + a_1.name + ")"
+			while newA in Globals.automata:
+				newA.name = newA.name + "'"
+			Globals.grammars.append(newA)
+			Globals.selected = newA
+			self.updateGR.emit(Globals.selected)

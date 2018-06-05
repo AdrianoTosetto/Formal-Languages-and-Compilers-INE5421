@@ -305,7 +305,8 @@ class NDAutomaton:
 		determinized = set()
 		for s in newA.states:
 			newState = State(s.name, s.isAcceptance)
-			newStates.add(newState)
+			if s.name != "":
+				newStates.add(newState)
 			if s == newA.initialState:
 				newInitialState = newState
 		for s in newA.finalStates:
