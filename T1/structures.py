@@ -235,7 +235,7 @@ class Node:
 			if node.costura_node.symbol == "?":
 				node_composition |= node.handle_optional(node.costura_node, UP, visited_down, visited_up)
 			if node.costura_node.symbol == "|":
-				node_composition |= node.handle_union(node.left, DOWN, visited_down, visited_up)
+				node_composition |= node.handle_union(node.costura_node, UP, visited_down, visited_up)
 			if node.costura_node.symbol == "+":
 				node_composition |= node.handle_plus(node.costura_node, DOWN, visited_down, visited_up)
 				node_composition |= node.handle_plus(node.costura_node, UP, visited_down, visited_up)
@@ -340,7 +340,7 @@ class Node:
 		if action == UP:
 			visited_up.add(node)
 			right_most = node.right_most_node()
-			print("right most "+str(right_most))
+			print("right most "+str(right_most) + " and node = " + str(node.right))
 			if right_most.costura_node.symbol == "*":
 				node_composition |= right_most.handle_star(right_most.costura_node, DOWN, visited_down, visited_up)
 				node_composition |= right_most.handle_star(right_most.costura_node, UP, visited_down, visited_up)
@@ -359,6 +359,7 @@ class Node:
 				node_composition |= right_most.handle_plus(right_most.costura_node, UP, visited_down, visited_up)
 		if action == DOWN:
 			visited_down.add(node)
+			print("nodo = " + str(node))
 			if node.left.is_leaf():
 				node_composition |= {node.left}
 			if node.right.is_leaf():

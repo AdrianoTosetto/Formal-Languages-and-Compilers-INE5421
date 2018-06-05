@@ -69,6 +69,7 @@ class SimoneTab(QWidget):
 		self.saveER.emit(Globals.selected)
 	def parse_to_automaton(self):
 		print("NANI")
+		ds_result = None
 		if type(Globals.selected) == type('') or type(Globals.selected) == type(""):
 			print(Globals.selected)
 			ds_result = RegExp(Globals.selected).to_automaton()
