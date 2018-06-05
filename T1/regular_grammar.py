@@ -177,8 +177,12 @@ class Grammar:
 	def convert_to_automaton(self):
 		alphabet = self.getAlphabet()
 		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
+		states_str = {s for s in self.get_non_terminals()}
 		# state that accepts the input
 		λ = non_deterministic_automaton.NDState('λ')
+		φ = non_deterministic_automaton.NDState('φ')
+		for s in alphabet:
+			λ.add_transition(non_deterministic_automaton.NDTransition(s, [φ]))
 		for s in states:
 			prods = self._get_ord_productions_from(s.__str__())
 			for prod in prods:
@@ -197,6 +201,15 @@ class Grammar:
 
 		states['λ'] = λ
 
+		for sstr in states_str:
+			for symbol in alphabet:
+				add = True
+				for t in states[sstr].ndtransitions:
+					if t.symbol == symbol:
+						add = False
+						break
+				if add:
+					states[sstr].add_transition( non_deterministic_automaton.NDTransition(symbol, [φ]))
 		initialState = states[self.productions[0].leftSide]
 		finalStates = [λ]
 		if self.has_empty_sentence():
