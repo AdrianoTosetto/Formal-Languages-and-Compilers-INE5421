@@ -565,6 +565,7 @@ class addAutomatonTab(QWidget):
 		self.transition_table_ui.setColumnCount(0)
 		self.transition_table_ui.setAcceptDrops(True)
 		self.transition_table_ui.setItem(0,0, StateTableItem("q0"))
+		self.complete_button = QPushButton("Completar")
 		self.minimize_button = QPushButton("Minimizar")
 		self.rename_button = QPushButton("Renomear estados")
 		self.rec_button = QPushButton("Reconhecer sentenças")
@@ -583,9 +584,11 @@ class addAutomatonTab(QWidget):
 		self.make_non_deterministic_button.clicked.connect(self.make_non_deterministic)
 		self.bottom_layout.addWidget(self.add_automaton_button, 0,2)
 		self.bottom_layout.addWidget(self.minimize_button, 0, 1)
-		self.bottom_layout.addWidget(self.rec_button, 0, 3)
-		self.bottom_layout.addWidget(self.n_sentences, 0, 4)
+		self.bottom_layout.addWidget(self.complete_button, 0, 3)
+		self.bottom_layout.addWidget(self.rec_button, 0, 4)
+		self.bottom_layout.addWidget(self.n_sentences, 0, 5)
 		self.minimize_button.clicked.connect(self.do_minimize)
+		self.complete_button.clicked.connect(self.do_complete)
 		self.bottom_panel = QWidget()
 		self.bottom_panel.setLayout(self.bottom_layout)
 
@@ -670,6 +673,14 @@ class addAutomatonTab(QWidget):
 		min_af.name = "minimized_" + af.name
 		Globals.automata.append(min_af)
 		Globals.selected = min_af
+		self.minimize.emit(Globals.selected)
+	def do_complete(self):
+		af = Globals.selected
+		if type(af) != Automaton:
+			print("Não pode")
+			return
+		af.complete()
+		Globals.selected = af
 		self.minimize.emit(Globals.selected)
 	def rename_states(self):
 		af = Globals.selected
