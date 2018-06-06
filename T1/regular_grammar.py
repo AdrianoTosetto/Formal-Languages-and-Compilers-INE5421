@@ -181,7 +181,7 @@ class Grammar:
 			sfinal = True
 		print(alphabet)
 		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
-		states_str = {s for s in self.get_non_terminals()}
+		states_str = {s for s in self.get_non_terminals()} #alguém me mata
 		# state that accepts the input
 		λ = non_deterministic_automaton.NDState('λ', True)
 		λ.isAccptance = True
