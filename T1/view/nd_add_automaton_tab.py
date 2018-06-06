@@ -91,7 +91,7 @@ class addNDAutomatonTab(QWidget):
 		self.list_states.itemSelectionChanged.connect(self.selectChanged)
 		self.top_layout.addWidget(self.list_states, 1,1)
 		self.list_states.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-		self.top_panel.setStyleSheet("background:green;")
+		self.top_panel.setStyleSheet("background:silver;")
 		self.top_panel.setLayout(self.top_layout)
 		self.layout.setRowStretch(0, 1)
 		self.layout.setRowStretch(1, 5)

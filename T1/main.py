@@ -30,41 +30,6 @@ if __name__ == "__main__":
 	#print(Globals.grammar_count)
 	myGrammar1 = Grammar(productions1)
 	#Globals.grammars.append(myGrammar1)
-	print(grammar_kleene_star(myGrammar))
-	print(myGrammar)
-	for p in grammar_kleene_star(myGrammar).produce(5):
-		print(p)
-
-	q0_0 = State('q0_0', True)
-	q1_0 = State('q1_0', True)
-
-	t0_0 = Transition('a', q0_0)
-	t1_0 = Transition('b', q1_0)
-	t2_0 = Transition('a', q0_0)
-
-	q0_0.add_transition(t0_0)
-	q0_0.add_transition(t1_0)
-	q1_0.add_transition(t2_0)
-
-	q0_1 = State('q0_1', True)
-	q1_1 = State('q1_1', True)
-
-	t0_1 = Transition('b', q0_1)
-	t1_1 = Transition('a', q1_1)
-	t2_1 = Transition('b', q0_1)
-
-	q0_1.add_transition(t0_1)
-	q0_1.add_transition(t1_1)
-	q1_1.add_transition(t2_1)
-
-	nbs = Automaton(set([q0_0,q1_0]),set([q0_0,q1_0]),q0_0,['a','b'], add = True)
-	nas = Automaton(set([q0_1,q1_1]),set([q0_1,q1_1]),q0_1,['a','b'], add = True)
-
-	print(automata_difference(nbs, nas, add = True))
-
-	print(areEqual(nbs, getReverse(nas)))
-
-	print(nas.to_grammar())
 
 
 	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
