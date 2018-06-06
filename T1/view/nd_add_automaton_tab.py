@@ -301,6 +301,7 @@ class addNDAutomatonTab(QWidget):
 			self.list_symbol.addItem(item)
 		for i in range(0, len(states_list)):
 			s = states_list[i]
+			print("vendo o estado " + str(s.isAcceptance))
 			item = StateItem(s.name)
 			item.setFlags(item.flags() | Qt.ItemIsEditable)
 			self.list_states.addItem(item)
@@ -310,6 +311,7 @@ class addNDAutomatonTab(QWidget):
 			self.initial_state_radio_group.addButton(rb)
 			if s.isAcceptance:
 				cb.setChecked(True)
+				print(str(s) + "eh de aceitação")
 			if s == af.initialState:
 				rb.setChecked(True)
 			self.transition_table_ui.setCellWidget(i, len(af.Σ)+1, cb)
@@ -335,13 +337,10 @@ class addNDAutomatonTab(QWidget):
 		column = -1
 		for i in range(0, self.transition_table_ui.columnCount()):
 			if self.transition_table_ui.horizontalHeaderItem(i).text() == symbol:
-				print("coluna = " + str(i))
 				column = i
 		for i in range(0, self.transition_table_ui.rowCount()):
 			if self.transition_table_ui.verticalHeaderItem(i).text() == state:
-				print("linha = " + str(i))
 				row = i
-		print((row,column))
 		self.transition_table_ui.setItem(row, column, QTableWidgetItem(target))
 	def save_automaton(self):
 		states = set()
@@ -355,7 +354,7 @@ class addNDAutomatonTab(QWidget):
 			states.add(newS)
 			if newS.isAcceptance:
 				finalStates.add(newS)
-			if self.transition_table_ui.cellWidget(i, len(newΣ) + 1).isChecked():
+			if self.transition_table_ui.cellWidget(i, len(newΣ)).isChecked():
 				initialState = newS
 		for i in range(0, self.transition_table_ui.rowCount()):
 			for s in states:

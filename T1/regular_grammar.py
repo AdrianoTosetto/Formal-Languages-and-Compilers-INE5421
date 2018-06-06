@@ -179,7 +179,7 @@ class Grammar:
 		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
 		states_str = {s for s in self.get_non_terminals()}
 		# state that accepts the input
-		λ = non_deterministic_automaton.NDState('λ')
+		λ = non_deterministic_automaton.NDState('λ', True)
 		λ.isAccptance = True
 		φ = non_deterministic_automaton.NDState('φ')
 		for s in alphabet:
@@ -217,7 +217,9 @@ class Grammar:
 		finalStates = [λ]
 		if self.has_empty_sentence():
 			finalStates.append(initialState)
-
+		print("sentences = ", end="")
+		print(non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet).\
+			n_first_sentences_accepted(4))
 		return non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet)
 
 	def add_production(self, prod):
