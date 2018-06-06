@@ -292,7 +292,7 @@ class NDAutomaton:
 		newState = State(states.__str__(), accpt)
 		if newState in determinizedStates:
 			return newState
-		determinizedStates.add(newState)
+
 		for a in self.Σ:
 			nextStates = set()
 			for s in states:
@@ -304,6 +304,7 @@ class NDAutomaton:
 						nextStates = nextStates | set(t.target_states)
 			if len(nextStates) != 0:
 				newState.add_transition(Transition(a, self.determinize_states(nextStates, finalStates, newStates, determinizedStates)))
+		determinizedStates.add(newState)
 		if any(s in self.finalStates for s in states):
 			finalStates.add(newState)
 		if newState in newStates:
