@@ -273,12 +273,13 @@ class NDAutomaton:
 			newState = State(oldState.name, oldState.isAcceptance)
 			if newState in determinizedStates:
 				return newState
-			determinizedStates.add(newState)
+			
 			for t in oldState.ndtransitions:
 				if len(t.target_states) != 0:
 					newT = Transition(t.symbol, self.determinize_states(set(t.target_states), finalStates, newStates, determinizedStates))
 					newState.add_transition(newT)
 				#print(str(newState) + " + " + str(newT))
+			determinizedStates.add(newState)
 			if newState in newStates:
 				newStates.remove(newState)
 			newStates.add(newState)
