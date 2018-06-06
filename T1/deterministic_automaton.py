@@ -18,7 +18,10 @@ class Automaton:
 		self.finalStates = (finalStates)
 		self.initialState = initialState
 		self.currentState = initialState
-		self.Σ = Σ
+		if len(Σ) == 0:
+			self.Σ = ['0','1']
+		else:
+			self.Σ = Σ
 		self.equi_classes = []
 		if self not in Globals.automata and add:
 			Globals.automata.append(self)

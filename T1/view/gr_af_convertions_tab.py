@@ -7,12 +7,12 @@ import functools
 sys.path.append('../')
 from globals import *
 import regular_grammar
-from non_deterministic_automaton import NDAutomaton
-from regular_grammar import Grammar
+import non_deterministic_automaton
+from regular_grammar import Grammar, Production
 import deterministic_automaton
 
 class ConvertionTab(QWidget):
-	updateAF = QtCore.pyqtSignal(NDAutomaton)
+	updateAF = QtCore.pyqtSignal(non_deterministic_automaton.NDAutomaton)
 	updateGR = QtCore.pyqtSignal(Grammar)
 	def __init__(self):
 		super(QWidget, self).__init__(parent=None)
@@ -81,7 +81,10 @@ class ConvertionTab(QWidget):
 			if a1.name == self.af_name.text():
 				a_1 = a1
 		if type(a_1) != type(deterministic_automaton.Automaton({},{},deterministic_automaton.State(""))):
-			return
+			if type(a_1) == type(non_deterministic_automaton.NDAutomaton({},{}, non_deterministic_automaton.NDState(""))):
+				a_1 = a_1.determinize()
+			else:
+				return
 		if a_1 != None:
 			newA = a_1.to_grammar()
 			newA.name = "G"
@@ -92,4 +95,5 @@ class ConvertionTab(QWidget):
 				newA.name = newA.name + "'"
 			Globals.grammars.append(newA)
 			Globals.selected = newA
+			#print(newA)
 			self.updateGR.emit(Globals.selected)

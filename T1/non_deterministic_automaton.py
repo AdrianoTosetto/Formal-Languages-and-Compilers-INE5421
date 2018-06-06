@@ -112,7 +112,10 @@ class NDAutomaton:
 		self.finalStates = (finalStates)
 		self.initialState = initialState
 		self.currentStates = {initialState} | initialState.next_states('&')
-		self.Σ = Σ
+		if len(Σ) == 0:
+			self.Σ = ['0','1']
+		else:
+			self.Σ = Σ
 		if self not in Globals.automata and add:
 			Globals.automata.append(self)
 
@@ -238,11 +241,13 @@ class NDAutomaton:
 			if s == self.initialState:
 				newInitial = news
 			next_states_by_s = s.next_states('&')
+			for ts in next_states_by_s:
+				if ts.isAcceptance:
+					news.isAcceptance = True
 			for symbol in self.Σ:
 				trans = copy.deepcopy(news.ndtransitions)
 				if trans == None:
 					trans = []
-				#print("symbol = " + str(symbol))
 				target_states = list()
 				for ns in next_states_by_s:
 					#print("ns = " + str(ns))
@@ -251,14 +256,12 @@ class NDAutomaton:
 					#print(trans)
 					#print("t = " + str(t))
 					#print("target_states = " + str(target_states))
-					if t.symbol == '&':
-						#print(news.ndtransitions)
+					if t.symbol == "&":
 						news.ndtransitions = trans[:].remove(t)
-					if len(target_states) > 0:
-						news.add_transition(NDTransition(symbol, set(target_states)))
+				if len(target_states) > 0:
+					news.add_transition(NDTransition(symbol, set(target_states)))
 			newStates.add(news)
 			if news.isAcceptance:
-				print("ACEITOU")
 				newFinalStates.add(news)
 		return NDAutomaton(newStates, newFinalStates, newInitial, self.Σ)
 
