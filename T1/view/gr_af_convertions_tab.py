@@ -88,7 +88,7 @@ class ConvertionTab(QWidget):
 			while newA in Globals.grammars:
 				newA.name = newA.name + "'"
 			newA.name = newA.name + " | L(" + newA.name + ") = T(" + a_1.name + ")"
-			while newA in Globals.automata:
+			while newA in Globals.grammars:
 				newA.name = newA.name + "'"
 			Globals.grammars.append(newA)
 			Globals.selected = newA

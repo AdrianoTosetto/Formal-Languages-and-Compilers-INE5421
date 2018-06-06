@@ -276,9 +276,12 @@ class NDAutomaton:
 			determinizedStates.add(newState)
 			for s in self.Σ:
 				nextStates = set()
-				for t in oldState.ndtransitions:
+				trans = oldState.ndtransitions
+				if trans == None:
+					trans = []
+				for t in trans:
 					if t.symbol == s:
-						nextStates |= set(t.target_states)
+						nextStates = nextStates | set(t.target_states)
 				if len(nextStates) != 0:
 					newT = Transition(t.symbol, self.determinize_states(nextStates, finalStates, newStates, determinizedStates))
 					newState.add_transition(newT)
@@ -351,7 +354,7 @@ class NDAutomaton:
 					if t.symbol == sym:
 						nextStates = nextStates | set(t.target_states)
 				if len(nextStates) != 0:
-					newState.add_transition(Transition(t.symbol, newA.determinize_states(nextStates, finalStates, newStates, determinized)))
+					newState.add_transition(Transition(sym, newA.determinize_states(nextStates, finalStates, newStates, determinized)))
 			if newState in newStates:
 				newStates.remove(newState)
 			if newState.name != "set()":
