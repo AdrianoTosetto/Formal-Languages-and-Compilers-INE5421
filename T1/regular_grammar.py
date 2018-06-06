@@ -175,7 +175,11 @@ class Grammar:
 		return ret
 
 	def convert_to_automaton(self):
-		alphabet = self.getAlphabet()
+		alphabet = list(set(self.getAlphabet()) - {'&'})
+		sfinal = False
+		if self.has_empty_sentence():
+			sfinal = True
+		print(alphabet)
 		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
 		states_str = {s for s in self.get_non_terminals()}
 		# state that accepts the input
@@ -215,8 +219,9 @@ class Grammar:
 					states[sstr].add_transition( non_deterministic_automaton.NDTransition(symbol, [φ]))
 		initialState = states[self.productions[0].leftSide]
 		finalStates = [λ]
-		if self.has_empty_sentence():
+		if self.has_empty_sentence() or sfinal:
 			finalStates.append(initialState)
+			initialState.isAccptance = True
 		print("sentences = ", end="")
 		print(non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet).\
 			n_first_sentences_accepted(4))

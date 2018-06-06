@@ -314,6 +314,7 @@ class addNDAutomatonTab(QWidget):
 				print(str(s) + "eh de aceitação")
 			if s == af.initialState:
 				rb.setChecked(True)
+				cb.setChecked(True)
 			self.transition_table_ui.setCellWidget(i, len(af.Σ)+1, cb)
 			self.transition_table_ui.setCellWidget(i, len(af.Σ), rb)
 
