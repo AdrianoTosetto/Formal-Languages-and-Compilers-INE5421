@@ -278,7 +278,7 @@ class NDAutomaton:
 				nextStates = set()
 				for t in oldState.ndtransitions:
 					if t.symbol == s:
-						nextStates |= t.target_states
+						nextStates |= set(t.target_states)
 				if len(nextStates) != 0:
 					newT = Transition(t.symbol, self.determinize_states(nextStates, finalStates, newStates, determinizedStates))
 					newState.add_transition(newT)
