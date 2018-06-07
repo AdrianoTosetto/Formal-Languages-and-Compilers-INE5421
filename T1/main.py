@@ -37,6 +37,8 @@ if __name__ == "__main__":
 	re = RegExp(expr)
 	print(re.to_automaton())
 	print(re.to_automaton().minimize().rename_states())
+	Globals.grammar_count = 1
+	Globals.automaton_count = 1
 	win = MainWindow()
 	#print("test = " + str(test))
 	#print(test.handle_leaf())
