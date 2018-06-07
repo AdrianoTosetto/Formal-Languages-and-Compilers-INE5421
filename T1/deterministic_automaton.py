@@ -2,6 +2,7 @@ from globals import *
 import copy
 import regular_grammar
 from regular_grammar import Production, Grammar
+import random
 
 
 class Automaton:
@@ -207,7 +208,7 @@ class Automaton:
 				stack.extend((self.next_states_all(vertex)))
 
 		return visited
-	def minimize(self):
+	def minimize1(self):
 		newA = copy.deepcopy(self)
 		newA.remove_dead_states()
 		newA.remove_unreacheable_states()
@@ -220,41 +221,48 @@ class Automaton:
 			acceptClasses -= {chosen}
 			nextc = set()
 			for sym in newA.Σ:
-				for sta in chosen:
+				for sta in chosen.states:
 					for tra in sta.transitions:
 						nextc |= {tra.target_state}
 				sub = set()
 				for cla in classes:
 					if len(cla.states & nextc):
-						sub |= cla.states
+						sub |= {cla}
 				for cla in sub:
-					classes -= {equiClass(cla.states)}
-					classes |= {equiClass(cla.states & nextc)}
-					classes |= {equiClass(cla.states - nextc)}
+					classes -= {cla}
+					if len(cla.states & nextc):
+						classes |= {equiClass(cla.states & nextc)}
+					if len(cla.states - nextc):
+						classes |= {equiClass(cla.states - nextc)}
 					if cla in acceptClasses:
-						acceptClasses -= {equiClass(cla.states)}
-						acceptClasses |= {equiClass(cla.states & nextc)}
-						acceptClasses |= {equiClass(cla.states - nextc)}
+						acceptClasses -= {cla}
+						if len(cla.states & nextc):
+							acceptClasses |= {equiClass(cla.states & nextc)}
+						if len(cla.states - nextc):
+							acceptClasses |= {equiClass(cla.states - nextc)}
 					else:
 						if len(cla.states & nextc) <= len(cla.states - nextc):
-							acceptClasses |= {equiClass(cla.states & nextc)}
-						else:
+							if len(cla.states & nextc):
+								acceptClasses |= {equiClass(cla.states & nextc)}
+						elif len(cla.states - nextc):
 							acceptClasses |= {equiClass(cla.states - nextc)}
+		newStates = set()
+		newFinalStates = set()
 		for eq in classes:
-			freerealestate = next(iter(eq.states))
+			freerealestate = random.sample(eq.states,1)[0]
 			news = State(str(eq), freerealestate.isAcceptance)
 			if freerealestate.isAcceptance:
 				newFinalStates.add(news)
-			if self.initialState in eq:
+			if self.initialState in eq.states:
 				newInitialState = news
 			newStates.add(news)
 		for s in newStates:
 			for eq in classes:
-				freerealestate = next(iter(eq.states))
+				freerealestate = random.sample(eq.states,1)[0]
 				for symbol in self.Σ:
 					for ns in newStates:
 						for eq1 in classes:
-							if freerealestate.next_state(symbol) in eq1:
+							if freerealestate.next_state(symbol) in eq1.states:
 								nexteq = eq1
 						if ns == State(str(nexteq)):
 							t = Transition(symbol, ns)
@@ -264,7 +272,7 @@ class Automaton:
 		newA = Automaton(newStates, newFinalStates, newInitialState, self.Σ)
 		return newA
 
-	def minimize1(self):
+	def minimize(self):
 		#print(self.get_eq_class(self.initialState))
 		#print(self.equi_classes)
 		#self.remove_dead_states()
@@ -568,14 +576,14 @@ class equiClass():
 
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()
-	def __iter__(self):
+	'''def __iter__(self):
 		self.num = 0
 		return self
 	def __next__(self):
 		if(self.num >= len(self.states)):
 			raise StopIteration
 		self.num += 1
-		return self.listStates[self.num - 1]
+		return self.listStates[self.num - 1]'''
 
 
 class Transition:
