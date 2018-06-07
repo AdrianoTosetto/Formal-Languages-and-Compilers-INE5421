@@ -32,11 +32,10 @@ if __name__ == "__main__":
 	#Globals.grammars.append(myGrammar1)
 
 
-	expr = '( 1 | 0 ) ? . ( ( 1 . 0 ) * . ( 0 . 1 ) ) * . ( 1 | 0 ) ?'
-	t = Tree()
-	nodo = t.build(polish_notation(expr))
-	t.costura()
-	test = nodo.most_left_node().costura_node.right
+	expr = '(a(bb)*a|(b|aba)(a(bb)*a)*(b|aba))*(b|aba)(a(bb)*a)*?'
+	re = RegExp(expr)
+	print(re.to_automaton())
+	print(re.to_automaton().minimize())
 	win = MainWindow()
 	#print("test = " + str(test))
 	#print(test.handle_leaf())
