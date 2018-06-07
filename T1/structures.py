@@ -696,6 +696,8 @@ class RegExp:
 				finalStates.append(state)
 			if state.name == str(q0_composition):
 				initialState = state
+				#if 'λ' self.symbols_of_a_composition(q0_composition):
+				#	initialState.isAcceptance = True
 		for s in states:
 			for s1 in states:
 				for t in trans:

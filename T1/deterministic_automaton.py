@@ -32,6 +32,8 @@ class Automaton:
 		self.name = name
 
 	def process_input(self, input):
+		if input == "&" and self.initialState.isAcceptance:
+			return True
 		for symbol in input:
 			self.currentState = self.currentState.next_state(symbol)
 			#print(self.currentState)
