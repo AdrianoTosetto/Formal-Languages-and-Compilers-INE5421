@@ -8,8 +8,9 @@ from globals import *
 class Grammar:
 	def __init__(self, productions, name = None, add = False):
 		if len(productions) is 0:
-			return None
-		self.productions = self.validate_productions(productions)
+			self.productions = {Production('S','aS')}
+		else:
+			self.productions = self.validate_productions(productions)
 		if name is None:
 			self.name = 'G' + str(Globals.grammar_count)
 			if add:
