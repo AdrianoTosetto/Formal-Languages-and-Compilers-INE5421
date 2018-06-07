@@ -155,7 +155,6 @@ class Node:
 
 	def costura(self):
 		in_order_nodes = self.in_order()
-		print(in_order_nodes)
 		iter_ = iter(in_order_nodes)
 		next(iter_)
 		n = None
@@ -163,14 +162,14 @@ class Node:
 			try:
 				n = next(iter_)
 			except:
-				print(str(node.symbol), end="")
-				print(" costura para lambda")
+				#print(str(node.symbol), end="")
+				#print(" costura para lambda")
 				node.costura_node = Node('λ')
 				return
 			if node.symbol == "." or node.symbol == "|":
 				continue
-			print(str(node.symbol) + " costura para ", end="")
-			print(n.symbol)
+			#print(str(node.symbol) + " costura para ", end="")
+			#print(n.symbol)
 			node.costura_node = n
 		self.isThreaded = True
 
@@ -202,7 +201,6 @@ class Node:
 			return set()
 		if node in visited_up and action == UP:
 			return set()
-		print("visitando o nodo " + str(node))
 		node_composition = set()
 		pendencies = Stack()
 		if action == DOWN:
@@ -225,7 +223,6 @@ class Node:
 			visited_up.add(node)
 			if node.costura_node.symbol == 'λ':
 				node_composition |= {node.costura_node}
-				print("deveria parar aqui")
 			if node.costura_node.symbol == "*":
 				node_composition |= node.handle_star(node.costura_node, DOWN, visited_down, visited_up)
 				node_composition |= node.handle_star(node.costura_node, UP, visited_down, visited_up)
@@ -340,7 +337,6 @@ class Node:
 		if action == UP:
 			visited_up.add(node)
 			right_most = node.right_most_node()
-			print("right most "+str(right_most) + " and node = " + str(node.right))
 			if right_most.costura_node.symbol == "*":
 				node_composition |= right_most.handle_star(right_most.costura_node, DOWN, visited_down, visited_up)
 				node_composition |= right_most.handle_star(right_most.costura_node, UP, visited_down, visited_up)
@@ -666,7 +662,6 @@ class RegExp:
 		q0_composition = ret[1]
 		Σ = list(ret[2])
 
-		print("COMPS: " + str(compositions))
 		unvisited = [q0_composition]
 		visited = []
 		trans = []
@@ -679,11 +674,9 @@ class RegExp:
 				if nextc is None:
 					continue
 				trans.append([comp, s, nextc])
-				print(str(comp) + " vai para " + str(nextc) + " por " + s)
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
 
-		print("visitados = " + str(visited))
 		states = []
 		finalStates = []
 		for v in visited:
@@ -716,8 +709,9 @@ class RegExp:
 			states.append(φ)
 
 		result_automaton = Automaton(states, finalStates, initialState, Σ)
-
-
+		result_automaton.equi_classes = [result_automaton.get_acceptance_states(), result_automaton.get_non_acceptance_states()]
+		
+		print(result_automaton.equi_classes)
 		return result_automaton
 	def symbols_of_a_composition(self, comp_str):
 		symbols = set()
@@ -735,7 +729,6 @@ class StateComposition:
 		self.symbol_composition = {}
 
 		for symbol in Σ:
-			print(self.get_compositions_from_symbol(symbol, self.state_composition))
 			self.symbol_composition[symbol] = self.get_compositions_from_symbol(symbol, self.state_composition)
 
 	def get_compositions_from_symbol(self, symbol, composition):

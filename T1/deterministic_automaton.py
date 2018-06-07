@@ -313,7 +313,7 @@ class Automaton:
 						for eq in self.equi_classes:
 							if eq == eqclass:
 								continue
-							if self.belong_equi_class(ts, eq):
+							if self.belong_equi_class1(ts, eq):
 								eq.add(ts)
 								added = True
 						if not added:
