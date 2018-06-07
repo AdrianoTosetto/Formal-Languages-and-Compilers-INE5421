@@ -35,8 +35,8 @@ if __name__ == "__main__":
 	expr = '(a(bb)*a|(b|aba)(a(bb)*a)*(b|aba))*(b|aba)(a(bb)*a)*?'
 	re = RegExp(expr)
 	print(re.to_automaton())
-	#print(re.to_automaton().minimize())
-	#win = MainWindow()
+	print(re.to_automaton().minimize().rename_states())
+	win = MainWindow()
 	#print("test = " + str(test))
 	#print(test.handle_leaf())
 	#print(nodo.right.symbol)

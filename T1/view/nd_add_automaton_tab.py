@@ -49,6 +49,13 @@ class addNDAutomatonTab(QWidget):
 
 		self.top_layout = QGridLayout()
 		self.add_remove_state_layout = QGridLayout()
+		self.automaton_name = QWidget()
+		self.name_layout = QGridLayout()
+		self.name_label = QLabel()
+		self.name_label.setText("Nome:")
+		self.name_edit = QLineEdit()
+		self.name_layout.addWidget(self.name_label,0,0)
+		self.name_layout.addWidget(self.name_edit,0,1)
 		self.add_remove_panel = QWidget()
 		self.top_panel = QWidget()
 		self.edit_name = QLineEdit()
@@ -70,9 +77,11 @@ class addNDAutomatonTab(QWidget):
 		self.add_remove_state_layout.addWidget(self.add_new_state, 0,0)
 		self.add_remove_state_layout.addWidget(self.remove_state_button, 1, 0)
 		self.add_remove_panel.setLayout(self.add_remove_state_layout)
-		self.top_layout.addWidget(self.add_remove_symbol_panel, 0, 0)
-		self.top_layout.addWidget(self.list_symbol, 0, 1)
-		self.top_layout.addWidget(self.add_remove_panel, 1,0)
+		self.automaton_name.setLayout(self.name_layout)
+		self.top_layout.addWidget(self.automaton_name)
+		self.top_layout.addWidget(self.add_remove_symbol_panel, 1, 0)
+		self.top_layout.addWidget(self.list_symbol, 1, 1)
+		self.top_layout.addWidget(self.add_remove_panel, 2,0)
 		self.setPolicyEdits()
 		self.setPolicyButtons()
 		self.top_layout.setColumnStretch(0, 1)
@@ -89,7 +98,7 @@ class addNDAutomatonTab(QWidget):
 		#self.list_states.setCurrentItem(item)
 
 		self.list_states.itemSelectionChanged.connect(self.selectChanged)
-		self.top_layout.addWidget(self.list_states, 1,1)
+		self.top_layout.addWidget(self.list_states, 2,1)
 		self.list_states.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.top_panel.setStyleSheet("background:silver;")
 		self.top_panel.setLayout(self.top_layout)
@@ -286,6 +295,7 @@ class addNDAutomatonTab(QWidget):
 		#self.showAutomaton(Globals.selected)
 
 	def showAutomaton(self, af):
+		self.name_edit.setText(af.name)
 		self.list_states.clear()
 		self.list_symbol.clear()
 		self.edit_alphabet.setText(','.join(map(str, af.Σ)) )
@@ -321,11 +331,16 @@ class addNDAutomatonTab(QWidget):
 			s = states_list[i]
 			for sig in af.Σ:
 				str_states_names = ""
+				absent = True
 				for t in s.ndtransitions:
 					if t.symbol == sig:
+						absent = False
 						for ts in t.target_states:
 							str_states_names += ts.name
-				self.set_transition_cell(s.name, str_states_names, sig)
+				if absent:
+					self.set_transition_cell(s.name, "-", sig)
+				else:
+					self.set_transition_cell(s.name, str_states_names, sig)
 			'''for t in s.ndtransitions:
 				str_states_names = ""
 				for ts in t.target_states:
@@ -365,7 +380,7 @@ class addNDAutomatonTab(QWidget):
 								s.add_transition(NDTransition(self.transition_table_ui.horizontalHeaderItem(j).text(), [ns]))
 
 		auts = []
-		newA = NDAutomaton(states, finalStates, initialState, newΣ, Globals.selected.name)
+		newA = NDAutomaton(states, finalStates, initialState, newΣ, self.name_edit.text())
 		for a in Globals.automata:
 			if a.name != Globals.selected.name:
 				auts.append(a)

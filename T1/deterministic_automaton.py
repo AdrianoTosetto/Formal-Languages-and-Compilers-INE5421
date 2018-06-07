@@ -25,6 +25,7 @@ class Automaton:
 		self.equi_classes = []
 		if self not in Globals.automata and add:
 			Globals.automata.append(self)
+		self.equi_classes = [self.get_acceptance_states(), self.get_non_acceptance_states()]
 
 	def set_name(name):
 		self.name = name

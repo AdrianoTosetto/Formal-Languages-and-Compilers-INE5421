@@ -594,6 +594,13 @@ class addAutomatonTab(QWidget):
 
 		self.top_layout = QGridLayout()
 		self.add_remove_state_layout = QGridLayout()
+		self.automaton_name = QWidget()
+		self.name_layout = QGridLayout()
+		self.name_label = QLabel()
+		self.name_label.setText("Nome:")
+		self.name_edit = QLineEdit()
+		self.name_layout.addWidget(self.name_label,0,0)
+		self.name_layout.addWidget(self.name_edit,0,1)
 		self.add_remove_panel = QWidget()
 		self.top_panel = QWidget()
 		self.edit_name = QLineEdit()
@@ -615,9 +622,11 @@ class addAutomatonTab(QWidget):
 		self.add_remove_state_layout.addWidget(self.add_new_state, 0,0)
 		self.add_remove_state_layout.addWidget(self.remove_state_button, 1, 0)
 		self.add_remove_panel.setLayout(self.add_remove_state_layout)
-		self.top_layout.addWidget(self.add_remove_symbol_panel, 0, 0)
-		self.top_layout.addWidget(self.list_symbol, 0, 1)
-		self.top_layout.addWidget(self.add_remove_panel, 1,0)
+		self.automaton_name.setLayout(self.name_layout)
+		self.top_layout.addWidget(self.automaton_name)
+		self.top_layout.addWidget(self.add_remove_symbol_panel, 1, 0)
+		self.top_layout.addWidget(self.list_symbol, 1, 1)
+		self.top_layout.addWidget(self.add_remove_panel, 2,0)
 		self.setPolicyEdits()
 		self.setPolicyButtons()
 		self.top_layout.setColumnStretch(0, 1)
@@ -634,7 +643,7 @@ class addAutomatonTab(QWidget):
 		#self.list_states.setCurrentItem(item)
 
 		self.list_states.itemSelectionChanged.connect(self.selectChanged)
-		self.top_layout.addWidget(self.list_states, 1,1)
+		self.top_layout.addWidget(self.list_states, 2,1)
 		self.list_states.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.top_panel.setStyleSheet("background:silver;")
 		self.top_panel.setLayout(self.top_layout)
@@ -864,6 +873,7 @@ class addAutomatonTab(QWidget):
 		#self.showAutomaton(Globals.selected)
 
 	def showAutomaton(self, af):
+		self.name_edit.setText(af.name)
 		self.list_states.clear()
 		self.list_symbol.clear()
 		self.edit_alphabet.setText(','.join(map(str, af.Σ)) )
@@ -895,8 +905,14 @@ class addAutomatonTab(QWidget):
 
 		for i in range(0, len(states_list)):
 			s = states_list[i]
-			for t in s.transitions:
-				self.set_transition_cell(s.name, t.target_state.name, t.symbol)
+			for sym in af.Σ:
+				absent = True
+				for t in s.transitions:
+					if t.symbol == sym:
+						absent = False
+						self.set_transition_cell(s.name, t.target_state.name, t.symbol)
+				if absent:
+					self.set_transition_cell(s.name, "-", sym)
 
 	def set_transition_cell(self, state, target, symbol):
 		row = -1
@@ -935,7 +951,7 @@ class addAutomatonTab(QWidget):
 								s.add_transition(Transition(self.transition_table_ui.horizontalHeaderItem(j).text(), ns))
 
 		auts = []
-		newA = Automaton(states, finalStates, initialState, newΣ, Globals.selected.name)
+		newA = Automaton(states, finalStates, initialState, newΣ, self.name_edit.text())
 		for a in Globals.automata:
 			if a.name != Globals.selected.name:
 				auts.append(a)
