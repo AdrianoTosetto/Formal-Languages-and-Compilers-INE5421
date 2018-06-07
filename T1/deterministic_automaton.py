@@ -207,14 +207,64 @@ class Automaton:
 				stack.extend((self.next_states_all(vertex)))
 
 		return visited
-	def minimize1(self):
-		acceptStates = self.finalStates
-		nonAcceptStates = self.states - self.finalStates
+	def minimize(self):
+		newA = copy.deepcopy(self)
+		newA.remove_dead_states()
+		newA.remove_unreacheable_states()
+		acceptStates = equiClass(set(newA.finalStates))
+		nonAcceptStates = equiClass(newA.states - set(newA.finalStates))
 		classes = {nonAcceptStates, acceptStates}
 		acceptClasses = {acceptStates}
 		while len(acceptClasses):
-			print("oi")
-	def minimize(self):
+			chosen = next(iter(acceptClasses))
+			acceptClasses -= {chosen}
+			nextc = set()
+			for sym in newA.Σ:
+				for sta in chosen:
+					for tra in sta.transitions:
+						nextc |= {tra.target_state}
+				sub = set()
+				for cla in classes:
+					if len(cla.states & nextc):
+						sub |= cla.states
+				for cla in sub:
+					classes -= {equiClass(cla.states)}
+					classes |= {equiClass(cla.states & nextc)}
+					classes |= {equiClass(cla.states - nextc)}
+					if cla in acceptClasses:
+						acceptClasses -= {equiClass(cla.states)}
+						acceptClasses |= {equiClass(cla.states & nextc)}
+						acceptClasses |= {equiClass(cla.states - nextc)}
+					else:
+						if len(cla.states & nextc) <= len(cla.states - nextc):
+							acceptClasses |= {equiClass(cla.states & nextc)}
+						else:
+							acceptClasses |= {equiClass(cla.states - nextc)}
+		for eq in classes:
+			freerealestate = next(iter(eq.states))
+			news = State(str(eq), freerealestate.isAcceptance)
+			if freerealestate.isAcceptance:
+				newFinalStates.add(news)
+			if self.initialState in eq:
+				newInitialState = news
+			newStates.add(news)
+		for s in newStates:
+			for eq in classes:
+				freerealestate = next(iter(eq.states))
+				for symbol in self.Σ:
+					for ns in newStates:
+						for eq1 in classes:
+							if freerealestate.next_state(symbol) in eq1:
+								nexteq = eq1
+						if ns == State(str(nexteq)):
+							t = Transition(symbol, ns)
+							if (s == State(str(eq))):
+								s.add_transition(t)
+
+		newA = Automaton(newStates, newFinalStates, newInitialState, self.Σ)
+		return newA
+
+	def minimize1(self):
 		#print(self.get_eq_class(self.initialState))
 		#print(self.equi_classes)
 		#self.remove_dead_states()
@@ -495,6 +545,37 @@ class Automaton:
 					if p.target_state.isAcceptance:
 						prods.append(Production(s.name, p.symbol))
 		return Grammar(prods)
+
+class equiClass():
+	def __init__(self, states):
+		self.states = states
+		self.listStates = list(states)
+	def __hash__(self):
+		hashable = ""
+		for s in self.states:
+			if s.name == 'λ':
+				hashable += 'lambda'
+			elif s.name == 'φ':
+				hashable += 'phi'
+			else:
+				hashable += s.name
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
+
+	def __eq__(self, other):
+		return self.__hash__() == other.__hash__()
+	def __iter__(self):
+		self.num = 0
+		return self
+	def __next__(self):
+		if(self.num >= len(self.states)):
+			raise StopIteration
+		self.num += 1
+		return self.listStates[self.num - 1]
 
 
 class Transition:
