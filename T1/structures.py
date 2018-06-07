@@ -617,9 +617,15 @@ def normalize(regex):
 
 
 class RegExp:
+	BRACKETS_ERROR = 1
+	EXPR_NOT_WELL_FORMED = 2
+	UNKNOWN = -1
+	OK = 0
 	def __init__(self, regex):
+		self.test_regex = regex
 		regex = normalize(regex)
 		self.regex = regex
+
 	def get_compositions_from(self, compositions, symbol):
 		for c in compositions:
 			print()
@@ -722,6 +728,22 @@ class RegExp:
 			symbols.add(ss.split()[1])
 		
 		return symbols
+
+	def isValid(self):
+		import re
+		re = re.compile(r'[(]?[a-z0-9]+([?+*]?([)][?+*]?)?)([|]?[(]?[a-z0-9]+([?+*]?([)][?+*]?[)]?)?))*')
+		match = re.match(self.test_regex)
+		print(match.group())
+		if (self.test_regex.count("(") != self.test_regex.count(")")):
+			return RegExp.BRACKETS_ERROR
+		try :
+			if (match.group() == self.test_regex):
+				return RegExp.OK
+			else:
+				return RegExp.EXPR_NOT_WELL_FORMED
+		except AttributeError:
+			return RegExp.UNKNOWN
+
 class StateComposition:
 
 	def __init__(self, state_composition, Σ):

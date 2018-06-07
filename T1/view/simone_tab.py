@@ -17,6 +17,12 @@ from structures import *
 class SimoneTab(QWidget):
 	saveER = QtCore.pyqtSignal(str)
 	saveDS = QtCore.pyqtSignal()
+	ERRORS = {
+			RegExp.BRACKETS_ERROR: "Número de (s e )s não estão corretos",
+			RegExp.EXPR_NOT_WELL_FORMED: "Expressão está mal formada",
+			RegExp.UNKNOWN: "Erro desconhecido",
+			RegExp.OK: "Regex salva"
+			}
 	def __init__(self):
 		super(QWidget,self).__init__()
 		self.regex_edit = QLineEdit() # re
@@ -56,9 +62,17 @@ class SimoneTab(QWidget):
 	def set_bottom_layout(self):
 		self.bottom_layout.addWidget(self.transition_table_composition)
 	def save_exp(self):
-		print("WHAT")
 		new_er = self.regex_edit.text()
 		new_ers = []
+		obj_expr = RegExp(new_er)
+		status = obj_expr.isValid()
+
+		if status is not RegExp.OK:
+			self.error(SimoneTab.ERRORS[status])
+			print("errou")
+			return
+		self.suc(SimoneTab.ERRORS[status])
+
 		for e in Globals.expressions:
 			if e != Globals.selected:
 				new_ers.append(e)
@@ -81,3 +95,14 @@ class SimoneTab(QWidget):
 		self.saveDS.emit()
 	def set_edit_er(self, regex):
 		self.regex_edit.setText(regex)
+	def error(self, msg):
+		error_dialog = QtWidgets.QErrorMessage()
+		error_dialog.showMessage(msg)
+		error_dialog.exec_()
+		
+	def suc(self, msg):
+		d = QDialog()
+		b1 = QPushButton(msg,d)
+		d.setWindowTitle(":)")
+		d.setWindowModality(Qt.ApplicationModal)
+		d.exec_()
