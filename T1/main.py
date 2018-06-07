@@ -32,7 +32,8 @@ if __name__ == "__main__":
 	#Globals.grammars.append(myGrammar1)
 
 
-	expr = '(a(bb)*a|(b|aba)(a(bb)*a)*(b|aba))*(b|aba)(a(bb)*a)*?'
+	#expr = '(a(bb)*a|(b|aba)(a(bb)*a)*(b|aba))*(b|aba)(a(bb)*a)*?'
+	expr = '(0|1(01*0)*1)(0|1(01*0)*1)*'
 	re = RegExp(expr)
 	print(re.to_automaton())
 	print(re.to_automaton().minimize().rename_states())

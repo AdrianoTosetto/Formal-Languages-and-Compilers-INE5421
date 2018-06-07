@@ -188,9 +188,21 @@ class MainWindow(QWidget):
 		self.display.setText('')
 		Globals.selected = None
 	def add_er(self):
-		newER = "a"
-		Globals.expressions.append(newER)
-		Globals.selected = newER
+		alphanum = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',\
+					'p','q','r','s','t','u','v','w','x','y','z','0','1','2','3',\
+					'4','5','6','7','8','9']
+		entered = False
+		expn = ""
+		while not entered:
+			exp = expn
+			for a in alphanum:
+				exp = expn + a
+				if exp not in Globals.expressions:
+					Globals.expressions.append(exp)
+					Globals.selected = exp
+					entered = True
+					break
+			expn += a
 		self.update_er()
 	def update_er(self):
 		self.erList.clear()
@@ -526,7 +538,10 @@ class addGrammarTab(QWidget):
 				else:
 					prods.append(Production(self.nt_line_edit[i], p))
 		grams = []
-		newG = Grammar(prods, newName)
+		if Grammar([], newName) in Globals.grammars:
+			newG = Grammar(prods, Globals.selected.name)
+		else:
+			newG = Grammar(prods, newName)
 		for g in Globals.grammars:
 			if g.name != Globals.selected.name:
 				grams.append(g)
@@ -951,7 +966,10 @@ class addAutomatonTab(QWidget):
 								s.add_transition(Transition(self.transition_table_ui.horizontalHeaderItem(j).text(), ns))
 
 		auts = []
-		newA = Automaton(states, finalStates, initialState, newΣ, self.name_edit.text())
+		if Automaton({},{}, State(""), name = self.name_edit.text()) in Globals.automata:
+			newA = Automaton(states, finalStates, initialState, newΣ, Globals.selected.name)
+		else:
+			newA = Automaton(states, finalStates, initialState, newΣ, self.name_edit.text())
 		for a in Globals.automata:
 			if a.name != Globals.selected.name:
 				auts.append(a)
