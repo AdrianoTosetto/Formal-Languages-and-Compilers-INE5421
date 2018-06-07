@@ -703,9 +703,31 @@ class RegExp:
 					if s.name == str(t[0]) and s1.name == str(t[2]):
 						s.add_transition(Transition(t[1], s1))
 
+		φ = State('φ', False)
+		for symbol in Σ:
+			t = Transition(symbol, φ)
+			φ.transitions.append(t)
+		add_phi = False
+		for s in states:
+			for lack_symbol in (set(Σ) - self.symbols_of_a_composition(s.name)):
+				s.add_transition(Transition(lack_symbol, φ))
+				add_phi = True
+		if add_phi:
+			states.append(φ)
+
 		result_automaton = Automaton(states, finalStates, initialState, Σ)
 
+
 		return result_automaton
+	def symbols_of_a_composition(self, comp_str):
+		symbols = set()
+		comp_str = comp_str.replace("{","")
+		comp_str = comp_str.replace("}","")
+		comp_str_list_symbol = comp_str.split(",")
+		for ss in comp_str_list_symbol:
+			symbols.add(ss.split()[1])
+		
+		return symbols
 class StateComposition:
 
 	def __init__(self, state_composition, Σ):
