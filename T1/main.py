@@ -36,7 +36,7 @@ if __name__ == "__main__":
 	expr = '(0|1(01*0)*1)(0|1(01*0)*1)*'
 	re = RegExp(expr)
 	print(re.to_automaton())
-	print(re.to_automaton().minimize().rename_states())
+	print(re.to_automaton().minimize1())
 	Globals.grammar_count = 1
 	Globals.automaton_count = 1
 	win = MainWindow()

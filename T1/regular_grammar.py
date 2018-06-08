@@ -182,7 +182,7 @@ class Grammar:
 			sfinal = True
 		print(alphabet)
 		states = {s:non_deterministic_automaton.NDState(s) for s in self.get_non_terminals()}
-		states_str = {s for s in self.get_non_terminals()} #alguém me mata
+		states_str = {s for s in set(self.get_non_terminals())} #alguém me mata
 		# state that accepts the input
 		λ = non_deterministic_automaton.NDState('λ', True)
 		λ.isAccptance = True
@@ -196,15 +196,18 @@ class Grammar:
 				sset = []
 				for i in prod:
 					symbol = i[0] #terminal symbol
-					if len(i) == 1:
+					if symbol == "&":
+						continue
+					if len(i) == 1 and not symbol=="&":
 						sset.append(λ)
 					else:
 						nt = i[1]
 						next_state = states[nt]
 						sset.append(next_state)
-				t = non_deterministic_automaton.NDTransition(symbol, sset)
+				if len(sset):
+					t = non_deterministic_automaton.NDTransition(symbol, sset)
+					states[s].add_transition(t)
 				sset = []
-				states[s].add_transition(t)
 
 		states['λ'] = λ
 		states['φ'] = φ
@@ -221,11 +224,12 @@ class Grammar:
 		initialState = states[self.productions[0].leftSide]
 		finalStates = [λ]
 		if self.has_empty_sentence() or sfinal:
-			initialState.isAccptance = True
+			initialState.isAcceptance = True
 			finalStates.append(initialState)
 		print("sentences = ", end="")
 		print(non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet).\
 			n_first_sentences_accepted(4))
+		alphabet = list(set(self.getAlphabet()) - {'&'})
 		return non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet)
 
 	def add_production(self, prod):

@@ -136,6 +136,8 @@ class NDAutomaton:
 		return self.__hash__() == other.__hash__()
 
 	def process_input(self, input):
+		if input == "&" and (self.initialState.isAcceptance or self.initialState in self.finalStates):
+			return True
 		for symbol in input:
 			ns = set()
 			for cs in self.currentStates:
@@ -147,7 +149,7 @@ class NDAutomaton:
 				return False
 		output = False
 		for s in self.currentStates:
-			if s.isAcceptance:
+			if s.isAcceptance or s in self.finalStates:
 				output = True
 		self.currentStates = {self.initialState} | self.initialState.next_states('&')
 		return output

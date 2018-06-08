@@ -680,6 +680,7 @@ class RegExp:
 				if nextc is None:
 					continue
 				trans.append([comp, s, nextc])
+				print(str(comp) + " vai para " + str(nextc) + " por " + str(s))
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
 
@@ -719,7 +720,7 @@ class RegExp:
 		result_automaton = Automaton(states, finalStates, initialState, Σ)
 		result_automaton.equi_classes = [result_automaton.get_acceptance_states(), result_automaton.get_non_acceptance_states()]
 		
-		print(result_automaton.equi_classes)
+		#print(states)
 		return result_automaton
 	def symbols_of_a_composition(self, comp_str):
 		symbols = set()

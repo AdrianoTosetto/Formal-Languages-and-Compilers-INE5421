@@ -32,7 +32,7 @@ class Automaton:
 		self.name = name
 
 	def process_input(self, input):
-		if input == "&" and self.initialState.isAcceptance:
+		if input == "&" and (self.initialState.isAcceptance or self.initialState in self.finalStates):
 			return True
 		for symbol in input:
 			self.currentState = self.currentState.next_state(symbol)
@@ -40,7 +40,7 @@ class Automaton:
 			if self.currentState is None:
 				self.currentState = self.initialState
 				return False
-		output = self.currentState.isAcceptance
+		output = self.currentState.isAcceptance or self.currentState in self.finalStates
 		#print(str(self.currentState) + " is " + str(output))
 		self.currentState = self.initialState
 		return output
