@@ -12,6 +12,10 @@ from operations_with_grammars import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class addNDAutomatonTab(QWidget):
 	saveAFD = QtCore.pyqtSignal(Automaton)
 	saveAFND = QtCore.pyqtSignal(NDAutomaton)

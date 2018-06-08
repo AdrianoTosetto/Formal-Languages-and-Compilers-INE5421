@@ -5,6 +5,11 @@ from deterministic_automaton import *
 from globals import *
 from operations_with_automata import *
 from functools import *
+
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 def find_key(value, dictionary):
     return reduce(lambda x, y: x if x is not None else y,
                   map(lambda x: x[0] if x[1] == value else None,

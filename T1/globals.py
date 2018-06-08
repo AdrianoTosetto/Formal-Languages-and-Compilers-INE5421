@@ -1,3 +1,7 @@
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class Globals:
     traversal = []
     grammars = []

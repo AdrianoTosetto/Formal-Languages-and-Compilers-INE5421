@@ -2,6 +2,10 @@ import non_deterministic_automaton
 from globals import *
 
 '''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
+'''
 	for regular grammars only
 '''
 
@@ -185,7 +189,7 @@ class Grammar:
 		states_str = {s for s in set(self.get_non_terminals())} #alguém me mata
 		# state that accepts the input
 		λ = non_deterministic_automaton.NDState('λ', True)
-		λ.isAccptance = True
+		λ.isAcceptance = True
 		φ = non_deterministic_automaton.NDState('φ')
 		for s in alphabet:
 			λ.add_transition(non_deterministic_automaton.NDTransition(s, [φ]))

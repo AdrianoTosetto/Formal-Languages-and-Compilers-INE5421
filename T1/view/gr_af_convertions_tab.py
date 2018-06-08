@@ -11,6 +11,10 @@ import non_deterministic_automaton
 from regular_grammar import Grammar, Production
 import deterministic_automaton
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class ConvertionTab(QWidget):
 	updateAF = QtCore.pyqtSignal(non_deterministic_automaton.NDAutomaton)
 	updateGR = QtCore.pyqtSignal(Grammar)

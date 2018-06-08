@@ -4,6 +4,10 @@ import regular_grammar
 from regular_grammar import Production, Grammar
 import random
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 
 class Automaton:
 
@@ -104,13 +108,13 @@ class Automaton:
 	def get_acceptance_states(self):
 		ret = []
 		for s in self.states:
-			if s.isAcceptance:
+			if s.isAcceptance or s in self.finalStates:
 				ret.append(s)
 		return ret
 	def get_non_acceptance_states(self):
 		ret= []
 		for s in self.states:
-			if not(s.isAcceptance):
+			if not(s.isAcceptance or s in self.finalStates):
 				ret.append(s)
 		return ret
 	def belong_same_equi_class(self, q0, q1):
@@ -210,7 +214,7 @@ class Automaton:
 				stack.extend((self.next_states_all(vertex)))
 
 		return visited
-	def minimize1(self):
+	'''def minimize1(self):
 		newA = copy.deepcopy(self)
 		newA.remove_dead_states()
 		newA.remove_unreacheable_states()
@@ -272,7 +276,7 @@ class Automaton:
 								s.add_transition(t)
 
 		newA = Automaton(newStates, newFinalStates, newInitialState, self.Σ)
-		return newA
+		return newA'''
 
 	def minimize(self):
 		#print(self.get_eq_class(self.initialState))
@@ -281,31 +285,43 @@ class Automaton:
 		#self.remove_unreacheable_states()
 		#self.remove_dead_states()
 		#self.remove_unreacheable_states()
+		if(len(self.states) == 1):
+			return copy.deepcopy(self)
 		if len(self.finalStates) is 0:
 			fakeFinal = State('', True)
 			self.finalStates = {fakeFinal}
 			self.states |= {fakeFinal}
+		if len(set(self.states) - set(self.finalStates)) is 0:
+			fakeNonFinal = State('', False)
+			self.states |= {fakeNonFinal}
+		if self.initialState in self.finalStates:
+			self.initialState.isAcceptance = False
+			newA = Automaton(set(self.states), set(self.finalStates) - {self.initialState}, self.initialState, self.Σ).minimize()
+			newA.initialState.isAcceptance = True
+			newA.finalStates |= {newA.initialState}
+		else:
+			newA = self
 		self.complete()
 		changed = True
 		while(changed):
 			#print(len(self.equi_classes))
 			changed = False
-			curr_equi_classes = self.equi_classes
+			curr_equi_classes = newA.equi_classes
 			for eqclass in curr_equi_classes:
 				#print(curr_equi_classes)
-				if self.test_eqclass1(eqclass):
+				if newA.test_eqclass1(eqclass):
 					changed = True
 
 		newStates = set()
 		newFinalStates = set()
-		newInitialState = State(self.get_eq_class(self.initialState))
+		newInitialState = State(newA.get_eq_class(newA.initialState))
 		#print(self.equi_classes)
-		for eq in self.equi_classes:
+		for eq in newA.equi_classes:
 			freerealestate = next(iter(eq))
-			news = State(str(self.get_eq_class(freerealestate)), freerealestate.isAcceptance)
+			news = State(str(newA.get_eq_class(freerealestate)), freerealestate.isAcceptance)
 			if freerealestate.isAcceptance:
 				newFinalStates.add(news)
-			if freerealestate == self.initialState:
+			if freerealestate == newA.initialState:
 				newInitialState = news
 			newStates.add(news)
 			'''
@@ -322,11 +338,11 @@ class Automaton:
 			'''
 		print(self.equi_classes)
 		for s in newStates:
-			for eq in self.equi_classes:
+			for eq in newA.equi_classes:
 				freerealestate = next(iter(eq))
 				for symbol in self.Σ:
 					for ns in newStates:
-						if ns == State(str(self.get_eq_class(freerealestate.next_state(symbol)))):
+						if ns == State(str(newA.get_eq_class(freerealestate.next_state(symbol)))):
 							t = Transition(symbol, ns)
 							if (s == State(str(eq))):
 								s.add_transition(t)
@@ -400,7 +416,7 @@ class Automaton:
 		eqclass_temp = eqclass
 		s = next(iter(eqclass))
 
-		test_states = eqclass_temp - {s}
+		test_states = set(eqclass_temp) - {s}
 
 		for ts in test_states:
 			for symbol in self.Σ:
@@ -556,7 +572,7 @@ class Automaton:
 						prods.append(Production(s.name, p.symbol))
 		return Grammar(prods)
 
-class equiClass():
+'''class equiClass():
 	def __init__(self, states):
 		self.states = states
 		self.listStates = list(states)
@@ -578,7 +594,7 @@ class equiClass():
 
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()
-	'''def __iter__(self):
+	def __iter__(self):
 		self.num = 0
 		return self
 	def __next__(self):
@@ -648,7 +664,7 @@ class State:
 		for t in self.transitions:
 			#print(t)
 			if t.get_symbol() == symbol:
-				return t.get_next_state()
+				return t.target_state
 		return None
 
 	def add_transition(self, t):

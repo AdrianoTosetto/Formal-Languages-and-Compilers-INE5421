@@ -3,6 +3,10 @@ from non_deterministic_automaton import *
 from regular_grammar import *
 import copy
 
+'''
+    Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 def make_nondeterministic(fa):
     if type(fa) is type(NDAutomaton(set(), set(), NDState(''))):
         return fa

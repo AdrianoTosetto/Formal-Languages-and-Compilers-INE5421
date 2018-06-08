@@ -16,6 +16,10 @@ from operations_with_automata import *
 from simone_tab import *
 hey = "haha"
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class MainWindow(QWidget):
 	jesus = "-"
 	jesus1 = "-"
@@ -895,10 +899,10 @@ class addAutomatonTab(QWidget):
 		newAF = make_nondeterministic(Globals.selected)
 		newAF.name = Globals.selected.name + " (nondeterministic)"
 		names = [af.name for af in Globals.automata]
-		while newM in Globals.automata:
+		while newAF in Globals.automata:
 			for name in names:
-				if newM.name == name:
-					newM.name += "'"
+				if newAF.name == name:
+					newAF.name += "'"
 					break
 		Globals.automata.append(newAF)
 		Globals.selected = newAF

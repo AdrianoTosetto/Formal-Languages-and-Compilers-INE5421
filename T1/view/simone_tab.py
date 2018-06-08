@@ -14,6 +14,10 @@ from nd_add_automaton_tab import *
 from operations_with_automata import *
 from structures import *
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class SimoneTab(QWidget):
 	saveER = QtCore.pyqtSignal(str)
 	saveDS = QtCore.pyqtSignal()

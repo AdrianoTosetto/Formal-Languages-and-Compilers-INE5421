@@ -9,6 +9,10 @@ import sys
 sys.path.append('view/')
 from main_window import *
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 if __name__ == "__main__":
 
 	leftSides = ['S', 'A', 'B']
@@ -36,7 +40,7 @@ if __name__ == "__main__":
 	expr = '(0|1(01*0)*1)(0|1(01*0)*1)*'
 	re = RegExp(expr)
 	print(re.to_automaton())
-	print(re.to_automaton().minimize1())
+	print(re.to_automaton().minimize())
 	Globals.grammar_count = 1
 	Globals.automaton_count = 1
 	win = MainWindow()

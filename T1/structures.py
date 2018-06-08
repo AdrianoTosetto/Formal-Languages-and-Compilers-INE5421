@@ -5,6 +5,10 @@ from deterministic_automaton import *
 UP = 0
 DOWN = 1
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class Stack:
      def __init__(self):
          self.items = []

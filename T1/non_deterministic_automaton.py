@@ -3,6 +3,10 @@ from deterministic_automaton import State, Transition, Automaton
 from globals import *
 import copy
 
+'''
+	Autoria: Adriano Tosetto, Giulio Simão
+'''
+
 class NDTransition:
 	def __init__(self, symbol, target_states):
 		self.target_states = target_states
