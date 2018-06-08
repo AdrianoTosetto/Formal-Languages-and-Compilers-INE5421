@@ -221,8 +221,8 @@ class Grammar:
 		initialState = states[self.productions[0].leftSide]
 		finalStates = [λ]
 		if self.has_empty_sentence() or sfinal:
-			finalStates.append(initialState)
 			initialState.isAccptance = True
+			finalStates.append(initialState)
 		print("sentences = ", end="")
 		print(non_deterministic_automaton.NDAutomaton(states.values(), finalStates, initialState, alphabet).\
 			n_first_sentences_accepted(4))

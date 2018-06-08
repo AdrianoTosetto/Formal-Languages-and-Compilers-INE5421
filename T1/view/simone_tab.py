@@ -91,6 +91,12 @@ class SimoneTab(QWidget):
 			print(Globals.selected)
 			ds_result = RegExp(Globals.selected).to_automaton()
 			print(ds_result)
+		names = [af.name for af in Globals.automata]
+		while ds_result in Globals.automata:
+			for name in names:
+				if ds_result.name == name:
+					ds_result.name += "'"
+					break
 		Globals.automata.append(ds_result)
 		self.saveDS.emit()
 	def set_edit_er(self, regex):

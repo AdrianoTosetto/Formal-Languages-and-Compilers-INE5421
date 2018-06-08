@@ -82,6 +82,12 @@ class addNDAutomatonTab(QWidget):
 		self.top_layout.addWidget(self.add_remove_symbol_panel, 1, 0)
 		self.top_layout.addWidget(self.list_symbol, 1, 1)
 		self.top_layout.addWidget(self.add_remove_panel, 2,0)
+
+		self.test_sentence_pertinence_button = QPushButton("testar sentença")
+		self.test_sentence_pertinence_edit   = QLineEdit()
+		self.test_sentence_pertinence_button.clicked.connect(self.pertinence_test)
+		self.top_layout.addWidget(self.test_sentence_pertinence_edit, 3, 1)
+		self.top_layout.addWidget(self.test_sentence_pertinence_button, 3,0)
 		self.setPolicyEdits()
 		self.setPolicyButtons()
 		self.top_layout.setColumnStretch(0, 1)
@@ -116,6 +122,32 @@ class addNDAutomatonTab(QWidget):
 		self.set_placeholders()
 		self.alphabet = []
 		#self.showAutomaton(Globals.automata[0])
+
+	def suc(self, msg):
+		d = QDialog()
+		b1 = QPushButton(msg,d)
+		d.setMinimumSize(300, 100)
+		d.setWindowTitle(":)")
+		d.setWindowModality(Qt.ApplicationModal)
+		d.exec_()
+	def error(self, msg):
+		error_dialog = QtWidgets.QErrorMessage()
+		error_dialog.showMessage(msg)
+		error_dialog.exec_()
+
+	def pertinence_test(self):
+		print("hahaha")
+		af = Globals.selected
+		if type(af) is not NDAutomaton:
+			self.error("Selecione um NAF :)")
+			return
+		sentence = self.test_sentence_pertinence_edit.text()
+		print(sentence)
+		print(af.process_input(sentence))
+		resp = ""
+		if not(af.process_input(sentence)):
+			resp = " não "
+		self.suc("A sentença" +resp+" pertence ao conjunto da linguagem")
 
 
 	def rec_sentences(self):
@@ -260,6 +292,12 @@ class addNDAutomatonTab(QWidget):
 	def create_transition_table(self):
 		newAF = Globals.selected.determinize()
 		newAF.name = Globals.selected.name + " (determinized)"
+		names = [af.name for af in Globals.automata]
+		while newAF in Globals.automata:
+			for name in names:
+				if newAF.name == name:
+					newAF.name += "'"
+					break
 		Globals.automata.append(newAF)
 		Globals.selected = newAF
 		self.saveAFD.emit(Globals.selected)
@@ -303,6 +341,7 @@ class addNDAutomatonTab(QWidget):
 		self.transition_table_ui.setRowCount(len(af.states))
 		self.transition_table_ui.setColumnCount(len(af.Σ) + 2)
 		self.setColsLabels(af.Σ)
+		print("alfabeto == " + str(af.Σ))
 		states_list = list(af.states)
 		self.initial_state_radio_group = QButtonGroup()
 		for i in range(0, len(af.Σ)):
@@ -319,7 +358,7 @@ class addNDAutomatonTab(QWidget):
 			cb = QCheckBox()
 			rb = QRadioButton()
 			self.initial_state_radio_group.addButton(rb)
-			if s.isAcceptance:
+			if s.isAcceptance or s in af.finalStates:
 				cb.setChecked(True)
 				print(str(s) + "eh de aceitação")
 			if s == af.initialState:

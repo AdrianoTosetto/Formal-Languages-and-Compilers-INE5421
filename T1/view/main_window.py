@@ -71,12 +71,12 @@ class MainWindow(QWidget):
 		self.centerLayout.addWidget(self.center, 0, 0)
 		self.centerLayout.setRowStretch(0,5)
 		self.centerLayout.setRowStretch(1,3)
-		self.display = QLabel()
+		self.display = QTextEdit()
 		self.display.setText('Selecione uma GR/ER/AF')
 		self.display.setStyleSheet("background-color:white;")
 		self.displayLayout = QVBoxLayout()
 		self.displayLayout.addWidget(self.display)
-		self.log = QLabel()
+		self.log = QTextEdit()
 		self.log.setText('')
 		self.log.setStyleSheet("background-color:white;")
 		self.logLayout = QVBoxLayout()
@@ -213,7 +213,14 @@ class MainWindow(QWidget):
 			self.erList.setItemWidget(item, item_widget)
 			self.erList.addItem(item)
 	def add_gr(self):
-		newG = Grammar([Production('S', '&')], add = True)
+		newG = Grammar([Production('S', '&')])
+		names = [gr.name for gr in Globals.grammars]
+		while newG in Globals.grammars:
+			for name in names:
+				if newG.name == name:
+					newG.name += "'"
+					break
+		Globals.grammars.append(newG)
 		Globals.selected = newG
 		self.update_gr()
 
@@ -228,7 +235,14 @@ class MainWindow(QWidget):
 
 	def add_af(self):
 		q0 = State("q0", True)
-		newM = Automaton([q0], [q0], q0, add = True)
+		newM = Automaton([q0], [q0], q0)
+		names = [af.name for af in Globals.automata]
+		while newM in Globals.automata:
+			for name in names:
+				if newM.name == name:
+					newM.name += "'"
+					break
+		Globals.automata.append(newM)
 		Globals.selected = newM
 		self.update_af()
 
@@ -880,6 +894,12 @@ class addAutomatonTab(QWidget):
 	def make_non_deterministic(self):
 		newAF = make_nondeterministic(Globals.selected)
 		newAF.name = Globals.selected.name + " (nondeterministic)"
+		names = [af.name for af in Globals.automata]
+		while newM in Globals.automata:
+			for name in names:
+				if newM.name == name:
+					newM.name += "'"
+					break
 		Globals.automata.append(newAF)
 		Globals.selected = newAF
 		self.saveAFND.emit(Globals.selected)
