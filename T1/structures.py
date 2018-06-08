@@ -672,7 +672,7 @@ class RegExp:
 	def to_automaton(self):
 		ret = self.parse()
 		compositions = ret[0]
-		q0_composition = ret[1]
+		q0_composition = set(sorted(list(ret[1]), key=lambda node: node.label))
 		Σ = list(ret[2])
 		error = ret[3]
 		unvisited = [q0_composition]
@@ -686,14 +686,16 @@ class RegExp:
 				nextc = self.handle_composition(comp, compositions, s)
 				if nextc is None:
 					nextc = compositions[error]
+				print(comp)
+				comp = set(sorted(list(comp), key=lambda node: node.label))
+				print(comp)
+				print(nextc)
+				nextc = set(sorted(list(nextc), key=lambda node: node.label))
+				print(nextc)
 				trans.append([comp, s, nextc])
-				print(trans)
 				print(str(comp) + " vai para " + str(nextc) + " por " + str(s))
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
-				else:
-					print(unvisited)
-					print("nextc = " + str(nextc))
 		print(trans)
 		states = []
 		finalStates = []
@@ -718,7 +720,7 @@ class RegExp:
 				for t in trans:
 					if s.name == str(t[0]) and s1.name == str(t[2]):
 						print("1")
-						#s.add_transition(Transition(t[1], s1))
+						s.add_transition(Transition(t[1], s1))
 						#print("adicionando " + str(t))
 
 		'''φ = State('φ', False)
@@ -754,6 +756,7 @@ class RegExp:
 		print(self.test_regex)
 		re = re.compile(r'[(]?[a-z0-9]+([?+*]?([)][?+*]?)?)([|]?[(]?[a-z0-9]+([?+*]?([)][?+*]?[)]?)?))*')
 		match = re.match(self.test_regex)
+		return RegExp.OK
 		if match is None:
 			return RegExp.OK
 		if (self.test_regex.count("(") != self.test_regex.count(")")):
