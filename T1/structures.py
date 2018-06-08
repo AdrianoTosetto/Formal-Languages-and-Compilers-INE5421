@@ -647,9 +647,12 @@ class RegExp:
 		for leaf in leaves:
 			compositions[leaf] = leaf.handle_leaf()
 			Σ.add(leaf.symbol)
+		error = Node('φ')
+		error.label = -2
+		compositions[error] = {error}
 		q0_composition = nodo.handle_root()
 
-		return (compositions, q0_composition, Σ)
+		return (compositions, q0_composition, Σ, error)
 	def handle_composition(self, composition, compositions, s):
 		'''composição pelo símbolo s'''
 		ret = set()
@@ -671,7 +674,7 @@ class RegExp:
 		compositions = ret[0]
 		q0_composition = ret[1]
 		Σ = list(ret[2])
-
+		error = ret[3]
 		unvisited = [q0_composition]
 		visited = []
 		trans = []
@@ -682,8 +685,9 @@ class RegExp:
 			for s in Σ:
 				nextc = self.handle_composition(comp, compositions, s)
 				if nextc is None:
-					continue
+					nextc = compositions[error]
 				trans.append([comp, s, nextc])
+				print(type(nextc))
 				print(str(comp) + " vai para " + str(nextc) + " por " + str(s))
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
@@ -709,7 +713,7 @@ class RegExp:
 					if s.name == str(t[0]) and s1.name == str(t[2]):
 						s.add_transition(Transition(t[1], s1))
 
-		φ = State('φ', False)
+		'''φ = State('φ', False)
 		for symbol in Σ:
 			t = Transition(symbol, φ)
 			φ.transitions.append(t)
@@ -719,7 +723,7 @@ class RegExp:
 				s.add_transition(Transition(lack_symbol, φ))
 				add_phi = True
 		if add_phi:
-			states.append(φ)
+			states.append(φ)'''
 
 		result_automaton = Automaton(states, finalStates, initialState, Σ)
 		result_automaton.equi_classes = [result_automaton.get_acceptance_states(), result_automaton.get_non_acceptance_states()]
@@ -738,9 +742,12 @@ class RegExp:
 
 	def isValid(self):
 		import re
+		#self.test_regex = self.test_regex.replace(" ", "")
+		print(self.test_regex)
 		re = re.compile(r'[(]?[a-z0-9]+([?+*]?([)][?+*]?)?)([|]?[(]?[a-z0-9]+([?+*]?([)][?+*]?[)]?)?))*')
 		match = re.match(self.test_regex)
-		print(match.group())
+		if match is None:
+			return RegExp.OK
 		if (self.test_regex.count("(") != self.test_regex.count(")")):
 			return RegExp.BRACKETS_ERROR
 		try :
