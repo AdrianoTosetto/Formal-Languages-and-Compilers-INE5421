@@ -687,11 +687,14 @@ class RegExp:
 				if nextc is None:
 					nextc = compositions[error]
 				trans.append([comp, s, nextc])
-				print(type(nextc))
+				print(trans)
 				print(str(comp) + " vai para " + str(nextc) + " por " + str(s))
 				if nextc not in unvisited and nextc not in visited:
 					unvisited.append(nextc)
-
+				else:
+					print(unvisited)
+					print("nextc = " + str(nextc))
+		print(trans)
 		states = []
 		finalStates = []
 		for v in visited:
@@ -707,11 +710,16 @@ class RegExp:
 				initialState = state
 				#if 'λ' self.symbols_of_a_composition(q0_composition):
 				#	initialState.isAcceptance = True
+		print("=============")
+		print(trans)
 		for s in states:
+			#print("ha")
 			for s1 in states:
 				for t in trans:
 					if s.name == str(t[0]) and s1.name == str(t[2]):
-						s.add_transition(Transition(t[1], s1))
+						print("1")
+						#s.add_transition(Transition(t[1], s1))
+						#print("adicionando " + str(t))
 
 		'''φ = State('φ', False)
 		for symbol in Σ:
