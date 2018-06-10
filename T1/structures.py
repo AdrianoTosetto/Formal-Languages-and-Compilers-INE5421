@@ -73,7 +73,6 @@ class Tree:
 	def __init__(self, root_node=None):
 		self.root = root_node
 		self.symbol = 'a'
-
 	def is_operand(self, char):
 		return char.lower() in "abcdefghijklmnopqrstuvwxyz" or char in "0123456789"
 	def is_operator(self, char):
@@ -123,6 +122,32 @@ class Node:
 		self.traversal = []
 		self.costura_node = None
 		self.isThreaded = False
+	def __lt__(self, other):
+		return self.label < other.label
+	def __le__(self, other):
+		return self.label <= other.label
+	'''def __ne__(self, other):
+		return self.__hash__() != other.__hash__()'''
+	def __ge__(self, other):
+		return self.label >= other.label
+	def __gt__(self, other):
+		return self.label > other.label
+	'''def __eq__(self, other):
+		return self.__hash__() == other.__hash__()'''
+	def __hash__(self):
+		hashable = str(self.label) + " "
+		if self.symbol == 'λ':
+			hashable += 'lambda'
+		elif self.symbol == 'φ':
+			hashable += 'phi'
+		else:
+			hashable += self.symbol
+		sigma = 0
+		i = 1
+		for c in hashable:
+			sigma += ord(c) * i
+			i += 1
+		return sigma
 	def set_left(self, left):
 		self.left = left
 	def set_right(self, right):
@@ -645,12 +670,12 @@ class RegExp:
 		states_compositions = {}
 		states = set()
 		for leaf in leaves:
-			compositions[leaf] = leaf.handle_leaf()
+			compositions[leaf] = sorted(leaf.handle_leaf())
 			Σ.add(leaf.symbol)
 		error = Node('φ')
 		error.label = -2
 		compositions[error] = {error}
-		q0_composition = nodo.handle_root()
+		q0_composition = sorted(nodo.handle_root())
 
 		return (compositions, q0_composition, Σ, error)
 	def handle_composition(self, composition, compositions, s):
@@ -663,11 +688,11 @@ class RegExp:
 			if c.label == -1:
 				continue
 			if c.symbol == s:
-				ret = ret | compositions[c]
+				ret = ret | set(compositions[c])
 		''' ret is empty? if so, return None '''
 		if not ret:
 			return None
-		return ret
+		return sorted(ret)
 
 	def to_automaton(self):
 		ret = self.parse()
@@ -737,7 +762,7 @@ class RegExp:
 
 		result_automaton = Automaton(states, finalStates, initialState, Σ)
 		result_automaton.equi_classes = [result_automaton.get_acceptance_states(), result_automaton.get_non_acceptance_states()]
-		
+
 		#print(states)
 		return result_automaton
 	def symbols_of_a_composition(self, comp_str):
@@ -747,7 +772,7 @@ class RegExp:
 		comp_str_list_symbol = comp_str.split(",")
 		for ss in comp_str_list_symbol:
 			symbols.add(ss.split()[1])
-		
+
 		return symbols
 
 	def isValid(self):

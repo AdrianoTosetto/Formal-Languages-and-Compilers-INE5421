@@ -743,6 +743,7 @@ class addAutomatonTab(QWidget):
 		Globals.automata.append(min_af)
 		Globals.selected = min_af
 		self.minimize.emit(Globals.selected)
+		self.save_automaton()
 	def do_complete(self):
 		af = Globals.selected
 		if type(af) != Automaton:

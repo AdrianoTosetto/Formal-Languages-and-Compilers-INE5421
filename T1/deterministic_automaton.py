@@ -31,7 +31,6 @@ class Automaton:
 		if self not in Globals.automata and add:
 			Globals.automata.append(self)
 		self.equi_classes = [self.get_acceptance_states(), self.get_non_acceptance_states()]
-		print(self.equi_classes)
 
 	def set_name(name):
 		self.name = name
@@ -124,6 +123,14 @@ class Automaton:
 				return True
 		return False
 	def remove_unreacheable_states(self):
+		test_states = set(self.states) - {self.initialState}
+
+		for s in copy.deepcopy(test_states):
+			if not self.has_path(self.initialState, s) and not(s.name == 'φ'):
+				self.states.remove(s)
+				self.remove_transitions_from(s)
+		self.equi_classes = [set(self.get_acceptance_states()), set(self.get_non_acceptance_states())]
+	'''def remove_unreacheable_states(self):
 		reachStates = {self.initialState}
 		newStates = {self.initialState}
 		temp = set()
@@ -157,7 +164,7 @@ class Automaton:
 			if s not in self.states:
 				finals -= {s}
 		self.finalStates = finals
-		'''self.rename_states()
+		self.rename_states()
 		print(self.states)
 		print(self.finalStates)'''
 
@@ -300,8 +307,13 @@ class Automaton:
 			newA = Automaton(set(self.states), set(self.finalStates) - {self.initialState}, self.initialState, self.Σ).minimize()
 			newA.initialState.isAcceptance = True
 			newA.finalStates |= {newA.initialState}
+			newA.remove_dead_states()
+			newA.remove_unreacheable_states()
 		else:
-			newA = self
+			a = self
+			a.remove_dead_states()
+			a.remove_unreacheable_states()
+			newA = a
 		self.complete()
 		changed = True
 		while(changed):
@@ -315,11 +327,11 @@ class Automaton:
 
 		newStates = set()
 		newFinalStates = set()
-		newInitialState = State(newA.get_eq_class(newA.initialState))
+		newInitialState = State(str(sorted(newA.get_eq_class(newA.initialState))))
 		#print(self.equi_classes)
 		for eq in newA.equi_classes:
 			freerealestate = next(iter(eq))
-			news = State(str(newA.get_eq_class(freerealestate)), freerealestate.isAcceptance)
+			news = State(str(sorted(eq)), freerealestate.isAcceptance)
 			if freerealestate.isAcceptance:
 				newFinalStates.add(news)
 			if freerealestate == newA.initialState:
@@ -337,16 +349,27 @@ class Automaton:
 				only one state and its transitions of the equivalence class is
 				needed. So break for and look for next class
 			'''
+		print("MANOOOOOOOOOOOOOOOOOOOOOOOOOOOOo")
 		print(self.equi_classes)
+		print(newStates)
 		for s in newStates:
 			for eq in newA.equi_classes:
 				freerealestate = next(iter(eq))
 				for symbol in self.Σ:
 					for ns in newStates:
-						if ns == State(str(newA.get_eq_class(freerealestate.next_state(symbol)))):
+						print(sorted(newA.get_eq_class(freerealestate.next_state(symbol))))
+						if ns == State(str(sorted(newA.get_eq_class(freerealestate.next_state(symbol))))):
+							print("OLOCO MEU")
 							t = Transition(symbol, ns)
-							if (s == State(str(eq))):
+							print(t)
+							print(sorted(eq))
+							if (s == State(str(sorted(eq)))):
+								print("AEE")
 								s.add_transition(t)
+		for s in newStates:
+			for t in s.transitions:
+				print("SDOPKAPOJKGPOAKPODSKAOPDKASPOKDAPO")
+				print(t.target_state.transitions[0])
 		'''
 		for s in newStates:
 			print("NOME: " + s.name)
@@ -365,8 +388,9 @@ class Automaton:
 			print("TRANSIÇÃO 3: " + str(ns) + " + " + str(ns.transitions[2]))'''
 		#print("batata: " + str(a.depth_first_search(next(iter(newStates)))))
 		#print(self.Σ)
-		a.remove_dead_states()
-		a.remove_unreacheable_states()
+		print(a)
+		#a.remove_dead_states()
+		#a.remove_unreacheable_states()
 		a.equi_classes = [a.get_acceptance_states(), a.get_non_acceptance_states()]
 
 		return a
@@ -376,7 +400,7 @@ class Automaton:
 	def get_eq_class(self, s):
 		for eq in self.equi_classes:
 			if s in eq:
-				return str(eq)
+				return sorted(eq)
 	def test_eqclass(self, eqclass):
 		garbage = set()
 		changed = False
@@ -436,6 +460,7 @@ class Automaton:
 			self.equi_classes.remove(eqclass)
 			self.equi_classes.append(eqclass_temp)
 			self.equi_classes.append(giulios)
+			self.equi_classes = sorted(self.equi_classes)
 
 		return changed
 	def belong_equi_class(self, ts, eq):
@@ -708,6 +733,16 @@ class State:
 				self.transitions.append(nt)
 				ret = True
 		return ret
+	def __lt__(self, other):
+		return self.__hash__() < other.__hash__()
+	def __le__(self, other):
+		return self.__hash__() <= other.__hash__()
+	def __ne__(self, other):
+		return self.__hash__() != other.__hash__()
+	def __ge__(self, other):
+		return self.__hash__() >= other.__hash__()
+	def __gt__(self, other):
+		return self.__hash__() > other.__hash__()
 
 '''
 	error state
