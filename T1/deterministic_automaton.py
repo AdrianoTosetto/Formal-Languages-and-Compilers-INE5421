@@ -575,7 +575,7 @@ class Automaton:
 	def to_grammar(self):
 		newAuto = self.rename_states_alphabet()
 		prods = []
-		if newAuto.initialState.isAcceptance:
+		if newAuto.initialState.isAcceptance or newAuto.initialState in newAuto.finalStates:
 			for t in newAuto.initialState.transitions:
 				prods.append(Production('S', t.symbol + t.target_state.name))
 				if t.target_state.isAcceptance:

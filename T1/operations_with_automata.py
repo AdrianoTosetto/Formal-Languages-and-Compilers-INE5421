@@ -198,16 +198,28 @@ def getReverse(af, add = False):
         newAF = af.determinize()
     else:
         newAF = af
-    acceptEpsilon = newAF.initialState.isAcceptance
+    acceptEpsilon = newAF.initialState.isAcceptance or newAF.initialState in newAF.finalStates
 
     for s in newAF.states:
         s.isAcceptance = False
 
     newAF.initialState.isAcceptance = True
 
-    newStates = copy.deepcopy(newAF.states)
+    newStates = set()
 
     for s in newAF.states:
+        newStates.add(State(s.name, s.isAcceptance))
+
+    for s in newAF.states:
+        for t in s.transitions:
+            for ns in newStates:
+                if ns == af.initialState:
+                    newFinal = ns
+                for os in newStates:
+                    if t.target_state == ns and s == os:
+                        ns.add_transition(Transition(t.symbol, os))
+
+    '''for s in newAF.states:
         for t in s.transitions:
             for ns in newStates:
                 if ns == af.initialState:
@@ -217,7 +229,7 @@ def getReverse(af, add = False):
                         for nt in ns.transitions:
                             if nt == t:
                                 ns.remove_transition(nt)
-                        ns.add_transition(Transition(t.symbol, os))
+                        ns.add_transition(Transition(t.symbol, os))'''
 
     newAF = make_nondeterministic(Automaton(newStates, {newFinal}, newFinal, af.Σ, add))
 
@@ -229,7 +241,7 @@ def getReverse(af, add = False):
             if s.name == 'q' + str(i):
                 i += 1
                 changed = True
-                continue
+                break
     newInitial = NDState('q' + str(i), acceptEpsilon)
 
     for f in af.finalStates:

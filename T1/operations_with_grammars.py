@@ -57,15 +57,15 @@ def grammar_union(gr1, gr2, add = False):
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
     count = 0
+    oldProds1_1 = []
     for p1 in oldProds1:
-        oldProds1_1 = []
         if p1.rightSide is not '&':
             oldProds1_1.append(p1)
         else:
             hasEpsilon = True
     oldProds1 = oldProds1_1
+    oldProds2_1 = []
     for p2 in oldProds2:
-        oldProds2_1 = []
         if p2.rightSide is not '&':
             oldProds2_1.append(p2)
         else:
@@ -126,6 +126,8 @@ def grammar_union(gr1, gr2, add = False):
     for p2 in oldProds2:
         if p2.leftSide == initial2:
             newProds.append(Production('S', p2.rightSide))
+    if hasEpsilon:
+        newProds.append(Production('S', '&'))
 
     newProds = newProds + oldProds1 + oldProds2
 
@@ -209,9 +211,9 @@ def grammar_concatenation(gr1, gr2, add = False):
         newProdsEpsilon = []
         for p1 in oldProds1:
             if len(p1.rightSide) == 1 and p1.rightSide != '&':
-                oldProds1.append(Production(p1.leftSide, p1.rightSide + initial2))
+                newProdsEpsilon.append(Production(p1.leftSide, p1.rightSide + initial2))
             if p1.leftSide == initial1:
-                oldProds1.append(Production(p1.leftSide, '&'))
+                newProdsEpsilon.append(Production(p1.leftSide, '&'))
                 for p2 in oldProds2:
                     if p2.leftSide == initial2:
                         newProdsEpsilon.append(Production(p1.leftSide, p2.rightSide))
