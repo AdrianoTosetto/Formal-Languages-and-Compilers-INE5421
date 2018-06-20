@@ -51,25 +51,25 @@ def grammar_union(gr1, gr2, add = False):
     oldNonTerminals1 = set()
     oldProds2 = copy.deepcopy(gr2.productions)
 
-    if newG not in Globals.grammars:
+    '''if newG not in Globals.grammars:
         Globals.grammars.append(newG)
-        Globals.grammar_count += 1
+        Globals.grammar_count += 1'''
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
     count = 0
     for p1 in oldProds1:
-        if p1.rightSide is '&':
+        oldProds1_1 = []
+        if p1.rightSide is not '&':
+            oldProds1_1.append(p1)
+        else:
             hasEpsilon = True
-            oldProds1_1 = oldProds1 - p1
-            break
-        oldProds1_1 = oldProds1
     oldProds1 = oldProds1_1
     for p2 in oldProds2:
-        if p2.rightSide is '&':
+        oldProds2_1 = []
+        if p2.rightSide is not '&':
+            oldProds2_1.append(p2)
+        else:
             hasEpsilon = True
-            oldProds2_1 = oldProds2 - p1
-            break
-        oldProds2_1 = oldProds2
     oldProds2 = oldProds2_1
     for p1 in gr1.productions:
         oldNonTerminals1.add(p1.leftSide)
@@ -134,7 +134,8 @@ def grammar_union(gr1, gr2, add = False):
     return newG
 
 def grammar_concatenation(gr1, gr2, add = False):
-    hasEpsilon = False
+    hasEpsilon1 = False
+    hasEpsilon2 = False
     oldProds1 = copy.deepcopy(gr1.productions)
     initial1 = copy.deepcopy(gr1.productions[0].leftSide)
     oldNonTerminals1 = set()
@@ -142,12 +143,19 @@ def grammar_concatenation(gr1, gr2, add = False):
     initial2 = copy.deepcopy(gr2.productions[0].leftSide)
     oldNonTerminals2 = set()
     count = 0
+    oldProds1_1 = []
+    oldProds2_1 = []
+    for p1 in oldProds1:
+        if p1.rightSide is not '&':
+            oldProds1_1.append(p1)
+        else:
+            hasEpsilon1 = True
+    oldProds1 = oldProds1_1
     for p2 in oldProds2:
-        if p2.rightSide is '&':
-            hasEpsilon = True
-            oldProds2_1 = oldProds2 - p1
-            break
-        oldProds2_1 = oldProds2
+        if p2.rightSide is not '&':
+            oldProds2_1.append(p2)
+        else:
+            hasEpsilon2 = True
     oldProds2 = oldProds2_1
     for p1 in gr1.productions:
         oldNonTerminals1.add(p1.leftSide)
@@ -182,6 +190,8 @@ def grammar_concatenation(gr1, gr2, add = False):
     for n1 in range(count1):
         for p1 in oldProds1:
             if p1.leftSide == str(n1):
+                if str(n1) == initial1:
+                    initial1 = alphabet[n1]
                 p1.leftSide = alphabet[n1]
             if len(p1.rightSide) > 1 and p1.rightSide[-1] == str(n1):
                 p1.rightSide = p1.rightSide[0] + alphabet[n1]
@@ -193,7 +203,30 @@ def grammar_concatenation(gr1, gr2, add = False):
                 p2.leftSide = alphabet[n2]
             if len(p2.rightSide) > 1 and p2.rightSide[-1] == str(n2):
                 p2.rightSide = p2.rightSide[0] + alphabet[n2]
-    if hasEpsilon:
+    #initial1 = oldProds1[0].leftSide
+    #initial2 = oldProds2[0].leftSide
+    if hasEpsilon1 and hasEpsilon2:
+        newProdsEpsilon = []
+        for p1 in oldProds1:
+            if len(p1.rightSide) == 1 and p1.rightSide != '&':
+                oldProds1.append(Production(p1.leftSide, p1.rightSide + initial2))
+            if p1.leftSide == initial1:
+                oldProds1.append(Production(p1.leftSide, '&'))
+                for p2 in oldProds2:
+                    if p2.leftSide == initial2:
+                        newProdsEpsilon.append(Production(p1.leftSide, p2.rightSide))
+        oldProds1 += newProdsEpsilon
+    elif hasEpsilon1 and not hasEpsilon2:
+        newProdsEpsilon = []
+        for p1 in oldProds1:
+            if len(p1.rightSide) == 1:
+                p1.rightSide = p1.rightSide + initial2
+            if p1.leftSide == initial1:
+                for p2 in oldProds2:
+                    if p2.leftSide == initial2:
+                        newProdsEpsilon.append(Production(p1.leftSide, p2.rightSide))
+        oldProds1 += newProdsEpsilon
+    elif not hasEpsilon1 and hasEpsilon2:
         for p1 in oldProds1:
             if len(p1.rightSide) == 1:
                 oldProds1.append(Production(p1.leftSide, p1.rightSide + initial2))
@@ -258,8 +291,8 @@ def grammar_kleene_star(gr, add = False):
     for p in oldProds:
         if len(p.rightSide) == 1:
             newP = Production(p.leftSide, p.rightSide + initial)
-            if newP not in oldProds:
-                oldProds.append(newP)
+            #if newP not in oldProds:
+            oldProds.append(newP)
 
     newProds = newProds + oldProds
 
