@@ -92,7 +92,7 @@ class Grammar:
 				continue
 			if self.produces_epsilon(prod):
 				return True
-
+		return False
 
 	def get_non_terminals_derive_epsilon(self):
 		print("l")
