@@ -13,8 +13,22 @@ class Grammar:
 		else:
 			self.productions = self.validate_productions(productions)
 		self.name = name
+		self.nts = self.get_non_terminals(productions)
+		self.prod_dict = self.get_prod_dict(productions)
+		print(self.prod_dict)
 
-
+	def get_prod_dict(self, productions):
+		ret = {}
+		for nt in self.nts:
+			dict_value = set()
+			for prod in productions:
+				if nt == prod.leftSide:
+					dict_value.add(prod.rightSide)
+			dict_value = set(sorted(dict_value))
+			ret[nt] = dict_value
+		return ret
+	def get_non_terminals(self, productions):
+		return sorted(set([prod.leftSide for prod in productions]))
 	def __hash__(self):
 		hashable = self.name
 		sigma = 0
@@ -59,7 +73,44 @@ class Grammar:
 		print("pintos")
 	def validate_productions(self,productions):
 		return productions
+	'''
+		returns if a given nt derives & directly
+		at this moment, it is just a helper method
+	'''
+	def derives_epsilon_directly(self, nt):
+		prods = self.prod_dict[nt]
 
+		return '&' in prods
+	def derives_epsilon(self, nt, visited=set()):
+		prods = self.prod_dict[nt]
+		visited = set([nt])
+		if self.derives_epsilon_directly(nt):
+			return True
+
+		for prod in prods:
+			if self.produces_some_terminal(prod):
+				continue
+			if self.produces_epsilon(prod):
+				return True
+
+
+	def get_non_terminals_derive_epsilon(self):
+		print("l")
+
+	def produces_some_terminal(self, prods):
+
+		explode = prods.split(" ")
+		for symbol in explode:
+			if isTerminalSymbol(symbol):
+				return True
+
+		return False
+	def produces_epsilon(self, prod):
+		explode = prod.split(" ")
+		for nt in explode:
+			if not self.derives_epsilon(nt):
+				return False
+		return True
 class Production:
 	def __init__(self, leftSide, rightSide):
 		self.leftSide = leftSide
@@ -127,7 +178,7 @@ class Production:
 	This function checks is the given symbol is a terminal symbol by
 	checking whether there is an upper-case letter in it
 '''
-def isTerminalSymbol(self, symbol):
+def isTerminalSymbol(symbol):
 	isTerminal = True
 	for character in symbol:
 		if character.isupper():
@@ -138,7 +189,7 @@ def isTerminalSymbol(self, symbol):
 	checking if the first character is an upper-case letter and the rest of
 	the characters are numbers
 '''
-def isNonTerminalSymbol(self, symbol):
+def isNonTerminalSymbol(symbol):
 	isNonTerminal = True
 	firstPass = True
 	if not symbol[0].isupper():
