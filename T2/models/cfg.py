@@ -4,7 +4,8 @@ class CFG:
         self.rules = tuple(self._parse(rule) for rule in rules)
 
     def _parse(self, rule):
-        return tuple(rule.replace(' ', '').split('::='))
+        temp = rule.split('->')
+        return tuple([temp[0], temp[1].split("|")])
         
     def __getitem__(self, nonterminal):
         yield from [rule for rule in self.rules 
@@ -30,12 +31,13 @@ class CFG:
 
 if __name__ == "__main__":
     g = CFG(\
-    '^ ::= A $',
-    'A ::= ABBC',
-    'A ::= B',
-    'A ::= 1',
-    'B ::= C',
-    'B ::= 2',
-    'C ::= 3',
-    'C ::= ',)
-    print(list(g.__getitem__('A')))
+    '^->A',
+    'AA->BBC|B',
+    'A->1',
+    'B->C',
+    'B->2',
+    'C->32',
+    'C->1',)
+    print(g.rules)
+    #print(g.__getitem__('A'))
+    #sprint(g.__getitem__('A'))

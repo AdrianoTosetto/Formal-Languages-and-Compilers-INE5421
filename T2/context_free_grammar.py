@@ -51,6 +51,15 @@ class Grammar:
 	def add_production(self, prod):
 		self.productions.append(prod)
 
+	@staticmethod
+	def parse_productions(self, str):
+		'''
+			S ->  Ab  | 
+		'''
+		print("pintos")
+	def validate_productions(self,productions):
+		return productions
+
 class Production:
 	def __init__(self, leftSide, rightSide):
 		self.leftSide = leftSide
