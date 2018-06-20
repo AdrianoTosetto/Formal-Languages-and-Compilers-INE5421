@@ -68,7 +68,7 @@ class Grammar:
 	@staticmethod
 	def parse_productions(self, str):
 		'''
-			S ->  Ab  | 
+			S ->  Ab  |
 		'''
 		print("pintos")
 	def validate_productions(self,productions):
@@ -92,6 +92,10 @@ class Grammar:
 				continue
 			if self.produces_epsilon(prod):
 				return True
+			explode = prod.split(" ")
+			for vn in explode:
+				if isNonTerminalSymbol(vn):
+					return self.derives_epsilon(vn, visited)
 		return False
 
 	def get_non_terminals_derive_epsilon(self):
@@ -103,7 +107,6 @@ class Grammar:
 		for symbol in explode:
 			if isTerminalSymbol(symbol):
 				return True
-
 		return False
 	def produces_epsilon(self, prod):
 		explode = prod.split(" ")
