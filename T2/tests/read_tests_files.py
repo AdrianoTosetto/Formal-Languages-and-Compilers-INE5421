@@ -3,7 +3,7 @@ sys.path.append('../')
 from T2.context_free_grammar import*
 
 '''
-	This class can read from a file 
+	This class can read from a file
 '''
 
 
@@ -36,7 +36,7 @@ class ReadTestsFiles:
 
 			for tt in temp2:
 				productions.append(Production(temp1[0].strip(' '), tt.strip(' ')))
-		
+
 
 		return Grammar(productions)
 
