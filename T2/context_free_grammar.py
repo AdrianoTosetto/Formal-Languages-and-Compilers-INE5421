@@ -167,10 +167,23 @@ class Grammar:
 		print("RS")
 
 	def make_epsilon_free(self, NE_set):
-		for prod in self.productions:
-			non_terminals_temp = [temp for temp in prod.rightSide.split(" ") if isNonTerminalSymbol(temp)]
-			print(non_terminals_temp)
+		productions = [self.productions][0]
+		print(self)
+		new_productions = []
+		for prod in productions:
+			non_terminals_temp = set([temp for temp in prod.rightSide.split(" ") if isNonTerminalSymbol(temp)])
+			non_terminals_temp = non_terminals_temp.intersection(NE_set)
+			power_set = set(powerset(non_terminals_temp)) - {()}
+			print(power_set)
+			for _set in power_set:
+				new_prod = [prod.rightSide][0]
+				for epsilon_terminal in _set:
+					new_prod = new_prod.replace(epsilon_terminal, "")
+					print(new_prod)
+				new_productions.append(Production(prod.leftSide, new_prod))
 			break
+
+		print(new_productions)
 	'''
 		This function removes all left recursions from a proper grammar
 	'''
@@ -242,7 +255,7 @@ class Production:
 		space
 	'''
 	def __str__(self):
-		if len(rightSide) < 1:
+		if len(self.rightSide) < 1:
 			return ""
 		result_string = self.leftSide + " ->"
 		for symbol in self.rightSide:
@@ -253,7 +266,7 @@ class Production:
 		side of the production (whithout the ->)
 	'''
 	def printRightSide(self):
-		if len(rightSide) < 1:
+		if len(self.rightSide) < 1:
 			return ""
 		firstPass = True
 		for symbol in self.rightSide:
@@ -306,6 +319,8 @@ def isTerminalSymbol(symbol):
 	the characters are numbers
 '''
 def isNonTerminalSymbol(symbol):
+	if symbol is None or symbol == "":
+		return False
 	isNonTerminal = True
 	firstPass = True
 	if not symbol[0].isupper():
@@ -350,3 +365,10 @@ def unparse_sentential_form(symbols):
 			sententialForm += symbol
 			first = False
 	return sententialForm
+
+
+def powerset(iterable):
+	from itertools import chain, combinations
+	"list(powerset([1,2,3])) --> [(), (1,), (2,), (3,), (1,2), (1,3), (2,3), (1,2,3)]"
+	s = list(iterable)
+	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
