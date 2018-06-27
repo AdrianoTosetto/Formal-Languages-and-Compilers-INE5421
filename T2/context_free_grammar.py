@@ -346,7 +346,7 @@ def parse_sentential_form(sententialForm):
 			symbol += character
 		elif len(symbol) > 0:
 			symbols.append(symbol)
-			symbol = ''
+			symbol = character
 	if len(symbol) > 0:
 		symbols.append(symbol)
 	return symbols
