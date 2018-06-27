@@ -168,22 +168,28 @@ class Grammar:
 
 	def make_epsilon_free(self, NE_set):
 		productions = [self.productions][0]
-		print(self)
 		new_productions = []
 		for prod in productions:
 			non_terminals_temp = set([temp for temp in prod.rightSide.split(" ") if isNonTerminalSymbol(temp)])
+			#print(str(prod.rightSide) + " " + str(non_terminals_temp))
 			non_terminals_temp = non_terminals_temp.intersection(NE_set)
+			if non_terminals_temp == set():
+				continue
+			#print("prod = " + prod.rightSide + " " + str(non_terminals_temp))
 			power_set = set(powerset(non_terminals_temp)) - {()}
-			print(power_set)
+			#print(power_set)
 			for _set in power_set:
 				new_prod = [prod.rightSide][0]
 				for epsilon_terminal in _set:
-					new_prod = new_prod.replace(epsilon_terminal, "").strip()
-				print(new_prod)
-				new_productions.append(Production(prod.leftSide, new_prod))
-			break
-
-		print(new_productions)
+					new_prod = new_prod.replace(epsilon_terminal, "")
+				new_prod = new_prod.strip()
+				import re
+				new_prod = re.sub(' +',' ',new_prod)
+				if new_prod is not "":
+					new_productions.append(Production(prod.leftSide, new_prod))
+			
+		#print(Grammar(new_productions))
+		print(Grammar(productions + new_productions, self.name + "_epsilon_free"))
 	'''
 		This function removes all left recursions from a proper grammar
 	'''
@@ -317,7 +323,7 @@ def isTerminalSymbol(symbol):
 	the characters are numbers
 '''
 def isNonTerminalSymbol(symbol):
-	if symbol is None or symbol == "":
+	if symbol is None or symbol == "" or symbol == " ":
 		return False
 	isNonTerminal = True
 	firstPass = True
