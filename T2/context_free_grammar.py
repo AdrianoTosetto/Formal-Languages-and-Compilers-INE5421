@@ -358,7 +358,7 @@ def unparse_sentential_form(symbols):
 	sententialForm = ''
 	first = True
 	for symbol in symbols:
-		if not First:
+		if not first:
 			sententialForm += ' '
 			sententialForm += symbol
 		else:
