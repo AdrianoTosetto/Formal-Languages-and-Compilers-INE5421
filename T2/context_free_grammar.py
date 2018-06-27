@@ -56,7 +56,7 @@ class Grammar:
 		for lefts in leftSides:
 			for prods in self.productions:
 				if first and lefts is prods.leftSide:
-					stringerson = stringerson + lefts + " -> " + prods.rightSide
+					stringerson = stringerson + lefts + " -> " + unparse_sentential_form(parse_sentential_form(prods.rightSide))
 					first = False
 				elif lefts is prods.leftSide:
 					stringerson = stringerson + " | " + prods.rightSide
