@@ -80,6 +80,7 @@ class Grammar:
 		at this moment, it is just a helper method
 	'''
 	def derives_epsilon_directly(self, nt):
+		nt = nt.strip()
 		prods = self.prod_dict[nt]
 
 		return '&' in prods or '' in prods
@@ -126,12 +127,12 @@ class Grammar:
 		if sententialForm[0] == '&' or len(sententialForm) == 0:
 			return {'&'}
 		elif isTerminalSymbol(sententialForm[0]):
-			return {sententialForm[0]}
+			return {sententialForm[0].strip()}
 		else:
-			prods = self.prod_dict[sententialForm[0]] #get productions from first symbol of the sentential form, if it's a non-terminal
+			prods = self.prod_dict[sententialForm[0].strip()] #get productions from first symbol of the sentential form, if it's a non-terminal
 			firstFromProds = set() #this set holds the FIRST set of the first symbol of the sentential form
 			for prod in prods:
-				prod = parse_sentential_form(prod)
+				prod = parse_sentential_form(prod.strip())
 				if prod[0] == sententialForm[0]: #if first symbol is equal to the productor
 					if self.derives_epsilon(prod[0]): #consider the production only if & is in FIRST of productor
 						prod.pop(0)
@@ -147,11 +148,11 @@ class Grammar:
 			while '&' in firstFromProds:
 				FIRST |= firstFromProds - {'&'}
 				if isTerminalSymbol(sententialForm[i]):
-					FIRST |= {sententialForm[i]}
+					FIRST |= {sententialForm[i].strip()}
 					jump = True
 					break
 				else:
-					prods = self.prod_dict[sententialForm[i]]
+					prods = self.prod_dict[sententialForm[i].strip()]
 					firstFromProds = set()
 					for prod in prods:
 						firstFromProds |= self.getFirst(parse_sentential_form(prod))
