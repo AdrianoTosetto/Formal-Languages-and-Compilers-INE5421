@@ -56,7 +56,7 @@ class Grammar:
 		for lefts in leftSides:
 			for prods in self.productions:
 				if first and lefts is prods.leftSide:
-					stringerson = stringerson + lefts + " -> " + prods.rightSide
+					stringerson = stringerson + lefts + " -> " + unparse_sentential_form(parse_sentential_form(prods.rightSide))
 					first = False
 				elif lefts is prods.leftSide:
 					stringerson = stringerson + " | " + prods.rightSide
@@ -257,9 +257,7 @@ class Production:
 	def __str__(self):
 		if len(self.rightSide) < 1:
 			return ""
-		result_string = self.leftSide + " ->"
-		for symbol in self.rightSide:
-			result_string += " " + symbol
+		result_string = self.leftSide + " -> " + unparse_sentential_form(parse_sentential_form(self.rightSide))
 		return result_string
 	'''
 		This function functions the same as above, but prints only the right
@@ -346,7 +344,7 @@ def parse_sentential_form(sententialForm):
 			symbol += character
 		elif len(symbol) > 0:
 			symbols.append(symbol)
-			symbol = ''
+			symbol = character
 	if len(symbol) > 0:
 		symbols.append(symbol)
 	return symbols
@@ -358,7 +356,7 @@ def unparse_sentential_form(symbols):
 	sententialForm = ''
 	first = True
 	for symbol in symbols:
-		if not First:
+		if not first:
 			sententialForm += ' '
 			sententialForm += symbol
 		else:
