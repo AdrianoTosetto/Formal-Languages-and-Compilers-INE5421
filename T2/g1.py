@@ -4,4 +4,4 @@ B -> b B | b
 C -> X Y
 D -> d D | &
 X -> x X | &
-Y -> yY  |&
+Y -> yY  | &

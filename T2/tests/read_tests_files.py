@@ -42,4 +42,6 @@ class ReadTestsFiles:
 
 
 if __name__ == "__main__":
-	g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
+	g3 = ReadTestsFiles.read_file_and_get_grammar("g3.txt")
+	print(g3)
+	g3.make_epsilon_free(['P','B','C','V','K'])

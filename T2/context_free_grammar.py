@@ -163,7 +163,14 @@ class Grammar:
 			if not jump:
 				FIRST |= firstFromProds
 			return FIRST
+	def get_follow(self):
+		print("RS")
 
+	def make_epsilon_free(self, NE_set):
+		for prod in self.productions:
+			non_terminals_temp = [temp for temp in prod.rightSide.split(" ") if isNonTerminalSymbol(temp)]
+			print(non_terminals_temp)
+			break
 	'''
 		This function removes all left recursions from a proper grammar
 	'''
