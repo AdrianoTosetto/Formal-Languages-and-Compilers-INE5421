@@ -178,8 +178,8 @@ class Grammar:
 			for _set in power_set:
 				new_prod = [prod.rightSide][0]
 				for epsilon_terminal in _set:
-					new_prod = new_prod.replace(epsilon_terminal, "")
-					print(new_prod)
+					new_prod = new_prod.replace(epsilon_terminal, "").strip()
+				print(new_prod)
 				new_productions.append(Production(prod.leftSide, new_prod))
 			break
 
