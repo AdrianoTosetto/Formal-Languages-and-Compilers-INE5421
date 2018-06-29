@@ -31,6 +31,8 @@ class ReadTestsFiles:
 		lines = rawstr.split("\n")
 
 		for t in lines:
+			if not t:
+				continue
 			temp1 = t.split("->")
 			temp2 = temp1[1].split("|")
 
@@ -42,7 +44,6 @@ class ReadTestsFiles:
 
 
 if __name__ == "__main__":
-	g3 = ReadTestsFiles.read_file_and_get_grammar("g3.txt")
-	print(g3.derives_epsilon('B'))
-	
+	g3 = ReadTestsFiles.read_file_and_get_grammar("g2.txt")
+
 	#g3.make_epsilon_free(set(['P','B','C','V','K']))

@@ -1,0 +1,2 @@
+C -> C ; V := exp | com
+V -> id | id [ exp ]

@@ -14,6 +14,7 @@ class CFGTests(unittest.TestCase):
         g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
         print(g1)
         g2 = ReadTestsFiles.read_file_and_get_grammar("g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
         self.assertEqual(g1.derives_epsilon('S'), True)
         self.assertEqual(g1.derives_epsilon('A'), False)
         self.assertEqual(g1.derives_epsilon('B'), False)
