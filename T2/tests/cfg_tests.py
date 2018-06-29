@@ -27,6 +27,8 @@ class CFGTests(unittest.TestCase):
         self.assertEqual(g2.derives_epsilon('K'), True)
         self.assertEqual(g2.derives_epsilon('V'), True)
         self.assertEqual(g2.derives_epsilon('C'), True)
+        self.assertEqual(g4.derives_epsilon('C'), False)
+        self.assertEqual(g4.derives_epsilon('V'), False)
 
     def test_terminal(self):
         self.assertEqual(isTerminalSymbol('S'), False)
@@ -73,6 +75,7 @@ class CFGTests(unittest.TestCase):
     def test_first(self):
         g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
         g2 = ReadTestsFiles.read_file_and_get_grammar("g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
         self.assertEqual(g1.getFirst(['S']), {'a', 'x', 'y', 'd', '&'})
         self.assertEqual(g1.getFirst(['A']), {'a'})
         self.assertEqual(g1.getFirst(['B']), {'b'})
@@ -85,5 +88,10 @@ class CFGTests(unittest.TestCase):
         self.assertEqual(g2.getFirst(['K']), {'c', '&'})
         self.assertEqual(g2.getFirst(['V']), {'v', '&'})
         self.assertEqual(g2.getFirst(['C']), {'b', 'com', '&'})
+        self.assertEqual(g4.getFirst(['C']), {'com'})
+        self.assertEqual(g4.getFirst(['V']), {'id'})
+
+    def test_left_recursion(self):
+        print("batata")
 if __name__ == '__main__':
     unittest.main()

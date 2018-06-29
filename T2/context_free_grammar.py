@@ -1,4 +1,5 @@
 import copy
+from globals import *
 
 '''
 	Autoria: Adriano Tosetto, Giulio Simão
@@ -9,14 +10,26 @@ import copy
 '''
 
 class Grammar:
-	def __init__(self, productions, name = None):
+	def __init__(self, productions, name = None, initial_symbol = None):
 		if len(productions) is 0:
-			self.productions = {Production('S','aS')}
+			self.productions = [Production('S','aS')]
 		else:
 			self.productions = self.validate_productions(productions)
-		self.name = name
+		if name == None:
+			i = 1
+			newName = "G" + str(i)
+			while Grammar([], newName) in Globals.grammars:
+				i+=1
+				newName = "G" + str(i)
+			self.name = newName
+		else:
+			self.name = name
 		self.nts = self.get_non_terminals(productions)
 		self.prod_dict = self.get_prod_dict(productions)
+		if initial_symbol == None:
+			self.initial_symbol = self.productions[0].leftSide
+		else:
+			self.initial_symbol = initial_symbol
 		print(self.prod_dict)
 
 	def get_prod_dict(self, productions):
@@ -188,16 +201,17 @@ class Grammar:
 				new_prod = re.sub(' +',' ',new_prod)
 				if new_prod is not "":
 					new_productions.append(Production(prod.leftSide, new_prod))
-			
+
 		#print(Grammar(new_productions))
 		print(Grammar(productions + new_productions, self.name + "_epsilon_free"))
 	'''
 		This function removes all left recursions from a proper grammar
 	'''
 	def remove_left_recursion(self):
-		non_terminals = self.get_non_terminals()
+		print(self)
+		non_terminals = self.get_non_terminals(self.productions)
 		non_terminals_temp = []
-		new_productions = copy.deep_copy(self.prod_dict)
+		new_productions = copy.deepcopy(self.prod_dict)
 		for nt in non_terminals:
 			for nt2 in non_terminals_temp:
 				nt1_prods = new_productions[nt]
@@ -212,33 +226,52 @@ class Grammar:
 							new_prod = prod2 + ' ' + unparse_sentential_form(parsed_prod_copy)
 							new_productions[nt].append(new_prod)
 			#Removes direct left recursions:
-			nt_prods = new_productions[nt]
-			new_nt = rename_non_terminal(nt)
+			nt_prods = list(new_productions[nt])
+			new_nt = self.rename_non_terminal(nt)
 			new_nt_prods = []
+			has_direct_left_recursion = False
 			for prod in nt_prods:
 				parsed_prod = parse_sentential_form(prod)
-				if parsed_prod[0] != nt:
-					nt_prods.pop(nt_prods.index(prod))
-					parsed_prod.append(new_nt)
-					unparsed_prod = unparse_sentential_form(parsed_prod)
-					nt_prods.append(unparsed_prod)
-				else:
-					parsed_prod.pop(0)
-					parsed_prod.append(new_nt)
-					unparsed_prod = unparse_sentential_form(parsed_prod)
-					new_nt_prods.append(unparsed_prod)
-			new_productions[new_nt] = new_nt_prods
-		return Grammar(new_productions, self.name + " (w/o left recursions)")
-		#-----------------------------------------------------------------------
-		#NO TEST REALIZED FOR THE ABOVE METHOD
-		#-----------------------------------------------------------------------
+				if parsed_prod[0] == nt:
+					has_direct_left_recursion = True
+					break
+			if has_direct_left_recursion:
+				print("PRODS = " + str(nt_prods))
+				nt_prods_copy = copy.deepcopy(nt_prods)
+				for prod in nt_prods:
+					parsed_prod = parse_sentential_form(prod)
+					print("parsed_prod: " + str(parsed_prod))
+					print("nt: " + str(nt))
+					if parsed_prod[0] != nt:
+						nt_prods_copy.pop(nt_prods_copy.index(prod))
+						parsed_prod.append(new_nt)
+						unparsed_prod = unparse_sentential_form(parsed_prod)
+						nt_prods_copy.append(unparsed_prod)
+					else:
+						parsed_prod.pop(0)
+						parsed_prod.append(new_nt)
+						unparsed_prod = unparse_sentential_form(parsed_prod)
+						new_nt_prods.append(unparsed_prod)
+						nt_prods_copy.pop(nt_prods_copy.index(prod))
+				new_productions[nt] = set(nt_prods_copy)
+				new_productions[new_nt] = set(new_nt_prods) | {'&'}
+		new_productions_list = []
+		for prods in new_productions[self.initial_symbol]:
+			new_productions_list.append(Production(self.initial_symbol, prods))
+		for key in new_productions.keys():
+			if key != self.initial_symbol:
+				for prods in new_productions[key]:
+					new_productions_list.append(Production(key, prods))
+		newG = Grammar(new_productions_list, self.name + " (w/o left recursions)")
+		print("resultado: " + str(newG))
+		return newG
 
 	'''
 		This function creates a new non-terminal symbol A1 for a given
 		non-terminal symbol A. If A1 already exists, A2 is created, and so on.
 	'''
 	def rename_non_terminal(self, non_terminal):
-		non_terminals = get_non_terminals()
+		non_terminals = self.get_non_terminals(self.productions)
 		i = 1
 		new_non_terminal = non_terminal + str(i)
 		while new_non_terminal in non_terminals:
