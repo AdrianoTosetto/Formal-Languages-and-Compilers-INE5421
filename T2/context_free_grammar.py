@@ -178,18 +178,23 @@ class Grammar:
 				FIRST |= firstFromProds
 			return FIRST
 	def get_NA(self, nt, visited=set()):
+		#if nt in visited:
+		#	return {nt}
+		#print(visited)
 		cnt = [nt][0]
 		cnt = cnt.strip()
 		NA = set(cnt)
 		visited.add(cnt)
 		productions = [self.prod_dict[cnt]][0]
+		#print(str(nt) + " -> " + str(productions))
 		for prod in productions:
+			#print(prod)
 			if len(prod) == 1 and prod.isupper():
 				if prod not in visited:
 					NA |= {prod}
-					NA |= self.get_NA(prod, [NA][0])
+					NA |= self.get_NA(prod, visited)#[NA][0])
 				else:
-					return NA
+					continue
 		return NA
 
 	def get_follow(self):
