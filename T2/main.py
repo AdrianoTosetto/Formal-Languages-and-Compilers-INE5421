@@ -15,7 +15,7 @@ if __name__ == "__main__":
 	#g5.remove_left_recursion()
 	g7 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
 	print(g7)
-	print(g7.get_NA('B', set()))
+	print(g7.remove_simple_productions())
 
 
 	'''leftSides = ['S', 'A', 'B', 'C', 'D']

@@ -183,8 +183,8 @@ class Grammar:
 		#print(visited)
 		cnt = [nt][0]
 		cnt = cnt.strip()
-		NA = set(cnt)
-		visited.add(cnt)
+		NA = set([cnt][0])
+		visited.add([cnt][0])
 		productions = [self.prod_dict[cnt]][0]
 		#print(str(nt) + " -> " + str(productions))
 		for prod in productions:
@@ -196,7 +196,24 @@ class Grammar:
 				else:
 					continue
 		return NA
+	def remove_simple_productions(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		new_productions = [self.productions][0]
+		new_productions = [prod for prod in new_productions if not(len(prod.rightSide) == 1 and prod.rightSide.isupper())]
+		#print(non_terminals)
+		for nt in non_terminals:
+			NA = self.get_NA(nt,set())
+			if len(NA) == 1:
+				continue
+			for na in NA:
+				prods = self.prod_dict[na]
+				for prod in prods:
+					prod = prod.strip()
+					if not(len(prod) == 1 and prod.isupper()):
+						new_productions.append(Production(nt, prod))
 
+
+		return Grammar(new_productions)
 	def get_follow(self):
 		print("RS")
 
