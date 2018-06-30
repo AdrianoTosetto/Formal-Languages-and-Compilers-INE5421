@@ -13,9 +13,18 @@ if __name__ == "__main__":
 	#g5 = ReadTestsFiles.read_file_and_get_grammar("g5.txt")
 	#g4.remove_left_recursion()
 	#g5.remove_left_recursion()
-	g7 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
+	'''g7 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
 	print(g7)
-	print(g7.remove_simple_productions())
+	print(g7.get_NA('B', set()))
+
+	g5 = ReadTestsFiles.read_file_and_get_grammar("g5.txt")
+	print(g5)
+	print(g5.get_NA('T'))
+	print(g5)
+	print(g5.get_NA('P'))'''
+
+	g8 = ReadTestsFiles.read_file_and_get_grammar("g8.txt")
+	print(g8.derives_epsilon('B'))
 
 
 	'''leftSides = ['S', 'A', 'B', 'C', 'D']

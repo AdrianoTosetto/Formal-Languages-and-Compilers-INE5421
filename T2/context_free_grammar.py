@@ -111,7 +111,9 @@ class Grammar:
 			explode = parse_sentential_form(prod)#prod.split(" ")
 			for vn in explode:
 				if isNonTerminalSymbol(vn):
-					return self.derives_epsilon(vn, visited)
+					if vn not in visited:
+						if self.derives_epsilon(vn, visited):
+							return True
 		return False
 
 	def get_non_terminals_derive_epsilon(self):
@@ -178,42 +180,20 @@ class Grammar:
 				FIRST |= firstFromProds
 			return FIRST
 	def get_NA(self, nt, visited=set()):
-		#if nt in visited:
-		#	return {nt}
-		#print(visited)
 		cnt = [nt][0]
 		cnt = cnt.strip()
-		NA = set([cnt][0])
-		visited.add([cnt][0])
+		NA = set(cnt)
+		visited.add(cnt)
 		productions = [self.prod_dict[cnt]][0]
-		#print(str(nt) + " -> " + str(productions))
 		for prod in productions:
-			#print(prod)
 			if len(prod) == 1 and prod.isupper():
 				if prod not in visited:
 					NA |= {prod}
-					NA |= self.get_NA(prod, visited)#[NA][0])
+					NA |= self.get_NA(prod, visited)
 				else:
 					continue
 		return NA
-	def remove_simple_productions(self):
-		non_terminals = self.get_non_terminals(self.productions)
-		new_productions = [self.productions][0]
-		new_productions = [prod for prod in new_productions if not(len(prod.rightSide) == 1 and prod.rightSide.isupper())]
-		#print(non_terminals)
-		for nt in non_terminals:
-			NA = self.get_NA(nt,set())
-			if len(NA) == 1:
-				continue
-			for na in NA:
-				prods = self.prod_dict[na]
-				for prod in prods:
-					prod = prod.strip()
-					if not(len(prod) == 1 and prod.isupper()):
-						new_productions.append(Production(nt, prod))
 
-
-		return Grammar(new_productions)
 	def get_follow(self):
 		print("RS")
 
