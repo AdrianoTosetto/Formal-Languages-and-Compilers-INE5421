@@ -26,6 +26,8 @@ if __name__ == "__main__":
 	g8 = ReadTestsFiles.read_file_and_get_grammar("g8.txt")
 	print(g8.derives_epsilon('B'))
 
+	print(get_non_terminals_from_production("a A B D1"))
+
 
 	'''leftSides = ['S', 'A', 'B', 'C', 'D']
 	rightSides = ['0 S', 'id A B', '0', '0B', '1S', '1', '0 A', '1 B']

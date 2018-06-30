@@ -196,6 +196,10 @@ class Grammar:
 
 	def get_follow(self):
 		print("RS")
+	def nt_is_fertile(self, nt):
+		nt = nt.strip()
+		prods = self.prod_dict[nt]
+
 
 	def make_epsilon_free(self, NE_set):
 		productions = [self.productions][0]
@@ -378,19 +382,12 @@ def isTerminalSymbol(symbol):
 def isNonTerminalSymbol(symbol):
 	if symbol is None or symbol == "" or symbol == " " or " " in symbol:
 		return False
-	isNonTerminal = True
-	firstPass = True
 	if not symbol[0].isupper():
-		isNonTerminal = False
-	for character in symbol:
-		if firstPass:
-			if not symbol.isupper():
-				isNonTerminal = False
-			firstPass = False
-		else:
-			if not symbol.isdigit():
-				isNonTerminal = False
-	return isNonTerminal
+		return False
+	for character in symbol[1:(len(symbol))]:
+		if not character.isdigit():
+			return False
+	return True
 
 '''
 	This function returns a sentential form as a list of symbols
@@ -423,6 +420,17 @@ def unparse_sentential_form(symbols):
 			first = False
 	return sententialForm
 
+def get_non_terminals_from_production(prod):
+	ret = set()
+	import re
+	prod = re.sub(' +',' ',prod)
+	explode = prod.split()
+
+	for e in explode:
+		e = e.strip()
+		if isNonTerminalSymbol(e):
+			ret.add(e)
+	return ret
 
 def powerset(iterable):
 	from itertools import chain, combinations
