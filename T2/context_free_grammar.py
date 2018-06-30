@@ -97,7 +97,8 @@ class Grammar:
 		prods = self.prod_dict[nt]
 
 		return '&' in prods or '' in prods
-	def derives_epsilon(self, nt, visited=set()):
+	def derives_epsilon(self, nt, visited=None):
+		visited = set() if visited is None else visited
 		prods = self.prod_dict[nt]
 		visited |= set([nt])
 		if self.derives_epsilon_directly(nt):
@@ -179,7 +180,8 @@ class Grammar:
 			if not jump:
 				FIRST |= firstFromProds
 			return FIRST
-	def get_NA(self, nt, visited=set()):
+	def get_NA(self, nt, visited=None):
+		visited = set() if visited is None else visited
 		cnt = [nt][0]
 		cnt = cnt.strip()
 		NA = set(cnt)
