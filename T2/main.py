@@ -9,10 +9,14 @@ from read_tests_files import *
 
 
 if __name__ == "__main__":
-	g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
-	g5 = ReadTestsFiles.read_file_and_get_grammar("g5.txt")
-	g4.remove_left_recursion()
-	g5.remove_left_recursion()
+	#g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
+	#g5 = ReadTestsFiles.read_file_and_get_grammar("g5.txt")
+	#g4.remove_left_recursion()
+	#g5.remove_left_recursion()
+	g7 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
+	print(g7)
+	print(g7.get_NA('B', set()))
+
 
 	'''leftSides = ['S', 'A', 'B', 'C', 'D']
 	rightSides = ['0 S', 'id A B', '0', '0B', '1S', '1', '0 A', '1 B']

@@ -177,6 +177,21 @@ class Grammar:
 			if not jump:
 				FIRST |= firstFromProds
 			return FIRST
+	def get_NA(self, nt, visited=set()):
+		cnt = [nt][0]
+		cnt = cnt.strip()
+		NA = set(cnt)
+		visited.add(cnt)
+		productions = [self.prod_dict[cnt]][0]
+		for prod in productions:
+			if len(prod) == 1 and prod.isupper():
+				if prod not in visited:
+					NA |= {prod}
+					NA |= self.get_NA(prod, [NA][0])
+				else:
+					return NA
+		return NA
+
 	def get_follow(self):
 		print("RS")
 
@@ -340,6 +355,8 @@ class Production:
 	'''
 	def __eq__(self, other):
 		return self.__hash__() == other.__hash__()
+	def has_simple_production(self):
+		return isNonTerminalSymbol(self.rightSide) or " " not in self.rightSide
 
 '''
 	This function checks is the given symbol is a terminal symbol by
@@ -357,7 +374,7 @@ def isTerminalSymbol(symbol):
 	the characters are numbers
 '''
 def isNonTerminalSymbol(symbol):
-	if symbol is None or symbol == "" or symbol == " ":
+	if symbol is None or symbol == "" or symbol == " " or " " in symbol:
 		return False
 	isNonTerminal = True
 	firstPass = True
@@ -384,7 +401,7 @@ def parse_sentential_form(sententialForm):
 			symbol += character
 		elif len(symbol) > 0:
 			symbols.append(symbol)
-			symbol = character
+			symbol = ""
 	if len(symbol) > 0:
 		symbols.append(symbol)
 	return symbols
