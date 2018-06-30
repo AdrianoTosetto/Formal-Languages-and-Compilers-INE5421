@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-from T2.context_free_grammar import*
+from context_free_grammar import*
 
 '''
 	This class can read from a file
@@ -45,5 +45,5 @@ class ReadTestsFiles:
 
 if __name__ == "__main__":
 	g6 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
-	g6_1 = g6.remove_simple_productions()
+	print(g6)
 	#g3.make_epsilon_free(set(['P','B','C','V','K']))

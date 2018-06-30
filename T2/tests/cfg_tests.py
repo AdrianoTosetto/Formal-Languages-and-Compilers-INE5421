@@ -3,18 +3,18 @@ sys.path.append('../')
 
 import unittest
 from read_tests_files import ReadTestsFiles
-from T2.context_free_grammar import *
+from context_free_grammar import *
 
 class CFGTests(unittest.TestCase):
 
     def build_grammars(self):
-        g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
 
     def test_epsilon(self):
-        g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
         print(g1)
-        g2 = ReadTestsFiles.read_file_and_get_grammar("g2.txt")
-        g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
         self.assertEqual(g1.derives_epsilon('S'), True)
         self.assertEqual(g1.derives_epsilon('A'), False)
         self.assertEqual(g1.derives_epsilon('B'), False)
@@ -73,9 +73,9 @@ class CFGTests(unittest.TestCase):
         self.assertEqual(not isNonTerminalSymbol('com'), True)
 
     def test_first(self):
-        g1 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
-        g2 = ReadTestsFiles.read_file_and_get_grammar("g2.txt")
-        g4 = ReadTestsFiles.read_file_and_get_grammar("g4.txt")
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
         self.assertEqual(g1.getFirst(['S']), {'a', 'x', 'y', 'd', '&'})
         self.assertEqual(g1.getFirst(['A']), {'a'})
         self.assertEqual(g1.getFirst(['B']), {'b'})
@@ -93,5 +93,24 @@ class CFGTests(unittest.TestCase):
 
     def test_left_recursion(self):
         print("batata")
+
+    def test_simple_productions(self):
+        g5 = ReadTestsFiles.read_file_and_get_grammar("../g5.txt")
+        g6 = ReadTestsFiles.read_file_and_get_grammar("../g6.txt")
+        g7 = ReadTestsFiles.read_file_and_get_grammar("../g7.txt")
+        self.assertEqual(g5.get_NA('E', set()), {'E', 'T', 'F', 'P'})
+        self.assertEqual(g5.get_NA('T', set()), {'T', 'F', 'P'})
+        self.assertEqual(g5.get_NA('F', set()), {'F', 'P'})
+        self.assertEqual(g5.get_NA('P', set()), {'P'})
+        self.assertEqual(g6.get_NA('S', set()), {'S'})
+        self.assertEqual(g6.get_NA('B', set()), {'B', 'E', 'F'})
+        self.assertEqual(g6.get_NA('D', set()), {'D', 'F'})
+        self.assertEqual(g6.get_NA('E', set()), {'E'})
+        self.assertEqual(g6.get_NA('F', set()), {'F'})
+        self.assertEqual(g7.get_NA('S', set()), {'S'})
+        self.assertEqual(g7.get_NA('B', set()), {'B', 'E', 'F', 'D'})
+        self.assertEqual(g7.get_NA('D', set()), {'B', 'E', 'F', 'D'})
+        self.assertEqual(g7.get_NA('E', set()), {'B', 'E', 'F', 'D'})
+        self.assertEqual(g7.get_NA('F', set()), {'B', 'E', 'F', 'D'})
 if __name__ == '__main__':
     unittest.main()
