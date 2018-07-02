@@ -26,7 +26,7 @@ class ReadTestsFiles:
 	'''
 
 	@staticmethod
-	def raw_string_to_grammar(rawstr):
+	def raw_string_to_grammar(rawstr, name=None):
 		productions = []
 		lines = rawstr.split("\n")
 
@@ -43,7 +43,27 @@ class ReadTestsFiles:
 		return Grammar(productions)
 
 
+class FileParser:
+
+	@staticmethod
+	def get_grammars_from_file(filename):
+		grammars_obj = []
+		file = open(filename)
+		rawstr = file.read()
+
+		rawgrammars = rawstr.split("new_grammar")
+		rawgrammars = rawgrammars[1:len(rawgrammars)]
+		for rawgrammar in rawgrammars:
+			rawgrammar = ''.join((rawgrammar.strip(), '\n'))
+			rawgrammar_temp1 = rawgrammar.split('\n', 1)
+			#print(rawgrammar_temp1[0])
+			grammars_obj.append(ReadTestsFiles.raw_string_to_grammar(rawgrammar_temp1[1], rawgrammar_temp1[0]))
+		return grammars_obj
+
 if __name__ == "__main__":
-	g6 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
-	print(g6)
+	p = FileParser()
+	print(p.get_grammars_from_file("../teste_save.txt")[0])
+	print(p.get_grammars_from_file("../teste_save.txt")[1])
+	#g6 = ReadTestsFiles.read_file_and_get_grammar("g7.txt")
+	#print(g6)
 	#g3.make_epsilon_free(set(['P','B','C','V','K']))
