@@ -11,6 +11,8 @@ from globals import *
 
 class Grammar:
 	def __init__(self, productions, name = None, initial_symbol = None):
+		if type(productions) == set:
+			productions = list(productions)
 		if len(productions) is 0:
 			self.productions = [Production('S','aS')]
 		else:
@@ -30,7 +32,7 @@ class Grammar:
 			self.initial_symbol = self.productions[0].leftSide
 		else:
 			self.initial_symbol = initial_symbol
-		print(self.prod_dict)
+		#print(self.prod_dict)
 
 	def get_prod_dict(self, productions):
 		ret = {}
@@ -85,7 +87,7 @@ class Grammar:
 		'''
 			S ->  Ab  |
 		'''
-		print("pintos")
+		print("haha")
 	def validate_productions(self,productions):
 		return productions
 	'''
@@ -98,6 +100,8 @@ class Grammar:
 
 		return '&' in prods or '' in prods
 	def derives_epsilon(self, nt, visited=None):
+		if isTerminalSymbol(nt[0]):
+			return False
 		visited = set() if visited is None else visited
 		prods = self.prod_dict[nt]
 		visited |= set([nt])
@@ -137,10 +141,11 @@ class Grammar:
 		This funtion returns the FIRST set of a given sentential form
 	'''
 
-	def getFirst(self, sententialForm):
+	def getFirst(self, sententialForm, visited = None):
+		visited = set() if visited is None else visited
 		if type(sententialForm) == type(''):
 			sententialForm = parse_sentential_form(sententialForm)
-		if sententialForm[0] == '&' or len(sententialForm) == 0:
+		if len(sententialForm) == 0 or sententialForm[0] == '&':
 			return {'&'}
 		elif isTerminalSymbol(sententialForm[0]):
 			return {sententialForm[0].strip()}
@@ -152,9 +157,15 @@ class Grammar:
 				if prod[0] == sententialForm[0]: #if first symbol is equal to the productor
 					if self.derives_epsilon(prod[0]): #consider the production only if & is in FIRST of productor
 						prod.pop(0)
-						firstFromProds |= self.getFirst(prod)
+						if prod[0] not in visited:
+							if isNonTerminalSymbol(prod[0]):
+								visited |= {prod[0]}
+							firstFromProds |= self.getFirst(prod, visited)
 				else:
-					firstFromProds |= self.getFirst(prod)
+					if prod[0] not in visited:
+						if isNonTerminalSymbol(prod[0]):
+							visited |= {prod[0]}
+						firstFromProds |= self.getFirst(prod, visited)
 			i = 1
 			FIRST = set()
 			if i >= len(sententialForm):
@@ -171,7 +182,10 @@ class Grammar:
 					prods = self.prod_dict[sententialForm[i].strip()]
 					firstFromProds = set()
 					for prod in prods:
-						firstFromProds |= self.getFirst(parse_sentential_form(prod))
+						if prod[0] not in visited:
+							if isNonTerminalSymbol(prod[0]):
+								visited |= {prod[0]}
+							firstFromProds |= self.getFirst(parse_sentential_form(prod), visited)
 					i += 1
 					if i >= len(sententialForm):
 						FIRST |= firstFromProds
@@ -180,31 +194,290 @@ class Grammar:
 			if not jump:
 				FIRST |= firstFromProds
 			return FIRST
+
+	'''
+		This funtion returns the FOLLOW set of a given non-terminal symbol
+	'''
+	def getFollow(self, non_terminal, visited = None):
+		visited = set() if visited is None else visited
+		FOLLOW = set()
+		if type(non_terminal) == type([]):
+			non_terminal = unparse_sentential_form(non_terminal)
+		visited |= {non_terminal}
+		if non_terminal == self.initial_symbol:
+			FOLLOW.add('$')
+		non_terminals = self.get_non_terminals(self.productions)
+		#non_terminals.pop(non_terminals.index(non_terminal))
+		for nt in non_terminals:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				prod = parse_sentential_form(prod)
+				if non_terminal in prod:
+					aux_first = self.getFirst(prod[prod.index(non_terminal)+1:len(prod)])
+					FOLLOW |= aux_first - {'&'}
+					if '&' in aux_first:
+						if nt not in visited:
+							FOLLOW |= self.getFollow(nt, visited)
+		return FOLLOW
+
+	def getFirstNT(self, sententialForm, visited = None, include_self = None):
+		include_self = True if include_self is None else include_self
+		visited = set() if visited is None else visited
+		if type(sententialForm) == type(''):
+			sententialForm = parse_sentential_form(sententialForm)
+		if len(sententialForm) == 0 or sententialForm[0] == '&':
+			return set()
+		elif isTerminalSymbol(sententialForm[0]):
+			return set()
+		else:
+			FIRST = set()
+			if include_self:
+				FIRST |= {sententialForm[0]}
+			firstFromBottom = set()
+			firstFromProds = set()
+			sentence = copy.deepcopy(sententialForm)
+
+			prods = self.prod_dict[sententialForm[0].strip()] #get productions from first symbol of the sentential form, if it's a non-terminal
+			firstFromProds = set() #this set holds the FIRST set of the first symbol of the sentential form
+			for prod in prods:
+				prod = parse_sentential_form(prod.strip())
+				'''if prod[0] == sententialForm[0]: #if first symbol is equal to the productor
+					if self.derives_epsilon(prod[0]): #consider the production only if & is in FIRST of productor
+						prod.pop(0)
+						if prod[0] not in visited:
+							if isNonTerminalSymbol(prod[0]):
+								visited |= {prod[0]}
+							firstFromProds |= self.getFirstNT(prod, visited)
+				else:'''
+				if prod[0] not in visited:
+					if isNonTerminalSymbol(prod[0]):
+						visited |= {prod[0]}
+					firstFromProds |= self.getFirstNT(prod, visited)
+
+			while self.derives_epsilon(sentence[0]):
+				sentence.pop(0)
+				if len(sentence) < 1:
+					break
+				if sentence[0] not in visited:
+					if isNonTerminalSymbol(sentence[0]):
+						visited |= {sentence[0]}
+					firstFromBottom |= self.getFirstNT(sentence, visited)
+
+			FIRST |= firstFromProds | firstFromBottom
+			return FIRST
+
+	def detect_direct_left_recursion(self, non_terminal):
+		if type(non_terminal) == type([]):
+			non_terminal = unparse_sentential_form(non_terminal)
+		nt_productions = self.prod_dict[non_terminal]
+		for prod in nt_productions:
+			if parse_sentential_form(prod)[0] == non_terminal:
+				return True
+		return False
+
+	def detect_direct_left_recursion_for_all(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:
+			if self.detect_direct_left_recursion(nt):
+				return True
+		return False
+
+	def detect_all_left_recursion(self, non_terminal):
+		if type(non_terminal) == type([]):
+			non_terminal = unparse_sentential_form(non_terminal)
+		return non_terminal in self.getFirstNT(non_terminal, include_self = False)
+
+	def detect_all_left_recursion_for_all(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:
+			if self.detect_all_left_recursion(nt):
+				return True
+		return False
+
+	def detect_indirect_left_recursion(self, non_terminal):
+		if type(non_terminal) == type([]):
+			non_terminal = unparse_sentential_form(non_terminal)
+		nt_productions = self.prod_dict[non_terminal]
+		for prod in nt_productions:
+			prod_first = parse_sentential_form(prod)[0]
+			if prod_first != non_terminal:
+				if non_terminal in self.getFirstNT(prod_first):
+					return True
+		return False
+
+	def detect_indirect_left_recursion_for_all(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:
+			if self.detect_indirect_left_recursion(nt):
+				return True
+		return False
+
 	def get_NA(self, nt, visited=None):
 		visited = set() if visited is None else visited
-		cnt = [nt][0]
+		cnt = copy.deepcopy(nt)
+		#print(cnt)
 		cnt = cnt.strip()
-		NA = set(cnt)
+		#print(cnt)
+		NA = {cnt}
 		visited.add(cnt)
 		productions = [self.prod_dict[cnt]][0]
+		#print(productions)
 		for prod in productions:
-			if len(prod) == 1 and prod.isupper():
-				if prod not in visited:
-					NA |= {prod}
-					NA |= self.get_NA(prod, visited)
+			#print("PROD = " + str(prod))
+			prod = parse_sentential_form(prod)
+			if len(prod) == 1 and isNonTerminalSymbol(prod[0]):
+				#print("PROD[0] = " + str(prod))
+				prod = unparse_sentential_form(prod)
+				if prod[0] not in visited:
+					NA |= {prod[0]}
+					NA |= self.get_NA(prod[0], visited)
 				else:
 					continue
+		#print("NA = " + str(NA))
 		return NA
 
-	def get_follow(self):
-		print("RS")
+	def remove_simple_productions(self, rename=None):
+		rename = True if rename is None else rename
+		copy_productions = copy.deepcopy(self.productions)
+		copy_productions = [prod for prod in copy_productions if len(parse_sentential_form(prod.rightSide)) > 1 or isTerminalSymbol(parse_sentential_form(prod.rightSide)[0]) or parse_sentential_form(prod.rightSide)[0] == '&']
+		new_prods = set()
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:
+			n_nt = self.get_NA(nt)
+			for n in n_nt:
+				for prod in copy_productions:
+					if prod.leftSide in n_nt:
+						new_prods.add(Production(nt, prod.rightSide))
+		new_prods |= set(copy_productions)
+		new_prods = list(new_prods)
+		if rename:
+			newG = Grammar(new_prods, self.name + " (w/o simple productions)", self.initial_symbol)
+		else:
+			newG = Grammar(new_prods, self.name, self.initial_symbol)
+		return newG
+
+	'''def get_follow(self):
+		print("RS")'''
 
 	def nt_is_fertile(self, nt):
 		nt = nt.strip()
 		prods = self.prod_dict[nt]
 
+	def remove_infertile_symbols(self, rename=None):
+		rename = True if rename is None else rename
+		non_terminals = self.get_non_terminals(self.productions)
+		fertiles = set()
+		fertiles_temp = set()
+		for nt in non_terminals:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				prod = parse_sentential_form(prod)
+				isFertile = True
+				for symbol in prod:
+					if isNonTerminalSymbol(symbol):
+						isFertile = False
+						break
+				if isFertile:
+					fertiles_temp |= {nt}
+					break
+		while fertiles_temp != fertiles:
+			fertiles = fertiles_temp
+			for nt in non_terminals:
+				nt_productions = self.prod_dict[nt]
+				for prod in nt_productions:
+					prod = parse_sentential_form(prod)
+					isFertile = True
+					for symbol in prod:
+						if isNonTerminalSymbol(symbol) and symbol not in fertiles_temp:
+							isFertile = False
+							break
+					if isFertile:
+						fertiles_temp |= {nt}
+						break
+		fertiles = fertiles_temp
+		new_prods = set()
+		for nt in fertiles:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				prod = parse_sentential_form(prod)
+				isFertile = True
+				for symbol in prod:
+					if isNonTerminalSymbol(symbol) and symbol not in fertiles:
+						isFertile = False
+						break
+				if isFertile:
+					new_prods.add(Production(nt, unparse_sentential_form(prod)))
+		if len(new_prods) < 1:
+			newInitial = 'S'
+		else:
+			newInitial = self.initial_symbol
+		new_prods = list(new_prods)
+		if rename:
+			newG = Grammar(new_prods, self.name + " (w/o infertile symbols)", newInitial)
+		else:
+			newG = Grammar(new_prods, self.name, newInitial)
+		return newG
 
-	def make_epsilon_free(self, NE_set):
+	def remove_unreachable_symbols(self, rename=None):
+		rename = True if rename is None else rename
+		non_terminals = self.get_non_terminals(self.productions)
+		reachable = set()
+		reachable_temp = {self.initial_symbol}
+		while reachable_temp != reachable:
+			reachable_next = reachable_temp - reachable
+			reachable = reachable_temp
+			for nt in reachable_next:
+				nt_productions = self.prod_dict[nt]
+				for prod in nt_productions:
+					prod = parse_sentential_form(prod)
+					for symbol in prod:
+						if isNonTerminalSymbol(symbol):
+							reachable_temp |= {symbol}
+		new_prods = set()
+		for nt in reachable:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				new_prods.add(Production(nt, prod))
+		if len(new_prods) < 1:
+			newInitial = 'S'
+		else:
+			newInitial = self.initial_symbol
+		new_prods = list(new_prods)
+		if rename:
+			newG = Grammar(new_prods, self.name + " (w/o unreachable symbols)", newInitial)
+		else:
+			newG = Grammar(new_prods, self.name, newInitial)
+		return newG
+
+	def remove_useless_symbols(self, rename = None):
+		rename = True if rename is None else rename
+		newG = self.remove_infertile_symbols(False).remove_unreachable_symbols(False)
+		if rename:
+			newG.name = self.name + " (w/o useless symbols)"
+		return newG
+
+	def getNE(self):
+		'''NE = set()
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:'''
+
+		return set([nt for nt in self.get_non_terminals(self.productions) if self.derives_epsilon(nt)])
+
+	def make_epsilon_free(self, NE_set=None, rename=None):
+		rename = True if rename is None else rename
+		NE_set = self.getNE() if NE_set is None else NE_set
+		p1 = None
+		p2 = None
+		newInitial = self.initial_symbol
+		if self.initial_symbol in NE_set:
+			#print("KKKKKKKKKKKKKKKKKKKKK")
+			i = 0
+			while 'S' + str(i) in self.get_non_terminals(self.productions):
+				i = i + 1
+			new_initial = 'S' + str(i)
+			p1 = Production(new_initial, self.initial_symbol)
+			p2 = Production(new_initial, '&')
+			newInitial = new_initial
 		productions = [self.productions][0]
 		new_productions = []
 		for prod in productions:
@@ -227,7 +500,26 @@ class Grammar:
 					new_productions.append(Production(prod.leftSide, new_prod))
 
 		#print(Grammar(new_productions))
-		print(Grammar(productions + new_productions, self.name + "_epsilon_free"))
+		fproductions = list(set(productions + new_productions))
+		fproductions = [prod for prod in fproductions if prod.rightSide.strip() is not "&"]
+		if p1 is not None and p2 is not None:
+			fproductions = [p1,p2] + fproductions
+		if rename:
+			newG = Grammar(fproductions, self.name + "_epsilon_free")
+		else:
+			newG = Grammar(fproductions, self.name)
+		return newG
+
+	def make_proper(self, rename=None):
+		rename = True if rename is None else rename
+		newG = self.make_epsilon_free()
+		newG = newG.remove_simple_productions()
+		newG = newG.remove_useless_symbols()
+		if rename:
+			newG.name = self.name + " (proper)"
+		else:
+			newG.name = self.name
+		return newG
 	'''
 		This function removes all left recursions from a proper grammar
 	'''
@@ -260,12 +552,12 @@ class Grammar:
 					has_direct_left_recursion = True
 					break
 			if has_direct_left_recursion:
-				print("PRODS = " + str(nt_prods))
+				#print("PRODS = " + str(nt_prods))
 				nt_prods_copy = copy.deepcopy(nt_prods)
 				for prod in nt_prods:
 					parsed_prod = parse_sentential_form(prod)
-					print("parsed_prod: " + str(parsed_prod))
-					print("nt: " + str(nt))
+					#print("parsed_prod: " + str(parsed_prod))
+					#print("nt: " + str(nt))
 					if parsed_prod[0] != nt:
 						nt_prods_copy.pop(nt_prods_copy.index(prod))
 						parsed_prod.append(new_nt)
@@ -287,8 +579,46 @@ class Grammar:
 				for prods in new_productions[key]:
 					new_productions_list.append(Production(key, prods))
 		newG = Grammar(new_productions_list, self.name + " (w/o left recursions)")
-		print("resultado: " + str(newG))
+		#print("resultado: " + str(newG))
 		return newG
+
+	def is_factored(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		for nt in non_terminals:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				for prod2 in nt_productions[nt_productions.index(prod)+1:len(nt_productions)]:
+					if self.getFirst(prod) & self.getFirst(prod2):
+						return False
+		return True
+
+	'''def get_factor(self, non_terminal):
+		nt_productions = self.prod_dict[non_terminal.strip()]
+		for prod in nt_productions:
+			prod = parse_sentential_form(prod)
+			intersections = []
+			for prod2 in nt_productions:
+				intersection = []
+				prod2 = parse_sentential_form(prod2)
+				i = 0
+				not_epsilon = False
+				for in range(0, min(len(prod), len(prod2))):
+					if prod[i] == prod[i]:
+						intersection.append(prod[i])
+						i+=1
+					else:
+						break
+				intersections.append(intersection)
+
+
+	def factorize(self, steps = 1):
+		non_terminals = self.get_non_terminals()
+		for nt in non_terminals:
+			firsts = []
+			nt_productions = self.prod_dict[nt.strip()]
+			for prods in nt_productions:
+				prods = parse_sentential_form(prods)
+				for symbol in prods:'''
 
 	'''
 		This function creates a new non-terminal symbol A1 for a given

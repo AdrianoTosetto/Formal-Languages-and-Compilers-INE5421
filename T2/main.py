@@ -23,10 +23,10 @@ if __name__ == "__main__":
 	print(g5)
 	print(g5.get_NA('P'))'''
 
-	g8 = ReadTestsFiles.read_file_and_get_grammar("g8.txt")
-	print(g8.derives_epsilon('B'))
+	g8 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
+	print(g8.make_proper())
 
-	print(get_non_terminals_from_production("a A B D1"))
+	#print(get_non_terminals_from_production("a A B D1"))
 
 
 	'''leftSides = ['S', 'A', 'B', 'C', 'D']

@@ -76,6 +76,7 @@ class CFGTests(unittest.TestCase):
         g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
         g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
         g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
+
         self.assertEqual(g1.getFirst(['S']), {'a', 'x', 'y', 'd', '&'})
         self.assertEqual(g1.getFirst(['A']), {'a'})
         self.assertEqual(g1.getFirst(['B']), {'b'})
@@ -83,16 +84,154 @@ class CFGTests(unittest.TestCase):
         self.assertEqual(g1.getFirst(['D']), {'d', '&'})
         self.assertEqual(g1.getFirst(['X']), {'x', '&'})
         self.assertEqual(g1.getFirst(['Y']), {'y', '&'})
+
         self.assertEqual(g2.getFirst(['P']), {'c', 'v', 'b', '&', ';', 'com'})
         self.assertEqual(g2.getFirst(['B']), {'c', 'v', 'b', '&', 'com'})
         self.assertEqual(g2.getFirst(['K']), {'c', '&'})
         self.assertEqual(g2.getFirst(['V']), {'v', '&'})
         self.assertEqual(g2.getFirst(['C']), {'b', 'com', '&'})
+
         self.assertEqual(g4.getFirst(['C']), {'com'})
         self.assertEqual(g4.getFirst(['V']), {'id'})
 
+    def test_follow(self):
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
+
+        self.assertEqual(g1.getFollow(['S']), {'$'})
+        self.assertEqual(g1.getFollow(['A']), {'b'})
+        self.assertEqual(g1.getFollow(['B']), {'b', '$'})
+        self.assertEqual(g1.getFollow(['C']), {'d', '$'})
+        self.assertEqual(g1.getFollow(['D']), {'$'})
+        self.assertEqual(g1.getFollow(['X']), {'y', 'd', '$'})
+        self.assertEqual(g1.getFollow(['Y']), {'d', '$'})
+
+        self.assertEqual(g2.getFollow(['P']), {'$', ';'})
+        self.assertEqual(g2.getFollow(['B']), {'$', ';'})
+        self.assertEqual(g2.getFollow(['K']), {'v', 'b', 'com', '$', ';'})
+        self.assertEqual(g2.getFollow(['V']), {'b', 'com', '$', ';'})
+        self.assertEqual(g2.getFollow(['C']), {'$', 'com', 'e', ';'})
+
+        self.assertEqual(g4.getFollow(['C']), {'$', ';'})
+        self.assertEqual(g4.getFollow(['V']), {':='})
+
+    def test_first_nt(self):
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
+
+        self.assertEqual(g1.getFirstNT(['S']), {'S', 'A', 'C', 'X', 'Y', 'D'})
+        self.assertEqual(g1.getFirstNT(['A']), {'A'})
+        self.assertEqual(g1.getFirstNT(['B']), {'B'})
+        self.assertEqual(g1.getFirstNT(['C']), {'C', 'X', 'Y'})
+        self.assertEqual(g1.getFirstNT(['D']), {'D'})
+        self.assertEqual(g1.getFirstNT(['X']), {'X'})
+        self.assertEqual(g1.getFirstNT(['Y']), {'Y'})
+
+        self.assertEqual(g2.getFirstNT(['P']), {'P', 'B', 'K', 'V', 'C'})
+        self.assertEqual(g2.getFirstNT(['B']), {'B', 'K', 'V', 'C'})
+        self.assertEqual(g2.getFirstNT(['K']), {'K'})
+        self.assertEqual(g2.getFirstNT(['V']), {'V'})
+        self.assertEqual(g2.getFirstNT(['C']), {'C'})
+
+        self.assertEqual(g4.getFirstNT(['C']), {'C'})
+        self.assertEqual(g4.getFirstNT(['V']), {'V'})
+
+    def test_has_left_recursion(self):
+        g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
+        g8 = ReadTestsFiles.read_file_and_get_grammar("../g8.txt")
+
+
+
+        self.assertEqual(g1.detect_direct_left_recursion(['S']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['A']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['B']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['C']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['D']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['X']), False)
+        self.assertEqual(g1.detect_direct_left_recursion(['Y']), False)
+
+        self.assertEqual(g1.detect_all_left_recursion(['S']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['A']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['B']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['C']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['D']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['X']), False)
+        self.assertEqual(g1.detect_all_left_recursion(['Y']), False)
+
+        self.assertEqual(g1.detect_indirect_left_recursion(['S']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['A']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['B']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['C']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['D']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['X']), False)
+        self.assertEqual(g1.detect_indirect_left_recursion(['Y']), False)
+
+
+
+        self.assertEqual(g2.detect_direct_left_recursion(['P']), True)
+        self.assertEqual(g2.detect_direct_left_recursion(['B']), False)
+        self.assertEqual(g2.detect_direct_left_recursion(['K']), False)
+        self.assertEqual(g2.detect_direct_left_recursion(['V']), False)
+        self.assertEqual(g2.detect_direct_left_recursion(['C']), True)
+
+        self.assertEqual(g2.detect_all_left_recursion(['P']), True)
+        self.assertEqual(g2.detect_all_left_recursion(['B']), False)
+        self.assertEqual(g2.detect_all_left_recursion(['K']), False)
+        self.assertEqual(g2.detect_all_left_recursion(['V']), False)
+        self.assertEqual(g2.detect_all_left_recursion(['C']), True)
+
+        self.assertEqual(g2.detect_indirect_left_recursion(['P']), False)
+        self.assertEqual(g2.detect_indirect_left_recursion(['B']), False)
+        self.assertEqual(g2.detect_indirect_left_recursion(['K']), False)
+        self.assertEqual(g2.detect_indirect_left_recursion(['V']), False)
+        self.assertEqual(g2.detect_indirect_left_recursion(['C']), False)
+
+
+
+        self.assertEqual(g4.detect_direct_left_recursion(['C']), True)
+        self.assertEqual(g4.detect_direct_left_recursion(['V']), False)
+
+        self.assertEqual(g4.detect_all_left_recursion(['C']), True)
+        self.assertEqual(g4.detect_all_left_recursion(['V']), False)
+
+        self.assertEqual(g4.detect_indirect_left_recursion(['C']), False)
+        self.assertEqual(g4.detect_indirect_left_recursion(['V']), False)
+
+
+
+        self.assertEqual(g8.detect_direct_left_recursion(['S']), False)
+        self.assertEqual(g8.detect_direct_left_recursion(['B']), False)
+        self.assertEqual(g8.detect_direct_left_recursion(['D']), False)
+        self.assertEqual(g8.detect_direct_left_recursion(['E']), False)
+        self.assertEqual(g8.detect_direct_left_recursion(['F']), False)
+
+        self.assertEqual(g8.detect_all_left_recursion(['S']), False)
+        self.assertEqual(g8.detect_all_left_recursion(['B']), True)
+        self.assertEqual(g8.detect_all_left_recursion(['D']), True)
+        self.assertEqual(g8.detect_all_left_recursion(['E']), True)
+        self.assertEqual(g8.detect_all_left_recursion(['F']), True)
+
+        self.assertEqual(g8.detect_indirect_left_recursion(['S']), False)
+        self.assertEqual(g8.detect_indirect_left_recursion(['B']), True)
+        self.assertEqual(g8.detect_indirect_left_recursion(['D']), True)
+        self.assertEqual(g8.detect_indirect_left_recursion(['E']), True)
+        self.assertEqual(g8.detect_indirect_left_recursion(['F']), True)
+
     def test_left_recursion(self):
-        print("batata")
+        print("kkkkkkkkkkkkkkkkkkkkkk")
+        '''g1 = ReadTestsFiles.read_file_and_get_grammar("../g1.txt")
+        g2 = ReadTestsFiles.read_file_and_get_grammar("../g2.txt")
+        g4 = ReadTestsFiles.read_file_and_get_grammar("../g4.txt")
+        g8 = ReadTestsFiles.read_file_and_get_grammar("../g8.txt")
+
+        self.assertEqual(g1.remove_left_recursion().detect_all_left_recursion_for_all(), False)
+        self.assertEqual(g2.remove_left_recursion().detect_all_left_recursion_for_all(), False)
+        self.assertEqual(g4.remove_left_recursion().detect_all_left_recursion_for_all(), False)
+        self.assertEqual(g8.remove_left_recursion().detect_all_left_recursion_for_all(), False)'''
 
     def test_simple_productions(self):
         g5 = ReadTestsFiles.read_file_and_get_grammar("../g5.txt")
