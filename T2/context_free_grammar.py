@@ -14,7 +14,8 @@ class Grammar:
 		if type(productions) == set:
 			productions = list(productions)
 		if len(productions) is 0:
-			self.productions = [Production('S','aS')]
+			self.productions = [Production('S','a S')]
+			productions = [Production('S','a S')]
 		else:
 			self.productions = self.validate_productions(productions)
 		if name == None:
@@ -32,7 +33,6 @@ class Grammar:
 			self.initial_symbol = self.productions[0].leftSide
 		else:
 			self.initial_symbol = initial_symbol
-		#print(self.prod_dict)
 
 	def get_prod_dict(self, productions):
 		ret = {}
@@ -44,6 +44,15 @@ class Grammar:
 			dict_value = set(sorted(dict_value))
 			ret[nt] = dict_value
 		return ret
+	def get_terminals(self, productions):
+		terminals = []
+		leftsides = sorted(set([prod.leftSide for prod in productions]))
+		for prod in leftsides:
+			prod = parse_sentential_form(prod)
+			for symbol in prod:
+				if isTerminalSymbol(symbol):
+					terminals.append(symbol)
+		return sorted(set(terminals))
 	def get_non_terminals(self, productions):
 		return sorted(set([prod.leftSide for prod in productions]))
 	def __hash__(self):
@@ -88,7 +97,7 @@ class Grammar:
 			S ->  Ab  |
 		'''
 		print("haha")
-	def validate_productions(self,productions):
+	def validate_productions(self,productions=None):
 		return productions
 	'''
 		returns if a given nt derives & directly
@@ -520,6 +529,85 @@ class Grammar:
 		else:
 			newG.name = self.name
 		return newG
+
+	def get_NF(self):
+		non_terminals = self.get_non_terminals(self.productions)
+		fertiles = set()
+		fertiles_temp = set()
+		for nt in non_terminals:
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				prod = parse_sentential_form(prod)
+				isFertile = True
+				for symbol in prod:
+					if isNonTerminalSymbol(symbol):
+						isFertile = False
+						break
+				if isFertile:
+					fertiles_temp |= {nt}
+					break
+		while fertiles_temp != fertiles:
+			fertiles = fertiles_temp
+			for nt in non_terminals:
+				nt_productions = self.prod_dict[nt]
+				for prod in nt_productions:
+					prod = parse_sentential_form(prod)
+					isFertile = True
+					for symbol in prod:
+						if isNonTerminalSymbol(symbol) and symbol not in fertiles_temp:
+							isFertile = False
+							break
+					if isFertile:
+						fertiles_temp |= {nt}
+						break
+		fertiles = fertiles_temp
+		NF = set(self.get_non_terminals(self.productions)) - fertiles
+		return NF
+
+	def get_VI(self):
+		self_wo_unreachables = self.remove_unreachable_symbols()
+		alphabet_self = self.get_terminals() | self.get_non_terminals()
+		alphabet_wo = self_wo_unreachables.get_terminals() | self_wo_unreachables.get_non_terminals()
+		VI = set(alphabet_self) - set(alphabet_wo)
+		return VI
+
+	def isEmpty(self):
+		return self.initial_symbol in self.get_NF()
+
+	def reachable_by_NT(self, non_terminal):
+		nt_productions = self.prod_dict[non_terminal]
+		reachable = set()
+		reachable_temp = set()
+		for prod in nt_productions:
+			prod = parse_sentential_form(prod)
+			for symbol in prod:
+				if isNonTerminalSymbol(symbol):
+					reachable_temp |= {symbol}
+		while reachable_temp != reachable:
+			reachable_next = reachable_temp - reachable
+			reachable = reachable_temp
+			for nt in reachable_next:
+				nt_productions = self.prod_dict[nt]
+				for prod in nt_productions:
+					prod = parse_sentential_form(prod)
+					for symbol in prod:
+						if isNonTerminalSymbol(symbol):
+							reachable_temp |= {symbol}
+		return reachable
+
+	def isInfinite(self):
+		if self.isEmpty():
+			return False
+		VI = self.get_VI()
+		reachable = self.get_non_terminals(self.productions) - VI
+		for nt in reachable:
+			if nt in self.reachable_by_NT(nt):
+				return True
+		return False
+
+	def isFinite(self):
+		return not self.isInfinite()
+
 	'''
 		This function removes all left recursions from a proper grammar
 	'''

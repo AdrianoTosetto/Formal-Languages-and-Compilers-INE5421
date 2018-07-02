@@ -26,6 +26,9 @@ if __name__ == "__main__":
 	g8 = ReadTestsFiles.read_file_and_get_grammar("g1.txt")
 	print(g8.make_proper())
 
+	newG = Grammar([])
+	print(newG.isEmpty())
+
 	#print(get_non_terminals_from_production("a A B D1"))
 
 
