@@ -44,7 +44,8 @@ class Grammar:
 			dict_value = set(sorted(dict_value))
 			ret[nt] = dict_value
 		return ret
-	def get_terminals(self, productions):
+	def get_terminals(self, productions=None):
+		productions = self.productions if productions is None else productions
 		terminals = []
 		leftsides = sorted(set([prod.leftSide for prod in productions]))
 		for prod in leftsides:
@@ -53,7 +54,8 @@ class Grammar:
 				if isTerminalSymbol(symbol):
 					terminals.append(symbol)
 		return sorted(set(terminals))
-	def get_non_terminals(self, productions):
+	def get_non_terminals(self, productions=None):
+		productions = self.productions if productions is None else productions
 		return sorted(set([prod.leftSide for prod in productions]))
 	def __hash__(self):
 		hashable = self.name
@@ -566,8 +568,8 @@ class Grammar:
 
 	def get_VI(self):
 		self_wo_unreachables = self.remove_unreachable_symbols()
-		alphabet_self = self.get_terminals() | self.get_non_terminals()
-		alphabet_wo = self_wo_unreachables.get_terminals() | self_wo_unreachables.get_non_terminals()
+		alphabet_self = set(self.get_terminals()) | set(self.get_non_terminals())
+		alphabet_wo = set(self_wo_unreachables.get_terminals()) | set(self_wo_unreachables.get_non_terminals())
 		VI = set(alphabet_self) - set(alphabet_wo)
 		return VI
 
@@ -599,7 +601,7 @@ class Grammar:
 		if self.isEmpty():
 			return False
 		VI = self.get_VI()
-		reachable = self.get_non_terminals(self.productions) - VI
+		reachable = set(self.get_non_terminals(self.productions)) - VI
 		for nt in reachable:
 			if nt in self.reachable_by_NT(nt):
 				return True
@@ -673,7 +675,7 @@ class Grammar:
 	def is_factored(self):
 		non_terminals = self.get_non_terminals(self.productions)
 		for nt in non_terminals:
-			nt_productions = self.prod_dict[nt]
+			nt_productions = list(self.prod_dict[nt])
 			for prod in nt_productions:
 				for prod2 in nt_productions[nt_productions.index(prod)+1:len(nt_productions)]:
 					if self.getFirst(prod) & self.getFirst(prod2):

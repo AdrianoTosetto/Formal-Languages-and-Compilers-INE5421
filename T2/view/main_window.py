@@ -9,6 +9,7 @@ from globals import *
 from context_free_grammar import *
 from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
 from PyQt5 import *
+from tests.read_tests_files import ReadTestsFiles
 hey = "haha"
 
 '''
@@ -31,6 +32,7 @@ class MainWindow(QWidget):
 		self.rightSide = QWidget()
 		self.leftSide.setStyleSheet("background-color:#404040;")
 		self.rightSide.setStyleSheet("background-color:gray;")
+		self.generateLeftSide()
 		self.displayScreen = QWidget()
 		self.editPanel = QWidget()
 		self.displayScreen.setStyleSheet("background-color:light-gray;")
@@ -39,12 +41,11 @@ class MainWindow(QWidget):
 		self.rightLayout.addWidget(self.displayScreen, 0, 0)
 		#self.rightLayout.addWidget(self.editPanel, 0, 1)
 		self.MyTableWidget = MyTableWidget(self.rightSide)
-		self.MyTableWidget.tab1.updateGR.connect(self.select_grammar)
+		self.MyTableWidget.tab1.updateGR.connect(self.update_grammar)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
 		self.rightLayout.setColumnStretch(0,5)
 		self.rightLayout.setColumnStretch(1,2)
-		self.generateLeftSide()
 
 		self.center = QWidget()
 		self.centerLayout = QGridLayout()
@@ -52,7 +53,8 @@ class MainWindow(QWidget):
 		self.centerLayout.setRowStretch(0,5)
 		self.centerLayout.setRowStretch(1,3)
 		self.display = QTextEdit()
-		self.display.setText('Selecione uma GR/ER/AF')
+		self.display.setDisabled(True)
+		self.display.setText('Selecione uma GLC')
 		self.display.setStyleSheet("background-color:white;")
 		self.displayLayout = QVBoxLayout()
 		self.displayLayout.addWidget(self.display)
@@ -100,11 +102,14 @@ class MainWindow(QWidget):
 	def select_grammar(self, gram):
 		self.update_gr()
 		self.display.setText(gram.name + ":\n" + str(gram))
+		self.log.setText(str(gram))
 		Globals.selected = gram
 		nts = gram.get_non_terminals()
 		prods = []
 		for nt in nts:
-			prods.append(gram.get_productions_from(nt))
+			nt_productions = gram.prod_dict[nt]
+			for prod in nt_productions:
+				prods.append(Production(nt, prod))
 		self.MyTableWidget.update(nts, prods, gram.name)
 	def addStuff(self):
 		self.add_gr()
@@ -131,6 +136,17 @@ class MainWindow(QWidget):
 		Globals.selected = newG
 		self.update_gr()
 
+	def update_grammar(self, gName):
+		newG = ReadTestsFiles.raw_string_to_grammar(self.log.toPlainText())
+		newG.name = gName
+		grams = []
+		for g in Globals.grammars:
+			if g.name != Globals.selected.name:
+				grams.append(g)
+			else:
+				grams.append(newG)
+		Globals.grammars = grams
+		Globals.selected = newG
 	def update_gr(self):
 		self.grList.clear()
 		for g in Globals.grammars:
@@ -206,7 +222,7 @@ class MyTableWidget(QWidget):
 		self.tabs = QTabWidget()
 		self.tab1 = addGrammarTab(["S"], [["&"]], "G1")
 
-		self.tabs.addTab(self.tab1,"Edit GR")
+		self.tabs.addTab(self.tab1,"")
 
         #self.tab1.layout = QVBoxLayout(self)
         #self.pushButton1 = QPushButton("PyQt5 button")
@@ -221,7 +237,7 @@ class MyTableWidget(QWidget):
 		self.nt_line_edit = nts
 		self.nt_line_prod = prods
 		self.new_gr_name = name
-		self.tab1.setProdWidgets(self.nt_line_edit, self.nt_line_prod, self.new_gr_name)
+		self.tab1.setProdWidgets(self.new_gr_name)
 		#self.tab1.line = len(nts)
 		print("auhauhaua=", end="")
 		print(self.tab1.line)
@@ -232,7 +248,7 @@ class MyTableWidget(QWidget):
 			print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
 
 class addGrammarTab(QWidget):
-	updateGR = QtCore.pyqtSignal(Grammar)
+	updateGR = QtCore.pyqtSignal(str)
 	def __init__(self, listNT = None, listProd=None, nameGR = ''):
 		super(QWidget, self).__init__()
 		self.nt_line_edit = listNT # nao-terminais da gramatica
@@ -248,7 +264,7 @@ class addGrammarTab(QWidget):
 		self.top_layout.setColumnStretch(1,1)
 		self.top_layout.setColumnStretch(2,6)
 		self.top_layout.setColumnStretch(3,1)
-		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit, self.new_gr_name)
+		self.setProdWidgets(self.new_gr_name)
 		self.top = QWidget()
 		self.top.setLayout(self.top_layout)
 		self.sarea = QScrollArea()
@@ -273,46 +289,68 @@ class addGrammarTab(QWidget):
 		self.layout.setRowStretch(0,9)
 		self.layout.setRowStretch(1,1)
 		self.setLayout(self.layout)
-	def setProdWidgets(self, listNT, listProd, gName):
-		if len(listNT) < 1 or len(listProd) < 1:
-			return None
-		for p in listProd:
-			if len(p) < 1:
-				return None
-		self.nt_line_edit = listNT
-		self.prod_nt_line_edit = listProd
+	def setProdWidgets(self, gName):
 		self.new_gr_name = gName
-		for i in reversed(range(self.top_layout.count())):
-		    self.top_layout.itemAt(i).widget().setParent(None)
 		self.top_layout.addWidget(QLabel("Nome:"), 0, 0)
 		self.top_layout.addWidget(QLineEdit(gName), 0, 1)
-		i = 1
-		self.nt_line_edit = listNT
-		self.prod_nt_line_edit = listProd
-		for nt in listNT:
-			p = QLineEdit(nt)
-			#p.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
-			self.top_layout.addWidget(p, i, 0)
 
-			strProd = ""
-			for ii in range(0, len(listProd[i-1]) - 1):
-				strProd += listProd[i-1][ii] + "|"
-			strProd += listProd[i-1][len(listProd[i-1]) - 1]
-			p1 = QLineEdit(strProd)
-			#p1.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.top_layout.addWidget(QLabel("Vazia?"), 1, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.isEmpty())), 1, 1)
 
-			self.top_layout.addWidget(p1,i, 2)
+		self.top_layout.addWidget(QLabel("Finita?"), 2, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.isFinite())), 2, 1)
 
-			label_arrow = QLabel("->")
-			self.top_layout.addWidget(label_arrow, i, 1)
+		self.top_layout.addWidget(QLabel("N_F:"), 3, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.get_NF())), 3, 1)
 
-			btn_remove = RemoveProdButton("Remover", i)
-			print("nt = " + nt + " line " + str(i-1))
-			btn_remove.clicked.connect(functools.partial(self.remove_prod_button_clicked, btn_remove.line))
-			self.top_layout.addWidget(btn_remove, i, 3)
+		self.top_layout.addWidget(QLabel("V_i:"), 4, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.get_VI())), 4, 1)
+
+		self.top_layout.addWidget(QLabel("N_e:"), 5, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.getNE())), 5, 1)
+
+		i = 6
+
+		for nt in Globals.selected.get_non_terminals():
+			self.top_layout.addWidget(QLabel("N("+nt+"):"), i, 0)
+			self.top_layout.addWidget(QLabel(str(Globals.selected.get_NA(nt))), i, 1)
 			i+=1
-		self.line = i
-		print("linhas " + str(self.line))
+
+		for nt in Globals.selected.get_non_terminals():
+			self.top_layout.addWidget(QLabel("FIRST("+nt+"):"), i, 0)
+			self.top_layout.addWidget(QLabel(str(Globals.selected.getFirst(nt))), i, 1)
+			i+=1
+
+		for nt in Globals.selected.get_non_terminals():
+			self.top_layout.addWidget(QLabel("FOLLOW("+nt+"):"), i, 0)
+			self.top_layout.addWidget(QLabel(str(Globals.selected.getFollow(nt))), i, 1)
+			i+=1
+
+		for nt in Globals.selected.get_non_terminals():
+			self.top_layout.addWidget(QLabel("FIRST-NT("+nt+"):"), i, 0)
+			self.top_layout.addWidget(QLabel(str(Globals.selected.getFirstNT(nt))), i, 1)
+			i+=1
+
+		self.top_layout.addWidget(QLabel("Fatorada?"), i, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.is_factored())), i, 1)
+		i+=1
+
+		self.top_layout.addWidget(QLabel("Possui RE?"), i, 0)
+		self.top_layout.addWidget(QLabel(str(Globals.selected.detect_all_left_recursion_for_all())), i, 1)
+		i+=1
+
+		if Globals.selected.detect_all_left_recursion_for_all():
+			for nt in Globals.selected.get_non_terminals():
+				if Globals.selected.detect_all_left_recursion(nt):
+					self.top_layout.addWidget(QLabel("RE por "+nt+":"), i, 0)
+					if Globals.selected.detect_direct_left_recursion(nt) and not Globals.selected.detect_indirect_left_recursion(nt):
+						self.top_layout.addWidget(QLabel("direta"), i, 1)
+					elif not Globals.selected.detect_direct_left_recursion(nt) and Globals.selected.detect_indirect_left_recursion(nt):
+						self.top_layout.addWidget(QLabel("indireta"), i, 1)
+					elif Globals.selected.detect_direct_left_recursion(nt) and Globals.selected.detect_indirect_left_recursion(nt):
+						self.top_layout.addWidget(QLabel("direta e indireta"), i, 1)
+					i+=1
+
 	def get_productions(self):
 		newNT = []
 		newProd = []
@@ -338,11 +376,7 @@ class addGrammarTab(QWidget):
 		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 	def add_production(self):
-		self.nt_line_edit.append("")
-		self.prod_nt_line_edit.append([""])
-		for i in reversed(range(self.top_layout.count())):
-		    self.top_layout.itemAt(i).widget().setParent(None)
-		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit, self.new_gr_name)
+		print("kkk")
 		#self.line+=1
 	def remove_prod_button_clicked(self, line):
 		#if len(Globals.selected.productions) <= 1:
@@ -355,34 +389,16 @@ class addGrammarTab(QWidget):
 		self.setProdWidgets(self.nt_line_edit, self.prod_nt_line_edit, self.new_gr_name)
 
 	def save_grammar(self):
-		if len(self.nt_line_edit) != len(self.prod_nt_line_edit):
-			return None
-		#print(self.nt_line_edit)
-		#print(self.prod_nt_line_edit)
-		newName = self.top_layout.itemAtPosition(0,1).widget().text()
-		self.new_gr_name = newName
-		self.get_productions()
-		prods = []
-		for i in range(0, len(self.nt_line_edit)):
-			for p in self.prod_nt_line_edit[i]:
-				if len(p) is 2:
-					if p[-1] in self.nt_line_edit:
-						prods.append(Production(self.nt_line_edit[i], p))
-				else:
-					prods.append(Production(self.nt_line_edit[i], p))
+		gName = self.top_layout.itemAtPosition(0,1).widget().text()
 		grams = []
-		if Grammar([], newName) in Globals.grammars:
-			newG = Grammar(prods, Globals.selected.name)
-		else:
-			newG = Grammar(prods, newName)
-		for g in Globals.grammars:
-			if g.name != Globals.selected.name:
-				grams.append(g)
-			else:
-				grams.append(newG)
-		Globals.grammars = grams
-		Globals.selected = newG
-		self.updateGR.emit(Globals.selected)
+		i = 0
+		if gName == '':
+			gName = "G" + str(i)
+			while Grammar([], gName) in Globals.grammars:
+				i+=1
+				gName = "G" + str(i)
+		self.updateGR.emit(gName)
+		self.setProdWidgets(gName)
 		'''
 			aqui voce pega tudo o que esta escrito nas caixas de texto e atualiza o
 			self.nt_line_edit e self.nt_line_prod e adiciona a gramatica que foi colocada.
