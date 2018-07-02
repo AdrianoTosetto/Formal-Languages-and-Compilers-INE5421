@@ -481,6 +481,10 @@ class Grammar:
 		p2 = None
 		newInitial = self.initial_symbol
 		if self.initial_symbol in NE_set:
+			if len(self.prod_dict[self.initial_symbol]) == 1:
+				newG = copy.deepcopy(self)
+				newG.name += " (epsilon-free)"
+				return self
 			#print("KKKKKKKKKKKKKKKKKKKKK")
 			i = 0
 			while 'S' + str(i) in self.get_non_terminals(self.productions):
@@ -516,7 +520,7 @@ class Grammar:
 		if p1 is not None and p2 is not None:
 			fproductions = [p1,p2] + fproductions
 		if rename:
-			newG = Grammar(fproductions, self.name + "_epsilon_free")
+			newG = Grammar(fproductions, self.name + " (epsilon-free)")
 		else:
 			newG = Grammar(fproductions, self.name)
 		return newG

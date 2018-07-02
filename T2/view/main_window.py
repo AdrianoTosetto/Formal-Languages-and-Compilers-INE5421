@@ -32,7 +32,6 @@ class MainWindow(QWidget):
 		self.rightSide = QWidget()
 		self.leftSide.setStyleSheet("background-color:#404040;")
 		self.rightSide.setStyleSheet("background-color:silver;")
-		self.generateLeftSide()
 		self.displayScreen = QWidget()
 		self.editPanel = QWidget()
 		self.displayScreen.setStyleSheet("background-color:light-gray;")
@@ -40,13 +39,6 @@ class MainWindow(QWidget):
 		self.rightLayout = QGridLayout()
 		self.rightLayout.addWidget(self.displayScreen, 0, 0)
 		#self.rightLayout.addWidget(self.editPanel, 0, 1)
-		self.MyTableWidget = MyTableWidget(self.rightSide)
-		self.MyTableWidget.tab1.updateGR.connect(self.update_grammar)
-		self.rightLayout.addWidget(self.MyTableWidget,0,1)
-		self.rightSide.setLayout(self.rightLayout)
-		self.rightLayout.setColumnStretch(0,3)
-		self.rightLayout.setColumnStretch(1,2)
-
 		self.center = QWidget()
 		self.centerLayout = QGridLayout()
 		self.centerLayout.addWidget(self.center, 0, 0)
@@ -66,6 +58,21 @@ class MainWindow(QWidget):
 		self.centerLayout.addWidget(self.display,0,0)
 		self.centerLayout.addWidget(self.log,1,0)
 		self.displayScreen.setLayout(self.centerLayout)
+
+		Globals.selected = Grammar([])
+
+		self.MyTableWidget = MyTableWidget(self.rightSide)
+		self.MyTableWidget.tab1.updateGR.connect(self.update_grammar)
+		self.MyTableWidget.tab1.addGR.connect(self.update_gr)
+		self.rightLayout.addWidget(self.MyTableWidget,0,1)
+		self.rightSide.setLayout(self.rightLayout)
+		self.rightLayout.setColumnStretch(0,3)
+		self.rightLayout.setColumnStretch(1,2)
+
+		self.generateLeftSide()
+		self.add_gr()
+
+
 
 		self.mainLayout = QGridLayout()
 		self.mainLayout.setColumnStretch(0, 1)
@@ -134,7 +141,7 @@ class MainWindow(QWidget):
 					break
 		Globals.grammars.append(newG)
 		Globals.selected = newG
-		self.update_gr()
+		self.select_grammar(Globals.selected)
 
 	def update_grammar(self, gName):
 		newG = ReadTestsFiles.raw_string_to_grammar(self.log.toPlainText())
@@ -147,6 +154,7 @@ class MainWindow(QWidget):
 				grams.append(newG)
 		Globals.grammars = grams
 		Globals.selected = newG
+		self.update_gr()
 	def update_gr(self):
 		self.grList.clear()
 		for g in Globals.grammars:
@@ -202,8 +210,6 @@ class MainWindow(QWidget):
 		self.update_gr()
 		self.listofentities.setLayout(self.listLayout)
 
-		self.add_gr()
-
 class GrammarButton(QPushButton):
 	def __init__(self, QString, grammar):
 		self.grammar = grammar
@@ -249,6 +255,7 @@ class MyTableWidget(QWidget):
 
 class addGrammarTab(QWidget):
 	updateGR = QtCore.pyqtSignal(str)
+	addGR = QtCore.pyqtSignal(Grammar)
 	def __init__(self, listNT = None, listProd=None, nameGR = ''):
 		super(QWidget, self).__init__()
 		self.nt_line_edit = listNT # nao-terminais da gramatica
@@ -273,12 +280,15 @@ class addGrammarTab(QWidget):
 		self.sarea.setWidgetResizable(True)
 		self.bottom_layout = QGridLayout()
 		self.add_grammar = QPushButton("Save grammar")
-		self.add_prod    = QPushButton("Add prod")
+		self.add_prod    = QPushButton("Make proper")
+		self.remove_left = QPushButton("Remove left recursion")
 		self.add_prod.clicked.connect(self.add_production)
 		self.add_grammar.clicked.connect(self.save_grammar)
+		self.remove_left.clicked.connect(self.remove_recursion)
 		self.setPolicyButtons()
 		self.bottom_layout.addWidget(self.add_grammar, 0, 0)
 		self.bottom_layout.addWidget(self.add_prod, 0, 1)
+		self.bottom_layout.addWidget(self.remove_left, 0, 2)
 		self.bottom = QWidget()
 		self.bottom.setLayout(self.bottom_layout)
 		self.bottom.setStyleSheet("background-color:silver;")
@@ -289,6 +299,16 @@ class addGrammarTab(QWidget):
 		self.layout.setRowStretch(0,9)
 		self.layout.setRowStretch(1,1)
 		self.setLayout(self.layout)
+
+	def remove_recursion(self):
+		newG = Globals.selected.remove_left_recursion()
+		gName = newG.name
+		i=0
+		while Grammar([], gName) in Globals.grammars:
+			i+=1
+			gName = newG3.name + str(i)
+			Globals.grammars.append(newG)
+		self.addGR.emit(newG)
 	def setProdWidgets(self, gName):
 		for i in reversed(range(self.top_layout.count())):
 			self.top_layout.itemAt(i).widget().setParent(None)
@@ -377,8 +397,43 @@ class addGrammarTab(QWidget):
 	def setPolicyButtons(self):
 		self.add_grammar.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.add_prod.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.remove_left.setSizePolicy ( QSizePolicy.Expanding, QSizePolicy.Expanding)
 	def add_production(self):
-		print("kkk")
+		newG = Globals.selected.make_epsilon_free()
+		print(newG)
+		newG1 = newG.remove_simple_productions()
+		print(newG1)
+		newG2 = newG1.remove_infertile_symbols()
+		print(newG2)
+		newG3 = newG2.remove_unreachable_symbols()
+		print(newG3)
+		newG3.name = Globals.selected.name + " (proper)"
+		grams = []
+		i = 0
+		gName = newG.name + str(i)
+		while Grammar([], gName) in Globals.grammars:
+			i+=1
+			gName = newG.name + str(i)
+		Globals.grammars.append(newG)
+		gName = newG1.name + str(i)
+		while Grammar([], gName) in Globals.grammars:
+			i+=1
+			gName = newG1.name + str(i)
+			Globals.grammars.append(newG1)
+		gName = newG2.name + str(i)
+		while Grammar([], gName) in Globals.grammars:
+			i+=1
+			gName = newG2.name + str(i)
+			Globals.grammars.append(newG2)
+		gName = newG3.name + str(i)
+		while Grammar([], gName) in Globals.grammars:
+			i+=1
+			gName = newG3.name + str(i)
+		Globals.grammars.append(newG3)
+		self.addGR.emit(newG)
+		self.addGR.emit(newG1)
+		self.addGR.emit(newG2)
+		self.addGR.emit(newG3)
 		#self.line+=1
 	def remove_prod_button_clicked(self, line):
 		#if len(Globals.selected.productions) <= 1:
