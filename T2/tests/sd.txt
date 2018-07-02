@@ -1,0 +1,14 @@
+new_grammar
+G1:
+S -> a B c D e
+B -> b B | E | F
+D -> d D | F | d
+E -> e E | e
+F -> f F | f
+new_grammar
+G1:
+S -> a B c D e
+B -> b B | E | F
+D -> d D | F | d
+E -> e E | e | D
+F -> f F | f | B
