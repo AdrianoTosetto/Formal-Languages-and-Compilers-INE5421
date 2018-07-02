@@ -392,7 +392,7 @@ class Grammar:
 					fertiles_temp |= {nt}
 					break
 		while fertiles_temp != fertiles:
-			fertiles = fertiles_temp
+			fertiles |= fertiles_temp
 			for nt in non_terminals:
 				nt_productions = self.prod_dict[nt]
 				for prod in nt_productions:
@@ -405,7 +405,7 @@ class Grammar:
 					if isFertile:
 						fertiles_temp |= {nt}
 						break
-		fertiles = fertiles_temp
+		fertiles |= fertiles_temp
 		new_prods = set()
 		for nt in fertiles:
 			nt_productions = self.prod_dict[nt]
@@ -436,7 +436,7 @@ class Grammar:
 		reachable_temp = {self.initial_symbol}
 		while reachable_temp != reachable:
 			reachable_next = reachable_temp - reachable
-			reachable = reachable_temp
+			reachable |= reachable_temp
 			for nt in reachable_next:
 				nt_productions = self.prod_dict[nt]
 				for prod in nt_productions:
@@ -533,6 +533,7 @@ class Grammar:
 		return newG
 
 	def get_NF(self):
+		#print("ATENÇÃO")
 		non_terminals = self.get_non_terminals(self.productions)
 		fertiles = set()
 		fertiles_temp = set()
@@ -549,20 +550,26 @@ class Grammar:
 					fertiles_temp |= {nt}
 					break
 		while fertiles_temp != fertiles:
-			fertiles = fertiles_temp
+			#print("fertiles, yo: " + str(fertiles_temp))
+			fertiles |= fertiles_temp
 			for nt in non_terminals:
 				nt_productions = self.prod_dict[nt]
 				for prod in nt_productions:
 					prod = parse_sentential_form(prod)
 					isFertile = True
 					for symbol in prod:
+						print(symbol)
 						if isNonTerminalSymbol(symbol) and symbol not in fertiles_temp:
+							#print(str(symbol) + " kkk")
 							isFertile = False
 							break
 					if isFertile:
+						#print("nt = " + nt)
 						fertiles_temp |= {nt}
 						break
-		fertiles = fertiles_temp
+				#print("Fertiles = " + str(fertiles))
+				#print("Fertiles Temp = " + str(fertiles_temp))
+		fertiles |= fertiles_temp
 		NF = set(self.get_non_terminals(self.productions)) - fertiles
 		return NF
 
@@ -587,7 +594,7 @@ class Grammar:
 					reachable_temp |= {symbol}
 		while reachable_temp != reachable:
 			reachable_next = reachable_temp - reachable
-			reachable = reachable_temp
+			reachable |= reachable_temp
 			for nt in reachable_next:
 				nt_productions = self.prod_dict[nt]
 				for prod in nt_productions:
@@ -601,10 +608,25 @@ class Grammar:
 		if self.isEmpty():
 			return False
 		VI = self.get_VI()
+		NF = self.get_NF()
 		reachable = set(self.get_non_terminals(self.productions)) - VI
 		for nt in reachable:
-			if nt in self.reachable_by_NT(nt):
-				return True
+			nt_productions = self.prod_dict[nt]
+			for prod in nt_productions:
+				cyclic = False
+				productive = False
+				prod = parse_sentential_form(prod)
+				for symbol in prod:
+					if symbol in self.reachable_by_NT(nt):
+						cyclic = True
+					if isTerminalSymbol(symbol):
+						productive = True
+					if symbol in NF:
+						cyclic = False
+						productive = False
+						break
+				if cyclic and productive:
+					return True
 		return False
 
 	def isFinite(self):

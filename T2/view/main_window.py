@@ -31,12 +31,12 @@ class MainWindow(QWidget):
 		self.leftSide = QWidget()
 		self.rightSide = QWidget()
 		self.leftSide.setStyleSheet("background-color:#404040;")
-		self.rightSide.setStyleSheet("background-color:gray;")
+		self.rightSide.setStyleSheet("background-color:silver;")
 		self.generateLeftSide()
 		self.displayScreen = QWidget()
 		self.editPanel = QWidget()
 		self.displayScreen.setStyleSheet("background-color:light-gray;")
-		self.editPanel.setStyleSheet("background-color:light-gray;")
+		self.editPanel.setStyleSheet("background-color:silver;")
 		self.rightLayout = QGridLayout()
 		self.rightLayout.addWidget(self.displayScreen, 0, 0)
 		#self.rightLayout.addWidget(self.editPanel, 0, 1)
@@ -44,7 +44,7 @@ class MainWindow(QWidget):
 		self.MyTableWidget.tab1.updateGR.connect(self.update_grammar)
 		self.rightLayout.addWidget(self.MyTableWidget,0,1)
 		self.rightSide.setLayout(self.rightLayout)
-		self.rightLayout.setColumnStretch(0,5)
+		self.rightLayout.setColumnStretch(0,3)
 		self.rightLayout.setColumnStretch(1,2)
 
 		self.center = QWidget()
@@ -290,6 +290,8 @@ class addGrammarTab(QWidget):
 		self.layout.setRowStretch(1,1)
 		self.setLayout(self.layout)
 	def setProdWidgets(self, gName):
+		for i in reversed(range(self.top_layout.count())):
+			self.top_layout.itemAt(i).widget().setParent(None)
 		self.new_gr_name = gName
 		self.top_layout.addWidget(QLabel("Nome:"), 0, 0)
 		self.top_layout.addWidget(QLineEdit(gName), 0, 1)
