@@ -822,6 +822,8 @@ def isTerminalSymbol(symbol):
 	for character in symbol:
 		if character.isupper():
 			isTerminal = False
+	if parse_sentential_form(symbol)[0] == '&' or parse_sentential_form(symbol)[0] == '$':
+		return False
 	return isTerminal
 '''
 	This function checks is the given symbol is a non-terminal symbol by

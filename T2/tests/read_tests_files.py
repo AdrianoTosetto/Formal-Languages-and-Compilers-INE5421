@@ -40,7 +40,7 @@ class ReadTestsFiles:
 				productions.append(Production(temp1[0].strip(' '), tt.strip(' ')))
 
 
-		return Grammar(productions)
+		return Grammar(productions, name)
 
 
 class FileParser:

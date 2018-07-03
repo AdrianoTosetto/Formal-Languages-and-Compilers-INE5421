@@ -1,0 +1,71 @@
+Alunos: Adriano Tosetto(15104099) e Giulio Guilherme(15100738)
+
+Como usar o programa:
+
+Colocamos um arquivo em txt com algumas gramáticas prontas que serão carregadas quando o programa iniciar.
+É possível adicionar as gramáticas diretamente neste arquivo antes de rodar o programa para que ele possa exibir o
+respectivo conteúdo;
+
+O arquivo deve estar no seguinte formato:
+
+new_grammar
+<Nome_Gramatica>:
+<Gramática>
+new_grammar
+<Nome_Gramatica>:
+<Gramática>
+
+Por exemplo:
+new_grammar
+G1:
+S -> a B c D e
+B -> b B | E | F
+D -> d D | F | d
+E -> e E | e
+F -> f F | f
+new_grammar
+G2:
+S -> a B c D e
+B -> b B | E | F
+D -> d D | F | d
+E -> e E | e | D
+F -> f F | f | B
+
+Ao inicializar o programa, todas as gramáticas contidas no arquivo bd.txt (loca-
+lizado na pasta tests) serão carregadas para o programa. As gramáticas já salvas
+nesse arquivo foram algumas das que foram usadas para testar o programa. Além
+disso, ao inicializar o programa, ele criará uma gramática G: P = {S -> &}, que
+é uma GLC padrão criada ao clicar no botão "Adicionar", no canto superior es-
+querdo.
+
+Além do botão de adicionar GLCs, no canto superior direito há um botão para ex-
+cluir a GLC selecionada e gravar as GLCs da lista do lado esquerdo da interface
+no arquivo bd.txt.
+
+Para selecionar uma GLC, basta clicar em seu nome na lista de GLCs no lado es-
+querdo da interface.
+
+Ao selecionar uma GLC, ela é exibida na seção central superior da GUI. Abaixo,
+está um espaço para editar textualmente a GLC selecionada.
+
+No lado direito da GUI, há um espaço que exibe diversas informações sobre a gra-
+mática, além de um espaço para editar seu nome e três botões, no canto inferior
+direito, que possibilita salvar a edição textual da gramática, gerar uma GLC
+própria equivalente e gerar uma GLC sem REs (recursões à esquerda) equivalente.
+
+Implementação:
+  Classes:
+    Grammar: representa a GLC. Nela, estão contidos todos os métodos necessários
+    para exibir as informações que estão na GUI, assim como os métodos de trans-
+    formar a GLC em própria e remover recursões à esquerda.
+
+    Production: representa uma produção da GLC. Contém os atributos leftSide e
+    rightSide, que são strings.
+
+    ReadTestsFiles: contém métodos que permitem ler um texto e gerar um objeto
+    Grammar.
+
+    FileParser: contém métodos que permitem leitura e escrita de GLCs em arquivos.
+
+  Além dessas classes, no arquivo context_free_grammar.py, há funções que auxi-
+  liam na tarefa de manipular formas sentenciais e símbolos.

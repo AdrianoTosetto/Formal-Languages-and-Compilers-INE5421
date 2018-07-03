@@ -16,6 +16,33 @@ hey = "haha"
 	Autoria: Adriano Tosetto, Giulio Simão
 '''
 
+class FileParser:
+
+	@staticmethod
+	def get_grammars_from_file(filename):
+		grammars_obj = []
+		file = open(filename)
+		rawstr = file.read()
+
+		rawgrammars = rawstr.split("new_grammar")
+		rawgrammars = rawgrammars[1:len(rawgrammars)]
+		for rawgrammar in rawgrammars:
+			rawgrammar = ''.join((rawgrammar.strip(), '\n'))
+			rawgrammar_temp1 = rawgrammar.split('\n', 1)
+			#print(rawgrammar_temp1[0])
+			grammars_obj.append(ReadTestsFiles.raw_string_to_grammar(rawgrammar_temp1[1], rawgrammar_temp1[0][0:len(rawgrammar_temp1[0])-1]))
+			print(rawgrammar_temp1[0])
+		return grammars_obj
+	@staticmethod
+	def save_grammars_to_file(filename, grammars):
+		open(filename, 'w').close()
+		f = open(filename, "+a")
+		for grammar in grammars:
+			str_grammar = str(grammar)
+			str_grammar = ("\nnew_grammar\n"+grammar.name+":\n" + str_grammar).strip() + '\n'
+			print(grammar.name)
+			f.write(str_grammar)
+
 class MainWindow(QWidget):
 	jesus = "-"
 	jesus1 = "-"
@@ -70,7 +97,7 @@ class MainWindow(QWidget):
 		self.rightLayout.setColumnStretch(1,2)
 
 		self.generateLeftSide()
-		self.add_gr()
+		self.initialize()
 
 
 
@@ -131,6 +158,9 @@ class MainWindow(QWidget):
 		self.update_gr()
 		self.display.setText('')
 		Globals.selected = None
+	def initialize(self):
+		Globals.grammars = FileParser.get_grammars_from_file("../tests/bd.txt")
+		self.add_gr()
 	def add_gr(self):
 		newG = Grammar([Production('S', '&')])
 		names = [gr.name for gr in Globals.grammars]
@@ -155,6 +185,7 @@ class MainWindow(QWidget):
 		Globals.grammars = grams
 		Globals.selected = newG
 		self.update_gr()
+		self.select_grammar(newG)
 	def update_gr(self):
 		self.grList.clear()
 		for g in Globals.grammars:
@@ -163,6 +194,8 @@ class MainWindow(QWidget):
 			item_widget.clicked.connect(functools.partial(self.select_grammar, g))
 			self.grList.setItemWidget(item, item_widget)
 			self.grList.addItem(item)
+	def saveContext(self):
+		FileParser.save_grammars_to_file("../tests/bd.txt", Globals.grammars)
 
 	def generateRightSide(self):
 		self.optionsGR = QWidget()
@@ -179,28 +212,39 @@ class MainWindow(QWidget):
 
 		self.optionAdd = QWidget()
 		self.optionDelete = QWidget()
+		self.optionSave = QWidget()
 		self.optionAdd.setStyleSheet("background-color:silver;")
 		self.optionDelete.setStyleSheet("background-color:silver;")
+		self.optionSave.setStyleSheet("background-color:silver;")
 		self.optionsLayout = QGridLayout()
 		self.optionsLayout.setColumnStretch(0,1)
 		self.optionsLayout.setColumnStretch(1,1)
+		self.optionsLayout.setColumnStretch(2,1)
 		self.optionsLayout.addWidget(self.optionAdd,0,0)
 		self.optionsLayout.addWidget(self.optionDelete,0,1)
+		self.optionsLayout.addWidget(self.optionSave,0,2)
 		self.options.setLayout(self.optionsLayout)
 
 		self.addButton = QPushButton('Adicionar', self)
-		self.addButton.setToolTip('Adicionar GR/ER/AF')
+		self.addButton.setToolTip('Adicionar GLC')
 		self.addButton.clicked.connect(self.addStuff)
 		self.addLayout = QVBoxLayout()
 		self.addLayout.addWidget(self.addButton)
 		self.optionAdd.setLayout(self.addLayout)
 
 		self.deleteButton = QPushButton('Deletar', self)
-		self.deleteButton.setToolTip('Deletar GR/ER/AF')
+		self.deleteButton.setToolTip('Deletar GLC')
 		self.deleteButton.clicked.connect(self.deleteStuff)
 		self.deleteLayout = QVBoxLayout()
 		self.deleteLayout.addWidget(self.deleteButton)
 		self.optionDelete.setLayout(self.deleteLayout)
+
+		self.saveButton = QPushButton('Gravar', self)
+		self.saveButton.setToolTip('Gravar GLCs em um arquivo ;^)')
+		self.saveButton.clicked.connect(self.saveContext)
+		self.saveLayout = QVBoxLayout()
+		self.saveLayout.addWidget(self.saveButton)
+		self.optionSave.setLayout(self.saveLayout)
 
 		self.grList = QListWidget(self)
 		self.afList = QListWidget(self)

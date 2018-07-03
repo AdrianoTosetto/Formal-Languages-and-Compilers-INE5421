@@ -1,0 +1,45 @@
+new_grammar
+G1:
+S -> A B | C D
+A -> a B | a
+B -> b B | b
+C -> X Y
+D -> d D | &
+X -> x X | &
+Y -> y Y | &
+new_grammar
+G2:
+P -> P ; B | B
+B -> K V C
+C -> b K V ; C e | b C e | C com | &
+K -> c K | &
+V -> v V | &
+new_grammar
+G3:
+C -> C ; V := exp | com
+V -> id | id [ exp ]
+new_grammar
+G4:
+E -> E + T | E - T | T
+F -> F ^ P | P
+P -> - P | + P | ( E ) | id
+T -> T * F | T / F | F
+new_grammar
+G5:
+S -> a B c D e
+B -> b B | E | F
+D -> d D | F | d
+E -> e E | e
+F -> f F | f
+new_grammar
+G6:
+S -> a B c D e
+B -> b B | E | F | F E
+D -> d D | F | d
+E -> e E | e | D
+F -> f F | f | B | &
+new_grammar
+G7:
+S -> A B | c
+A -> b
+B -> c
