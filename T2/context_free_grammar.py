@@ -640,23 +640,32 @@ class Grammar:
 		This function removes all left recursions from a proper grammar
 	'''
 	def remove_left_recursion(self):
-		print(self)
-		non_terminals = self.get_non_terminals(self.productions)
+		#print(self)
+		non_terminals = list(self.get_non_terminals(self.productions))
 		non_terminals_temp = []
 		new_productions = copy.deepcopy(self.prod_dict)
 		for nt in non_terminals:
-			for nt2 in non_terminals_temp:
-				nt1_prods = new_productions[nt]
-				for prod in nt1_prods:
-					parsed_prod = parse_sentential_form(prod)
-					if parsed_prod[0] == nt2:
-						parsed_prod_copy = copy.deep_copy(parsed_prod)
-						parsed_prod_copy.pop(0)
-						nt2_prods = new_productions[nt2]
-						new_productions[nt].pop(new_productions[nt].index(prod))
-						for prod2 in nt2_prods:
-							new_prod = prod2 + ' ' + unparse_sentential_form(parsed_prod_copy)
-							new_productions[nt].append(new_prod)
+			repeat = True
+			while repeat:
+				repeat = False
+				print(non_terminals_temp)
+				print(new_productions[nt])
+
+				for nt2 in non_terminals_temp:
+					nt1_prods = copy.deepcopy(new_productions[nt])
+					new_prods_list = list(new_productions[nt])
+					for prod in nt1_prods:
+						parsed_prod = parse_sentential_form(prod)
+						if parsed_prod[0] == nt2:
+							repeat = True
+							parsed_prod_copy = copy.deepcopy(parsed_prod)
+							parsed_prod_copy.pop(0)
+							nt2_prods = new_productions[nt2]
+							new_prods_list.pop(new_prods_list.index(prod))
+							for prod2 in nt2_prods:
+								new_prod = prod2 + ' ' + unparse_sentential_form(parsed_prod_copy)
+								new_prods_list.append(new_prod)
+					new_productions[nt] = set(new_prods_list)
 			non_terminals_temp.append(nt)
 			#Removes direct left recursions:
 			nt_prods = list(new_productions[nt])

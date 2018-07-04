@@ -43,3 +43,9 @@ G7:
 S -> A B | c
 A -> b
 B -> c
+new_grammar
+G8:
+S -> A a S | &
+A -> S A a | B b | C d
+B -> C B c | S A B a
+C -> B c | S C a | A b | &

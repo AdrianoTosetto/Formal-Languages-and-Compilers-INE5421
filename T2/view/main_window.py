@@ -351,7 +351,7 @@ class addGrammarTab(QWidget):
 		while Grammar([], gName) in Globals.grammars:
 			i+=1
 			gName = newG3.name + str(i)
-			Globals.grammars.append(newG)
+		Globals.grammars.append(newG)
 		self.addGR.emit(newG)
 	def setProdWidgets(self, gName):
 		for i in reversed(range(self.top_layout.count())):
@@ -463,12 +463,12 @@ class addGrammarTab(QWidget):
 		while Grammar([], gName) in Globals.grammars:
 			i+=1
 			gName = newG1.name + str(i)
-			Globals.grammars.append(newG1)
+		Globals.grammars.append(newG1)
 		gName = newG2.name + str(i)
 		while Grammar([], gName) in Globals.grammars:
 			i+=1
 			gName = newG2.name + str(i)
-			Globals.grammars.append(newG2)
+		Globals.grammars.append(newG2)
 		gName = newG3.name + str(i)
 		while Grammar([], gName) in Globals.grammars:
 			i+=1
