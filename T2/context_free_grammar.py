@@ -657,6 +657,7 @@ class Grammar:
 						for prod2 in nt2_prods:
 							new_prod = prod2 + ' ' + unparse_sentential_form(parsed_prod_copy)
 							new_productions[nt].append(new_prod)
+			non_terminals_temp.append(nt)
 			#Removes direct left recursions:
 			nt_prods = list(new_productions[nt])
 			new_nt = self.rename_non_terminal(nt)
